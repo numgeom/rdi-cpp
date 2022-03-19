@@ -7,9 +7,7 @@
 #define RDI_PARAMS_H
 
 // definition of parameter structure
-#ifndef MATLAB_MEX_FILE
 namespace rdi{
-#endif //  MATLAB_MEX_FILE
 /*!
  * @struct RdiParams
  * @brief Parameter structure used in RDI library
@@ -36,7 +34,6 @@ struct RdiParams {
   bool   parTask;      ///< use OpenMP task for building OSUS operators
 };
 
-#ifndef MATLAB_MEX_FILE
 }   // namespace rdi
 
 namespace rdi_stencils {
@@ -46,7 +43,5 @@ using rdi::RdiParams;
 namespace rdi_kernel {
 using rdi::RdiParams;
 }
-
-#endif //  MATLAB_MEX_FILE
 
 #endif // RDI_PARAMS_H
