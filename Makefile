@@ -5,7 +5,7 @@ USE_OPENMP = 1
 USE_METIS = 1
 WLSLIB_HOME = ../../wlslib
 MOMP2CPP_HOME = ../../momp2cpp
-CPPFLAGS = -Isrc -Isrc/extern -I${WLSLIB_HOME}/cpp/src
+CPPFLAGS = -Isrc -I${WLSLIB_HOME}/cpp/src -I${WLSLIB_HOME}/cpp/src/extern
 
 ifeq (${DEBUG},)
 OPTFLAGS = -O3 -DNDEBUG
