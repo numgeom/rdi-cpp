@@ -12,8 +12,8 @@
 // Include files
 #include "rdi_compute_stencils.h"
 #include "m2c_lib.h"
-#include "rdi_compute_stencils_types.h"
 #include "coder_array.h"
+#include "rdi_params.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 // Variable Definitions
-namespace rdi_kernel
+namespace rdi_stencils
 {
   static const signed char iv[12]{ 5, 10, 15, 20, 12, 20, 35, 55, 30, 60, 80,
     100 };
@@ -54,7 +54,7 @@ namespace rdi_kernel
 }
 
 // Function Declarations
-namespace rdi_kernel
+namespace rdi_stencils
 {
   static inline
   void append_one_ring(int vid, const ::coder::array<int, 2U> &tets,
@@ -139,7 +139,7 @@ namespace rdi_kernel
 }
 
 // Function Definitions
-namespace rdi_kernel
+namespace rdi_stencils
 {
   static void append_one_ring(int vid, const ::coder::array<int, 2U> &tets,
     const ::coder::array<int, 2U> &sibhfs, const ::coder::array<int, 1U> &v2hf,
@@ -631,8 +631,8 @@ namespace rdi_kernel
     double ring, ::coder::array<int, 2U> &stcls, const ::coder::array<int, 1U>
     &nrange)
   {
-    ::coder::array<int, 2U> sibhfs;
-    ::coder::array<int, 1U> v2hf;
+    ::coder::array<int, 2U> sibhfs_;
+    ::coder::array<int, 1U> v2hf_;
     ::coder::array<boolean_T, 1U> etagsElem_;
     ::coder::array<boolean_T, 1U> etags_;
     ::coder::array<boolean_T, 1U> vtags_;
@@ -645,8 +645,8 @@ namespace rdi_kernel
     int nVerts;
 
     //  kernel for 3D
-    determine_sibling_halffaces(n, conn, sibhfs);
-    determine_incident_halffaces(n, conn, sibhfs, v2hf);
+    determine_sibling_halffaces(n, conn, sibhfs_);
+    determine_incident_halffaces(n, conn, sibhfs_, v2hf_);
 
     //  buffer for AHF
     vtags_.set_size(n);
@@ -681,7 +681,7 @@ namespace rdi_kernel
         nid = b_i + 1;
       }
 
-      obtain_nring_vol(nid, ring, conn, sibhfs, v2hf, ngbvs, ngbes, vtags_,
+      obtain_nring_vol(nid, ring, conn, sibhfs_, v2hf_, ngbvs, ngbes, vtags_,
                        etags_, etagsElem_, &nVerts, &a__1);
 
       //  NOTE: ngbvs doesn't count i
@@ -701,8 +701,8 @@ namespace rdi_kernel
   static void compute_stcl_kernel_tet(int n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls)
   {
-    ::coder::array<int, 2U> sibhfs;
-    ::coder::array<int, 1U> v2hf;
+    ::coder::array<int, 2U> sibhfs_;
+    ::coder::array<int, 1U> v2hf_;
     ::coder::array<boolean_T, 1U> etagsElem_;
     ::coder::array<boolean_T, 1U> etags_;
     ::coder::array<boolean_T, 1U> vtags_;
@@ -714,8 +714,8 @@ namespace rdi_kernel
     int nVerts;
 
     //  kernel for 3D
-    determine_sibling_halffaces(n, conn, sibhfs);
-    determine_incident_halffaces(n, conn, sibhfs, v2hf);
+    determine_sibling_halffaces(n, conn, sibhfs_);
+    determine_incident_halffaces(n, conn, sibhfs_, v2hf_);
 
     //  buffer for AHF
     vtags_.set_size(n);
@@ -738,7 +738,7 @@ namespace rdi_kernel
     maxStclSize = stcls.size(1) - 1;
     for (int b_i{0}; b_i < n; b_i++) {
       int n0;
-      obtain_nring_vol(b_i + 1, ring, conn, sibhfs, v2hf, ngbvs, ngbes, vtags_,
+      obtain_nring_vol(b_i + 1, ring, conn, sibhfs_, v2hf_, ngbvs, ngbes, vtags_,
                        etags_, etagsElem_, &nVerts, &a__1);
 
       //  NOTE: ngbvs doesn't count i
@@ -4814,7 +4814,7 @@ namespace rdi_kernel
 
     tStart = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tStart)
 
     //  topological dimension
     maxStcl = params->maxStclSize;
@@ -4872,7 +4872,7 @@ namespace rdi_kernel
 
     tEnd = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tEnd)
 
     if (params->verbose > 1) {
       m2cPrintf(" Stencil computation finished in %gs...\n", tEnd - tStart);
@@ -4894,7 +4894,7 @@ namespace rdi_kernel
 
     tStart = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tStart)
 
     //  topological dimension
     maxStcl = params->maxStclSize;
@@ -4939,7 +4939,7 @@ namespace rdi_kernel
 
     tEnd = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tEnd)
 
     if (params->verbose > 1) {
       m2cPrintf(" Stencil computation finished in %gs...\n", tEnd - tStart);

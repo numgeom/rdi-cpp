@@ -17,6 +17,7 @@
 #ifdef OMP4M_HAS_METIS
 #include "metis.h"
 #endif
+#include "rdi_params.hpp"
 #include "wls_lapack.hpp"
 #include <cmath>
 #include <cstdio>
@@ -665,7 +666,7 @@ namespace rdi_kernel
 
           loop_ub = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&loop_ub)
 
         }
 
@@ -733,7 +734,7 @@ namespace rdi_kernel
 
           loop_ub = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&loop_ub)
 
         }
 
@@ -913,7 +914,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     rdCountsLoc = 0;
@@ -1022,7 +1023,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     b_WlsDataStruct(degree, interp0, useDag, &wls[n].wlsObj, &wls[n].wlsWgts,
@@ -1098,7 +1099,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     //  if a previously assembled operator had a LAPACK error, then stop
     if (rdCounts[n] >= 0) {
@@ -1167,7 +1168,7 @@ namespace rdi_kernel
 
             loop_ub = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&loop_ub)
 
           }
 
@@ -1222,7 +1223,7 @@ namespace rdi_kernel
 
             loop_ub = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&loop_ub)
 
           }
 
@@ -1290,7 +1291,7 @@ namespace rdi_kernel
 
           loop_ub = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&loop_ub)
 
         }
 
@@ -1345,7 +1346,7 @@ namespace rdi_kernel
 
           loop_ub = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&loop_ub)
 
         }
 
@@ -1450,6 +1451,11 @@ namespace rdi_kernel
     rdCounts = 0;
 
     //  kernel for surface computation
+    nrm0_idx_0 = 0.0;
+    nrm0_idx_1 = 0.0;
+    nrm0_idx_2 = 0.0;
+
+    //  We will use normal matches as scaling to the weights
     wls->wlsWgts.params_pointwise.size[1] = 1;
     wls->wlsWgts.params_pointwise.size[0] = 512;
 
@@ -1767,7 +1773,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     rdCountsLoc = 0;
@@ -1876,7 +1882,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     b_WlsDataStruct(degree, interp0, useDag, &wls[n].wlsObj, &wls[n].wlsWgts,
@@ -1954,7 +1960,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     //  if a previously assembled operator had a LAPACK error, then stop
     if (rdCounts[n] >= 0) {
@@ -2107,7 +2113,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     rdCountsLoc = 0;
@@ -2216,7 +2222,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     b_WlsDataStruct(degree, interp0, useDag, &wls[n].wlsObj, &wls[n].wlsWgts,
@@ -2292,7 +2298,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     //  if a previously assembled operator had a LAPACK error, then stop
     if (rdCounts[n] >= 0) {
@@ -2336,6 +2342,11 @@ namespace rdi_kernel
     boolean_T isSphSurf;
 
     //  kernel for surface computation
+    nrm0_idx_0 = 0.0;
+    nrm0_idx_1 = 0.0;
+    nrm0_idx_2 = 0.0;
+
+    //  We will use normal matches as scaling to the weights
     wls->wlsWgts.params_pointwise.size[1] = 1;
     wls->wlsWgts.params_pointwise.size[0] = 512;
 
@@ -2650,7 +2661,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     rdCountsLoc = 0;
@@ -2759,7 +2770,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     b_WlsDataStruct(degree, interp0, useDag, &wls[n].wlsObj, &wls[n].wlsWgts,
@@ -2837,7 +2848,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     //  if a previously assembled operator had a LAPACK error, then stop
     if (rdCounts[n] >= 0) {
@@ -3275,7 +3286,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     rdCountsLoc = 0;
@@ -3384,7 +3395,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     rdCounts[n] = 0;
     b_WlsDataStruct(degree, interp0, useDag, &wls[n].wlsObj, &wls[n].wlsWgts,
@@ -3460,7 +3471,7 @@ namespace rdi_kernel
 
     n = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&n)
 
     //  if a previously assembled operator had a LAPACK error, then stop
     if (rdCounts[n] >= 0) {
@@ -3503,6 +3514,10 @@ namespace rdi_kernel
     rdCounts = 0;
 
     //  kernel for surface computation
+    nrm0_idx_0 = 0.0;
+    nrm0_idx_1 = 0.0;
+
+    //  We will use normal matches as scaling to the weights
     wls->wlsWgts.params_pointwise.size[1] = 1;
     wls->wlsWgts.params_pointwise.size[0] = 512;
 
@@ -3943,7 +3958,7 @@ namespace rdi_kernel
 
     threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
     if (threadID >= nThreads) {
       //  The excess threads would not be assigned any task
@@ -4081,7 +4096,7 @@ namespace rdi_kernel
 
     nthreads = omp_get_num_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nthreads)
 
     if (nthreads == 1) {
       istart = 0;
@@ -4098,7 +4113,7 @@ namespace rdi_kernel
 
       threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
       chunk = n / nthreads;
       b_remainder = n - nthreads * chunk;
@@ -4215,7 +4230,7 @@ namespace rdi_kernel
 
     threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
     if (threadID >= nThreads) {
       //  The excess threads would not be assigned any task
@@ -4571,7 +4586,7 @@ namespace rdi_kernel
 
     nthreads = omp_get_num_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nthreads)
 
     if (nthreads == 1) {
       istart = 0;
@@ -4588,7 +4603,7 @@ namespace rdi_kernel
 
       threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
       chunk = n / nthreads;
       b_remainder = n - nthreads * chunk;
@@ -4759,11 +4774,6 @@ namespace rdi_kernel
   {
     double d1;
     double h0;
-    double nrm02_idx_0;
-    double nrm02_idx_1;
-    double nrm03_idx_0;
-    double nrm03_idx_1;
-    double nrm03_idx_2;
     int b_remainder;
     int chunk;
     int iendM;
@@ -4780,7 +4790,7 @@ namespace rdi_kernel
 
     threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
     if (threadID >= nThreads) {
       //  The excess threads would not be assigned any task
@@ -4801,6 +4811,12 @@ namespace rdi_kernel
     if (dim == 3) {
       double xs3[384];
       double us3[256];
+      double nrm03_idx_0;
+      double nrm03_idx_1;
+      double nrm03_idx_2;
+      nrm03_idx_0 = 0.0;
+      nrm03_idx_1 = 0.0;
+      nrm03_idx_2 = 0.0;
 
       //  nodal h
       for (int i{istartN}; i <= iendN; i++) {
@@ -4911,8 +4927,14 @@ namespace rdi_kernel
     } else {
       double xs2[256];
       double us2[128];
+      double nrm02_idx_0;
+      double nrm02_idx_1;
 
       //  2D
+      nrm02_idx_0 = 0.0;
+      nrm02_idx_1 = 0.0;
+
+      //  nodal h
       for (int i{istartN}; i <= iendN; i++) {
         double b_xs2_tmp;
         double xs2_tmp;
@@ -4927,10 +4949,10 @@ namespace rdi_kernel
         b_xs2_tmp = xs[xs.size(1) * (i - 1) + 1];
         xs2[1] = b_xs2_tmp;
         for (int j{0}; j < nPoints; j++) {
-          u1 = (n2nList[i - 1] + j) - 1;
+          u1 = n2nList[i - 1];
           u0 = (j + 1) << 1;
-          xs2[u0] = xs[xs.size(1) * u1];
-          xs2[u0 + 1] = xs[xs.size(1) * u1 + 1];
+          xs2[u0] = xs[xs.size(1) * ((u1 + j) - 1)];
+          xs2[u0 + 1] = xs[xs.size(1) * ((u1 + j) - 1) + 1];
         }
 
         b_i = nPoints + 1;
@@ -4976,7 +4998,7 @@ namespace rdi_kernel
 
     threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
     if (threadID >= nThreads) {
       //  The excess threads would not be assigned any task
@@ -5020,16 +5042,17 @@ namespace rdi_kernel
     double d2;
     double d3;
     double h0;
-    double nrm02_idx_0;
-    double nrm02_idx_1;
-    double nrm03_idx_0;
-    double nrm03_idx_1;
-    double nrm03_idx_2;
 
     //  serial
     if (dim == 3) {
       double xs3[384];
       double us3[256];
+      double nrm03_idx_0;
+      double nrm03_idx_1;
+      double nrm03_idx_2;
+      nrm03_idx_0 = 0.0;
+      nrm03_idx_1 = 0.0;
+      nrm03_idx_2 = 0.0;
 
       //  nodal h
       for (int i{0}; i < n; i++) {
@@ -5039,9 +5062,9 @@ namespace rdi_kernel
         double t3_idx_3;
         double t3_idx_5;
         int b_i;
-        int b_xs2_tmp;
         int nPoints;
         int xs2_tmp;
+        int xs3_tmp;
         boolean_T guard1{ false };
 
         nPoints = n2nPtr[i + 1] - n2nPtr[i];
@@ -5051,19 +5074,19 @@ namespace rdi_kernel
         xs3[1] = xs[xs.size(1) * i + 1];
         xs3[2] = xs[xs.size(1) * i + 2];
         for (int j{0}; j < nPoints; j++) {
-          xs2_tmp = n2nList[(n2nPtr[i] + j) - 1] - 1;
-          b_xs2_tmp = 3 * (j + 1);
-          xs3[b_xs2_tmp] = xs[xs.size(1) * xs2_tmp];
-          xs3[b_xs2_tmp + 1] = xs[xs.size(1) * xs2_tmp + 1];
-          xs3[b_xs2_tmp + 2] = xs[xs.size(1) * xs2_tmp + 2];
+          xs3_tmp = n2nList[(n2nPtr[i] + j) - 1] - 1;
+          xs2_tmp = 3 * (j + 1);
+          xs3[xs2_tmp] = xs[xs.size(1) * xs3_tmp];
+          xs3[xs2_tmp + 1] = xs[xs.size(1) * xs3_tmp + 1];
+          xs3[xs2_tmp + 2] = xs[xs.size(1) * xs3_tmp + 2];
         }
 
         b_i = nPoints + 1;
         for (int j{2}; j <= b_i; j++) {
-          xs2_tmp = 3 * (j - 1);
-          xs3[xs2_tmp] -= xs3[0];
-          xs3[xs2_tmp + 1] -= xs3[1];
-          xs3[xs2_tmp + 2] -= xs3[2];
+          xs3_tmp = 3 * (j - 1);
+          xs3[xs3_tmp] -= xs3[0];
+          xs3[xs3_tmp + 1] -= xs3[1];
+          xs3[xs3_tmp + 2] -= xs3[2];
         }
 
         if ((nrms.size(0) != 0) && (nrms.size(1) != 0)) {
@@ -5119,16 +5142,16 @@ namespace rdi_kernel
           double d4;
           d1 = xs3[3 * j + 1];
           d4 = xs3[3 * j + 2];
-          b_xs2_tmp = j << 1;
-          us3[b_xs2_tmp] = (xs3[3 * j] * d + d2 * d1) + d3 * d4;
-          us3[b_xs2_tmp + 1] = (d1 * t3_idx_1 + d1 * t3_idx_3) + t3_idx_5 * d4;
+          xs2_tmp = j << 1;
+          us3[xs2_tmp] = (xs3[3 * j] * d + d2 * d1) + d3 * d4;
+          us3[xs2_tmp + 1] = (d1 * t3_idx_1 + d1 * t3_idx_3) + t3_idx_5 * d4;
         }
 
         h0 = 0.0;
         for (int j{2}; j <= b_i; j++) {
-          b_xs2_tmp = (j - 1) << 1;
-          d = us3[b_xs2_tmp];
-          d1 = us3[b_xs2_tmp + 1];
+          xs2_tmp = (j - 1) << 1;
+          d = us3[xs2_tmp];
+          d1 = us3[xs2_tmp + 1];
           h0 += std::sqrt(d * d + d1 * d1);
         }
 
@@ -5137,11 +5160,16 @@ namespace rdi_kernel
     } else {
       double xs2[256];
       double us2[128];
+      double nrm02_idx_0;
+      double nrm02_idx_1;
 
       //  2D
+      nrm02_idx_0 = 0.0;
+      nrm02_idx_1 = 0.0;
+
+      //  nodal h
       for (int i{0}; i < n; i++) {
         int b_i;
-        int b_xs2_tmp;
         int nPoints;
         int xs2_tmp;
         nPoints = n2nPtr[i + 1] - n2nPtr[i];
@@ -5150,10 +5178,9 @@ namespace rdi_kernel
         xs2[0] = xs[xs.size(1) * i];
         xs2[1] = xs[xs.size(1) * i + 1];
         for (int j{0}; j < nPoints; j++) {
-          xs2_tmp = (n2nList[i] + j) - 1;
-          b_xs2_tmp = (j + 1) << 1;
-          xs2[b_xs2_tmp] = xs[xs.size(1) * xs2_tmp];
-          xs2[b_xs2_tmp + 1] = xs[xs.size(1) * xs2_tmp + 1];
+          xs2_tmp = (j + 1) << 1;
+          xs2[xs2_tmp] = xs[xs.size(1) * ((n2nList[i] + j) - 1)];
+          xs2[xs2_tmp + 1] = xs[xs.size(1) * ((n2nList[i] + j) - 1) + 1];
         }
 
         b_i = nPoints + 1;
@@ -5179,9 +5206,8 @@ namespace rdi_kernel
 
         //  compute tangent
         for (int j{0}; j <= nPoints; j++) {
-          b_xs2_tmp = j << 1;
-          us2[j] = xs2[b_xs2_tmp] * -nrm02_idx_1 + xs2[b_xs2_tmp + 1] *
-            nrm02_idx_0;
+          xs2_tmp = j << 1;
+          us2[j] = xs2[xs2_tmp] * -nrm02_idx_1 + xs2[xs2_tmp + 1] * nrm02_idx_0;
         }
 
         h0 = 0.0;
@@ -5218,16 +5244,17 @@ namespace rdi_kernel
     double d2;
     double d3;
     double h0;
-    double nrm02_idx_0;
-    double nrm02_idx_1;
-    double nrm03_idx_0;
-    double nrm03_idx_1;
-    double nrm03_idx_2;
 
     //  serial
     if (dim == 3) {
       double xs3[384];
       double us3[256];
+      double nrm03_idx_0;
+      double nrm03_idx_1;
+      double nrm03_idx_2;
+      nrm03_idx_0 = 0.0;
+      nrm03_idx_1 = 0.0;
+      nrm03_idx_2 = 0.0;
 
       //  nodal h
       for (int i{0}; i < n; i++) {
@@ -5237,9 +5264,9 @@ namespace rdi_kernel
         double t3_idx_3;
         double t3_idx_5;
         int b_i;
-        int b_xs2_tmp;
         int nPoints;
         int xs2_tmp;
+        int xs3_tmp;
         boolean_T guard1{ false };
 
         nPoints = n2nPtr[i + 1] - n2nPtr[i];
@@ -5249,19 +5276,19 @@ namespace rdi_kernel
         xs3[1] = xs[xs.size(1) * i + 1];
         xs3[2] = xs[xs.size(1) * i + 2];
         for (int j{0}; j < nPoints; j++) {
-          xs2_tmp = n2nList[(n2nPtr[i] + j) - 1] - 1;
-          b_xs2_tmp = 3 * (j + 1);
-          xs3[b_xs2_tmp] = xs[xs.size(1) * xs2_tmp];
-          xs3[b_xs2_tmp + 1] = xs[xs.size(1) * xs2_tmp + 1];
-          xs3[b_xs2_tmp + 2] = xs[xs.size(1) * xs2_tmp + 2];
+          xs3_tmp = n2nList[(n2nPtr[i] + j) - 1] - 1;
+          xs2_tmp = 3 * (j + 1);
+          xs3[xs2_tmp] = xs[xs.size(1) * xs3_tmp];
+          xs3[xs2_tmp + 1] = xs[xs.size(1) * xs3_tmp + 1];
+          xs3[xs2_tmp + 2] = xs[xs.size(1) * xs3_tmp + 2];
         }
 
         b_i = nPoints + 1;
         for (int j{2}; j <= b_i; j++) {
-          xs2_tmp = 3 * (j - 1);
-          xs3[xs2_tmp] -= xs3[0];
-          xs3[xs2_tmp + 1] -= xs3[1];
-          xs3[xs2_tmp + 2] -= xs3[2];
+          xs3_tmp = 3 * (j - 1);
+          xs3[xs3_tmp] -= xs3[0];
+          xs3[xs3_tmp + 1] -= xs3[1];
+          xs3[xs3_tmp + 2] -= xs3[2];
         }
 
         if (surfType == 1) {
@@ -5313,16 +5340,16 @@ namespace rdi_kernel
           double d4;
           d1 = xs3[3 * j + 1];
           d4 = xs3[3 * j + 2];
-          b_xs2_tmp = j << 1;
-          us3[b_xs2_tmp] = (xs3[3 * j] * d + d2 * d1) + d3 * d4;
-          us3[b_xs2_tmp + 1] = (d1 * t3_idx_1 + d1 * t3_idx_3) + t3_idx_5 * d4;
+          xs2_tmp = j << 1;
+          us3[xs2_tmp] = (xs3[3 * j] * d + d2 * d1) + d3 * d4;
+          us3[xs2_tmp + 1] = (d1 * t3_idx_1 + d1 * t3_idx_3) + t3_idx_5 * d4;
         }
 
         h0 = 0.0;
         for (int j{2}; j <= b_i; j++) {
-          b_xs2_tmp = (j - 1) << 1;
-          d = us3[b_xs2_tmp];
-          d1 = us3[b_xs2_tmp + 1];
+          xs2_tmp = (j - 1) << 1;
+          d = us3[xs2_tmp];
+          d1 = us3[xs2_tmp + 1];
           h0 += std::sqrt(d * d + d1 * d1);
         }
 
@@ -5331,11 +5358,16 @@ namespace rdi_kernel
     } else {
       double xs2[256];
       double us2[128];
+      double nrm02_idx_0;
+      double nrm02_idx_1;
 
       //  2D
+      nrm02_idx_0 = 0.0;
+      nrm02_idx_1 = 0.0;
+
+      //  nodal h
       for (int i{0}; i < n; i++) {
         int b_i;
-        int b_xs2_tmp;
         int nPoints;
         int xs2_tmp;
         nPoints = n2nPtr[i + 1] - n2nPtr[i];
@@ -5344,10 +5376,9 @@ namespace rdi_kernel
         xs2[0] = xs[xs.size(1) * i];
         xs2[1] = xs[xs.size(1) * i + 1];
         for (int j{0}; j < nPoints; j++) {
-          xs2_tmp = (n2nList[i] + j) - 1;
-          b_xs2_tmp = (j + 1) << 1;
-          xs2[b_xs2_tmp] = xs[xs.size(1) * xs2_tmp];
-          xs2[b_xs2_tmp + 1] = xs[xs.size(1) * xs2_tmp + 1];
+          xs2_tmp = (j + 1) << 1;
+          xs2[xs2_tmp] = xs[xs.size(1) * ((n2nList[i] + j) - 1)];
+          xs2[xs2_tmp + 1] = xs[xs.size(1) * ((n2nList[i] + j) - 1) + 1];
         }
 
         b_i = nPoints + 1;
@@ -5370,9 +5401,8 @@ namespace rdi_kernel
 
         //  compute tangent
         for (int j{0}; j <= nPoints; j++) {
-          b_xs2_tmp = j << 1;
-          us2[j] = xs2[b_xs2_tmp] * -nrm02_idx_1 + xs2[b_xs2_tmp + 1] *
-            nrm02_idx_0;
+          xs2_tmp = j << 1;
+          us2[j] = xs2[xs2_tmp] * -nrm02_idx_1 + xs2[xs2_tmp + 1] * nrm02_idx_0;
         }
 
         h0 = 0.0;
@@ -5407,11 +5437,6 @@ namespace rdi_kernel
   {
     double d1;
     double h0;
-    double nrm02_idx_0;
-    double nrm02_idx_1;
-    double nrm03_idx_0;
-    double nrm03_idx_1;
-    double nrm03_idx_2;
     int b_remainder;
     int chunk;
     int iendM;
@@ -5428,7 +5453,7 @@ namespace rdi_kernel
 
     threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
     if (threadID >= nThreads) {
       //  The excess threads would not be assigned any task
@@ -5449,6 +5474,12 @@ namespace rdi_kernel
     if (dim == 3) {
       double xs3[384];
       double us3[256];
+      double nrm03_idx_0;
+      double nrm03_idx_1;
+      double nrm03_idx_2;
+      nrm03_idx_0 = 0.0;
+      nrm03_idx_1 = 0.0;
+      nrm03_idx_2 = 0.0;
 
       //  nodal h
       for (int i{istartN}; i <= iendN; i++) {
@@ -5555,8 +5586,14 @@ namespace rdi_kernel
     } else {
       double xs2[256];
       double us2[128];
+      double nrm02_idx_0;
+      double nrm02_idx_1;
 
       //  2D
+      nrm02_idx_0 = 0.0;
+      nrm02_idx_1 = 0.0;
+
+      //  nodal h
       for (int i{istartN}; i <= iendN; i++) {
         double b_xs2_tmp;
         double xs2_tmp;
@@ -5571,10 +5608,10 @@ namespace rdi_kernel
         b_xs2_tmp = xs[xs.size(1) * (i - 1) + 1];
         xs2[1] = b_xs2_tmp;
         for (int j{0}; j < nPoints; j++) {
-          u1 = (n2nList[i - 1] + j) - 1;
+          u1 = n2nList[i - 1];
           u0 = (j + 1) << 1;
-          xs2[u0] = xs[xs.size(1) * u1];
-          xs2[u0 + 1] = xs[xs.size(1) * u1 + 1];
+          xs2[u0] = xs[xs.size(1) * ((u1 + j) - 1)];
+          xs2[u0 + 1] = xs[xs.size(1) * ((u1 + j) - 1) + 1];
         }
 
         b_i = nPoints + 1;
@@ -5617,7 +5654,7 @@ namespace rdi_kernel
 
     threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
     if (threadID >= nThreads) {
       //  The excess threads would not be assigned any task
@@ -5717,7 +5754,7 @@ namespace rdi_kernel
 
     threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
     if (threadID >= nThreads) {
       //  The excess threads would not be assigned any task
@@ -5825,7 +5862,7 @@ namespace rdi_kernel
 
     nthreads = omp_get_num_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nthreads)
 
     if (nthreads == 1) {
       istart = 0;
@@ -5842,7 +5879,7 @@ namespace rdi_kernel
 
       threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
       chunk = nrows / nthreads;
       b_remainder = nrows - nthreads * chunk;
@@ -6098,6 +6135,10 @@ namespace rdi_kernel
     boolean_T isSphSurf;
 
     //  kernel for surface computation
+    nrm0_idx_0 = 0.0;
+    nrm0_idx_1 = 0.0;
+
+    //  We will use normal matches as scaling to the weights
     wls->wlsWgts.params_pointwise.size[1] = 1;
     wls->wlsWgts.params_pointwise.size[0] = 512;
 
@@ -8456,7 +8497,7 @@ namespace rdi_kernel
 
     nthreads = omp_get_num_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nthreads)
 
     if (nthreads == 1) {
       istart = 1;
@@ -8474,7 +8515,7 @@ namespace rdi_kernel
 
       threadID = omp_get_thread_num();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&threadID)
 
       chunk = n / nthreads;
       b_remainder = n - nthreads * chunk;
@@ -8689,7 +8730,7 @@ namespace rdi_kernel
 
         nParts = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nParts)
 
       }
 
@@ -10053,7 +10094,7 @@ namespace rdi_kernel
 
     tStart = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tStart)
 
     if (rowPtr.size(0) == 0) {
       //  call on no rank-deficient nodes
@@ -10072,7 +10113,7 @@ namespace rdi_kernel
 
     tEnd = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tEnd)
 
     if (params->verbose > 1) {
       m2cPrintf(" Init or updated OSUS operator in %gs...\n", tEnd - tStart);
@@ -10086,7 +10127,7 @@ namespace rdi_kernel
 
     tStart = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tStart)
 
     if (isSurf) {
       //  surface assembly
@@ -10107,7 +10148,7 @@ namespace rdi_kernel
 
     tEnd = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tEnd)
 
     if (params->verbose > 1) {
       m2cPrintf(" Assembly OSUS operator finished in %gs...\n", tEnd - tStart);
@@ -10199,7 +10240,7 @@ namespace rdi_kernel
 
     tStart = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tStart)
 
     //  call on no rank-deficient nodes
     init_osusop(mesh->conn, stcls, maxStclPr, rowPtr, colInd, vals, nnzPr);
@@ -10212,7 +10253,7 @@ namespace rdi_kernel
 
     tEnd = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tEnd)
 
     if (params->verbose > 1) {
       m2cPrintf(" Init or updated OSUS operator in %gs...\n", tEnd - tStart);
@@ -10226,7 +10267,7 @@ namespace rdi_kernel
 
     tStart = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tStart)
 
     if (isSurf) {
       //  surface assembly
@@ -10247,7 +10288,7 @@ namespace rdi_kernel
 
     tEnd = omp_get_wtime();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&tEnd)
 
     if (params->verbose > 1) {
       m2cPrintf(" Assembly OSUS operator finished in %gs...\n", tEnd - tStart);
@@ -11012,7 +11053,7 @@ namespace rdi_kernel
 
       nthreads = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nthreads)
 
     }
 
@@ -11158,7 +11199,7 @@ namespace rdi_kernel
 
       last = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&last)
 
     }
 
@@ -11233,7 +11274,7 @@ namespace rdi_kernel
 
       nthreads = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nthreads)
 
     }
 
@@ -11308,7 +11349,7 @@ namespace rdi_kernel
 
       nThreads = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nThreads)
 
     }
 
@@ -11325,6 +11366,9 @@ namespace rdi_kernel
                         "wrong (topological) dimension %d", dim);
     }
 
+    params->hGlobal = 0.0;
+
+    //   % topological dimension {1, 2, 3}
     params->dim = dim;
     params->ring = 2.0;
     params->maxStclSize = 0;
@@ -11346,7 +11390,7 @@ namespace rdi_kernel
 
       nThreads = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nThreads)
 
     }
 
@@ -11364,6 +11408,9 @@ namespace rdi_kernel
                         "wrong (topological) dimension %d", dim);
     }
 
+    params->hGlobal = 0.0;
+
+    //   % topological dimension {1, 2, 3}
     params->dim = dim;
     params->ring = 2.0;
     params->maxStclSize = 0;
@@ -11383,10 +11430,11 @@ namespace rdi_kernel
 
 #ifdef _OPENMP
 
-    params->nThreads = omp_get_max_threads();
+    nThreads = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&nThreads)
 
+    params->nThreads = nThreads;
     params->parTask = true;
   }
 
@@ -11474,7 +11522,7 @@ namespace rdi_kernel
 
         last = omp_get_max_threads();
 
-#endif //_OPENMP
+#endif                                 //_OPENMP(&last)
 
       }
 

@@ -14,25 +14,6 @@
 
 // Type Definitions
 namespace rdi_kernel {
-struct RdiParams {
-  int dim;
-  double ring;
-  int maxStclSize;
-  int verbose;
-  int degree;
-  int surfType;
-  double epsBeta;
-  double cGlobal;
-  double cLocal;
-  double kappa1;
-  double kappa0;
-  boolean_T markNearDis;
-  boolean_T wlsInterp0;
-  boolean_T wlsUseDag;
-  int nThreads;
-  boolean_T parTask;
-};
-
 struct Omp4mPart {
   int nparts;
   ::coder::array<int, 1U> part_ptr;

@@ -37,6 +37,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
+#include "rdi_params.hpp"
+
 // declaration of coder::array
 namespace coder {
 
@@ -45,39 +47,14 @@ class array;
 
 }  // namespace coder
 
+
 // definition of parameter structure
 namespace rdi_kernel {
 
 // declaration of mesh object
 struct RdiMesh;
 
-/*!
- * @struct RdiParams
- * @brief Parameter structure used in RDI library
- *
- */
-struct RdiParams {
-  int    dim;          ///< topological dimension
-  double ring;         ///< ring size (2)
-  int    maxStclSize;  ///< max stencil size per node (1-3D: 10,30,60)
-  int    verbose;      ///< verbose (<1 silent, 1 default, >1 detailed)
-  int    degree;       ///< monomial degree (2)
-  int surfType;  ///< special surface type (0); surfType=1 means spherical (3D)
-                 ///< or circle (2D) surface
-  double epsBeta;  ///< threshold for computing @f$\beta@f$
-  double hGlobal;  ///< global mesh size (0)
-  double cGlobal;  ///< global threshold for OSUS detection (0.05)
-  double cLocal;   ///< local threshold for OSUS detection (0.5)
-  double kappa1;   ///< threshold for osc. detection for @f$C_1$@f disc. (0.3)
-  double kappa0;   ///< threshold for osc. detection for @f$C_0$@f disc. (1.0)
-  bool   markNearDis;  ///< mark near-by (1-ring) nodes as dis. (true)
-  bool   wlsInterp0;   ///< use interpolation mode for WLS (false)
-  bool   wlsUseDag;    ///< use dag for WLS (false)
-  int    nThreads;     ///< number of parallel threads
-  bool   parTask;      ///< use OpenMP task for building OSUS operators
-};
-
-}  // namespace rdi_kernel
+}
 
 namespace rdi {
 

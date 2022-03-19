@@ -12,17 +12,12 @@
 #include "rtwtypes.h"
 #include "m2c_lib.h"
 #include "coder_array.h"
+#include "rdi_params.hpp"
 #include <cstddef>
 #include <cstdlib>
 
-// Type Declarations
-namespace rdi_kernel {
-struct RdiParams;
-
-}
-
 // Function Declarations
-namespace rdi_kernel {
+namespace rdi_stencils {
 static inline void rdi_compute_stencils(int n, const ::coder::array<int, 2U> &conn,
                                   const RdiParams *params,
                                   const ::coder::array<int, 1U> &nrange,
@@ -36,7 +31,7 @@ static inline void rdi_compute_stencils_initialize();
 
 static inline void rdi_compute_stencils_terminate();
 
-} // namespace rdi_kernel
+} // namespace rdi_stencils
 
 #include "rdi_compute_stencils.cpp"
 #endif
