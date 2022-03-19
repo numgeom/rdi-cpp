@@ -12,7 +12,7 @@ OPTFLAGS = -O3 -DNDEBUG
 else ifeq (${DEBUG},1)
 OPTFLAGS = -O2
 else
-OPTFLAGS = -O3 -DNDEBUG -fno-omit-frame-pointer -fsanitize=address
+OPTFLAGS = -O0 -fno-omit-frame-pointer -fsanitize=address
 endif
 
 LIBRDI_CXXFLAGS = -fPIC -g -Wall -Wno-comment ${OPTFLAGS} ${CXXFLAGS}
