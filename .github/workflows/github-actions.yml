@@ -22,5 +22,5 @@ jobs:
           git clone https://numgeomciowner:${{ secrets.NUMGEOMCI_GITHUB_TOKEN }}@github.com/numgeomci/momp2cpp
       - name: run unit tests
         run: |
-          make DEBUG=2 && cd ..
+          make DEBUG=2 WLSLIB_HOME=../wlslib MOMP2CPP_HOME=../momp2cpp && cd ..
       - run: echo " This job's status is ${{ job.status }}."
