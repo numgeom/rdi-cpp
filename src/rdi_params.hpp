@@ -6,6 +6,7 @@
 #ifndef RDI_PARAMS_H
 #define RDI_PARAMS_H
 
+#ifndef MATLAB_MEX_FILE
 // definition of parameter structure
 namespace rdi{
 /*!
@@ -13,6 +14,8 @@ namespace rdi{
  * @brief Parameter structure used in RDI library
  *
  */
+#endif // MATLAB_MEX_FILE
+
 struct RdiParams {
   int    dim;          ///< topological dimension
   double ring;         ///< ring size (2)
@@ -34,6 +37,8 @@ struct RdiParams {
   bool   parTask;      ///< use OpenMP task for building OSUS operators
 };
 
+#ifndef MATLAB_MEX_FILE
+
 }   // namespace rdi
 
 namespace rdi_stencils {
@@ -43,5 +48,6 @@ using rdi::RdiParams;
 namespace rdi_kernel {
 using rdi::RdiParams;
 }
+#endif
 
 #endif // RDI_PARAMS_H
