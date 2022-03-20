@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2022, NumGeom Group at Stony Brook University
+Copyright (c) 2022, The NumGeom Group at Stony Brook University
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -12,6 +12,10 @@ modification, are permitted provided that the following conditions are met:
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -37,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
+#include "rdi_params.hpp"
+
 // declaration of coder::array
 namespace coder {
 
@@ -45,39 +51,14 @@ class array;
 
 }  // namespace coder
 
+
 // definition of parameter structure
 namespace rdi_kernel {
 
 // declaration of mesh object
 struct RdiMesh;
 
-/*!
- * @struct RdiParams
- * @brief Parameter structure used in RDI library
- *
- */
-struct RdiParams {
-  int    dim;          ///< topological dimension
-  double ring;         ///< ring size (2)
-  int    maxStclSize;  ///< max stencil size per node (1-3D: 10,30,60)
-  int    verbose;      ///< verbose (<1 silent, 1 default, >1 detailed)
-  int    degree;       ///< monomial degree (2)
-  int surfType;  ///< special surface type (0); surfType=1 means spherical (3D)
-                 ///< or circle (2D) surface
-  double epsBeta;  ///< threshold for computing @f$\beta@f$
-  double hGlobal;  ///< global mesh size (0)
-  double cGlobal;  ///< global threshold for OSUS detection (0.05)
-  double cLocal;   ///< local threshold for OSUS detection (0.5)
-  double kappa1;   ///< threshold for osc. detection for @f$C_1$@f disc. (0.3)
-  double kappa0;   ///< threshold for osc. detection for @f$C_0$@f disc. (1.0)
-  bool   markNearDis;  ///< mark near-by (1-ring) nodes as dis. (true)
-  bool   wlsInterp0;   ///< use interpolation mode for WLS (false)
-  bool   wlsUseDag;    ///< use dag for WLS (false)
-  int    nThreads;     ///< number of parallel threads
-  bool   parTask;      ///< use OpenMP task for building OSUS operators
-};
-
-}  // namespace rdi_kernel
+}
 
 namespace rdi {
 

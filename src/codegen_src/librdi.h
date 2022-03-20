@@ -12,16 +12,15 @@
 #include "rtwtypes.h"
 #include "m2c_lib.h"
 #include "coder_array.h"
+#include "rdi_params.hpp"
 #include <cstddef>
 #include <cstdlib>
 
 // Type Declarations
 namespace rdi_kernel {
-struct RdiParams;
-
 struct RdiMesh;
 
-} // namespace rdi_kernel
+}
 
 // Function Declarations
 namespace rdi_kernel {

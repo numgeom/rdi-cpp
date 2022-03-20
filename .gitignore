@@ -32,3 +32,5 @@
 *.app
 
 .MATLABDriveTag
+
+src/extern

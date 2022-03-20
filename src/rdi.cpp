@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2022, NumGeom Group at Stony Brook University
+Copyright (c) 2022, The NumGeom Group at Stony Brook University
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -12,6 +12,10 @@ modification, are permitted provided that the following conditions are met:
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -47,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  define OMP4M_HAS_METIS
 #endif
 
-#include <coder_array.h>
+#include "coder_array.h"
 
 #include "rdi.hpp"
 
@@ -388,7 +392,7 @@ void RDI::_compute_cellsizes(const RdiParams &params) {
 void RDI::_compute_stencils(const RdiParams &             params,
                             const ::coder::array<int, 1> &rd_nodes) {
   // use our default impl with AHF, this is not feature-aware for surface
-  rdi_kernel::rdi_compute_stencils(nnodes(), _mesh->conn, &params, rd_nodes,
+  rdi_stencils::rdi_compute_stencils(nnodes(), _mesh->conn, &params, rd_nodes,
                                    *_stencils);
 }
 
