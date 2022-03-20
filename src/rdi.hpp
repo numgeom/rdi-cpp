@@ -62,8 +62,6 @@ struct RdiMesh;
 
 namespace rdi {
 
-using rdi_kernel::RdiParams;
-
 /*!
  * @brief Set a parameter structure to tis default values
  *
