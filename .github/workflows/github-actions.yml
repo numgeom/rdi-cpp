@@ -19,7 +19,7 @@ jobs:
           cd ..
           mkdir wlslib
           git clone https://github.com/numgeom/wlslib-cpp wlslib/cpp
-          git clone https://github.com/numgeomworks/momp2cpp momp2cpp
+          git clone https://numgeomciowner@github.com/numgeomworks/momp2cpp momp2cpp
       - name: run unit tests
         run: |
           make DEBUG=2 && cd ..
