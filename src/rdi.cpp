@@ -51,8 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  define OMP4M_HAS_METIS
 #endif
 
-#include "coder_array.h"
-
 #include "rdi.hpp"
 
 // internal generated sources
@@ -202,7 +200,7 @@ void RDI::compute_osusop(RdiParams &params) {
     if (params.verbose > 0)
       std::printf(
           "%d rd nodes were detected, updating the op with ring %g...\n",
-          rd_nodes.size(0), params.ring);
+          (int)rd_nodes.size(0), params.ring);
     _compute_stencils(params, rd_nodes);         // build stencils
     _assemble_osusop(params, nnz_pr, rd_nodes);  // assemble operator
   }
