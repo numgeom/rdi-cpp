@@ -11,6 +11,7 @@
 // Include files
 #include "rtwtypes.h"
 #include "m2c_lib.h"
+#include "rdi_compute_stencils_types.h"
 #include "coder_array.h"
 #include "rdi_params.hpp"
 #include <cstddef>
@@ -26,10 +27,6 @@ static inline void rdi_compute_stencils(int n, const ::coder::array<int, 2U> &co
 static inline void rdi_compute_stencils(int n, const ::coder::array<int, 2U> &conn,
                                   const RdiParams *params,
                                   ::coder::array<int, 2U> &stcls);
-
-static inline void rdi_compute_stencils_initialize();
-
-static inline void rdi_compute_stencils_terminate();
 
 } // namespace rdi_stencils
 

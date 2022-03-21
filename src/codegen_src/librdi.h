@@ -11,6 +11,7 @@
 // Include files
 #include "rtwtypes.h"
 #include "m2c_lib.h"
+#include "librdi_types.h"
 #include "coder_array.h"
 #include "rdi_params.hpp"
 #include <cstddef>
@@ -24,9 +25,6 @@ struct RdiMesh;
 
 // Function Declarations
 namespace rdi_kernel {
-static inline void librdi_initialize();
-
-static inline void librdi_terminate();
 
 static inline void rdi_assemble_osusop(
     const RdiMesh *mesh, const ::coder::array<int, 2U> &stcls,

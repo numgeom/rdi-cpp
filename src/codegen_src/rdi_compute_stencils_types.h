@@ -10,6 +10,17 @@
 
 // Include files
 #include "rtwtypes.h"
+#ifndef CODER_ARRAY_SIZE_TYPE_DEFINED
+#define CODER_ARRAY_SIZE_TYPE_DEFINED
+namespace coder {
+#ifdef M2C_USE64
+typedef int64_T SizeType;
+#else
+typedef int SizeType;
+#endif // M2C_USE64
+} // namespace coder
+#endif // CODER_ARRAY_SIZE_TYPE_DEFINED
+
 
 #endif
 // End of code generation (rdi_compute_stencils_types.h)

@@ -152,11 +152,11 @@ namespace rdi_stencils
 
     //  This determines the 1-ring of vertices aroung the element VID
     if (v2hf[vid - 1] != 0) {
-      int size_stack;
+      coder::SizeType size_stack;
       boolean_T exitg1;
       boolean_T overflow;
 
-      stack[0] = static_cast<int>(static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
+      stack[0] = static_cast<int>(static_cast<coder::SizeType>(v2hf[vid - 1]) >> 3);
 
       //  Element (region) ID
       overflow = false;
@@ -167,7 +167,7 @@ namespace rdi_stencils
       //  sibhfs_tet(lvid, :) gives the faces that border on local vertex lvid.
       exitg1 = false;
       while ((!exitg1) && (size_stack > 0)) {
-        int rid;
+        coder::SizeType rid;
 
         //  Pop the element from top of stack
         rid = stack[size_stack - 1] - 1;
@@ -180,8 +180,8 @@ namespace rdi_stencils
           exitg1 = true;
         } else {
           if (!etags[rid]) {
-            int ii;
-            int lvid;
+            coder::SizeType ii;
+            coder::SizeType lvid;
             boolean_T exitg2;
             etags[rid] = true;
             (*nelems)++;
@@ -192,7 +192,7 @@ namespace rdi_stencils
             ii = 0;
             exitg2 = false;
             while ((!exitg2) && (ii < 4)) {
-              int v;
+              coder::SizeType v;
               v = tets[ii + tets.size(1) * rid];
               if (v == vid) {
                 lvid = ii + 1;
@@ -218,9 +218,9 @@ namespace rdi_stencils
             while ((ii < 3) && (lvid != 0)) {
               unsigned int c;
 
-              c = static_cast<unsigned int>(sibhfs[(iv9[ii + 3 * (lvid - 1)] +
+              c = static_cast<coder::SizeType>(sibhfs[(iv9[ii + 3 * (lvid - 1)] +
                 sibhfs.size(1) * rid) - 1]) >> 3;
-              if ((static_cast<int>(c) != 0) && (!etags[static_cast<int>(c) - 1]))
+              if ((static_cast<int>(c) != 0) && (!etags[static_cast<coder::SizeType>(c) - 1]))
               {
                 if (size_stack >= 1024) {
                   m2cPrintf("Overflow in stack in append_one_ring.m \n");
@@ -250,16 +250,16 @@ namespace rdi_stencils
     array<boolean_T, 1U> &etags, int ngbes[128])
   {
     int stack[128];
-    int nelems;
+    coder::SizeType nelems;
     nelems = 0;
 
     //  This determines the 1-ring of vertices aroung the element VID
     if (v2hf[vid - 1] != 0) {
-      int size_stack;
+      coder::SizeType size_stack;
       boolean_T exitg1;
       boolean_T overflow;
 
-      stack[0] = static_cast<int>(static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
+      stack[0] = static_cast<int>(static_cast<coder::SizeType>(v2hf[vid - 1]) >> 3);
 
       //  Element (region) ID
       overflow = false;
@@ -270,7 +270,7 @@ namespace rdi_stencils
       //  sibhfs_tet(lvid, :) gives the faces that border on local vertex lvid.
       exitg1 = false;
       while ((!exitg1) && (size_stack > 0)) {
-        int rid;
+        coder::SizeType rid;
 
         //  Pop the element from top of stack
         rid = stack[size_stack - 1] - 1;
@@ -283,8 +283,8 @@ namespace rdi_stencils
           exitg1 = true;
         } else {
           if (!etags[rid]) {
-            int ii;
-            int lvid;
+            coder::SizeType ii;
+            coder::SizeType lvid;
             boolean_T exitg2;
             etags[rid] = true;
             nelems++;
@@ -295,7 +295,7 @@ namespace rdi_stencils
             ii = 0;
             exitg2 = false;
             while ((!exitg2) && (ii < 4)) {
-              int v;
+              coder::SizeType v;
               v = tets[ii + tets.size(1) * rid];
               if (v == vid) {
                 lvid = ii + 1;
@@ -321,9 +321,9 @@ namespace rdi_stencils
             while ((ii < 3) && (lvid != 0)) {
               unsigned int c;
 
-              c = static_cast<unsigned int>(sibhfs[(iv9[ii + 3 * (lvid - 1)] +
+              c = static_cast<coder::SizeType>(sibhfs[(iv9[ii + 3 * (lvid - 1)] +
                 sibhfs.size(1) * rid) - 1]) >> 3;
-              if ((static_cast<int>(c) != 0) && (!etags[static_cast<int>(c) - 1]))
+              if ((static_cast<int>(c) != 0) && (!etags[static_cast<coder::SizeType>(c) - 1]))
               {
                 if (size_stack >= 128) {
                   m2cPrintf("Overflow in stack in append_one_ring.m \n");
@@ -359,12 +359,12 @@ namespace rdi_stencils
     ::coder::array<boolean_T, 1U> vtags_;
     int ngbes[128];
     int ngbvs[128];
-    int N;
+    coder::SizeType N;
     int a__1;
-    int loop_ub;
-    int maxStclSize;
+    coder::SizeType loop_ub;
+    coder::SizeType maxStclSize;
     int nVerts;
-    int nedgs;
+    coder::SizeType nedgs;
 
     //  kernel for 1D
     determine_sibling_halfverts(n, conn, sibhvs_);
@@ -374,13 +374,13 @@ namespace rdi_stencils
 
     //  Construct a vertex to halfedge mapping.
     v2hv_.set_size(n);
-    for (int i{0}; i < n; i++) {
+    for (coder::SizeType i{0}; i < n; i++) {
       v2hv_[i] = 0;
     }
 
     //  Compute v2hv.
-    for (int kk{0}; kk < nedgs; kk++) {
-      int v;
+    for (coder::SizeType kk{0}; kk < nedgs; kk++) {
+      coder::SizeType v;
       v = conn[conn.size(1) * kk];
       if ((v > 0) && (v2hv_[v - 1] == 0)) {
         //  Encode <eid,lvid> pair into a hvid.
@@ -396,13 +396,13 @@ namespace rdi_stencils
 
     //  buffers
     vtags_.set_size(n);
-    for (int i{0}; i < n; i++) {
+    for (coder::SizeType i{0}; i < n; i++) {
       vtags_[i] = false;
     }
 
     etags_.set_size(conn.size(0));
     loop_ub = conn.size(0);
-    for (int i{0}; i < loop_ub; i++) {
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       etags_[i] = false;
     }
 
@@ -412,9 +412,9 @@ namespace rdi_stencils
       N = nrange.size(0);
     }
 
-    for (int b_i{0}; b_i < N; b_i++) {
-      int n0;
-      int nid;
+    for (coder::SizeType b_i{0}; b_i < N; b_i++) {
+      coder::SizeType n0;
+      coder::SizeType nid;
       if (nrange.size(0) != 0) {
         nid = nrange[b_i];
       } else {
@@ -432,7 +432,7 @@ namespace rdi_stencils
 
       stcls[stcls.size(1) * b_i] = nid;
       stcls[(stcls.size(1) + stcls.size(1) * b_i) - 1] = n0;
-      for (int j{2}; j <= n0; j++) {
+      for (coder::SizeType j{2}; j <= n0; j++) {
         stcls[(j + stcls.size(1) * b_i) - 1] = ngbvs[j - 2];
       }
     }
@@ -448,10 +448,10 @@ namespace rdi_stencils
     int ngbes[128];
     int ngbvs[128];
     int a__1;
-    int loop_ub;
-    int maxStclSize;
+    coder::SizeType loop_ub;
+    coder::SizeType maxStclSize;
     int nVerts;
-    int nedgs;
+    coder::SizeType nedgs;
 
     //  kernel for 1D
     determine_sibling_halfverts(n, conn, sibhvs_);
@@ -461,13 +461,13 @@ namespace rdi_stencils
 
     //  Construct a vertex to halfedge mapping.
     v2hv_.set_size(n);
-    for (int i{0}; i < n; i++) {
+    for (coder::SizeType i{0}; i < n; i++) {
       v2hv_[i] = 0;
     }
 
     //  Compute v2hv.
-    for (int kk{0}; kk < nedgs; kk++) {
-      int v;
+    for (coder::SizeType kk{0}; kk < nedgs; kk++) {
+      coder::SizeType v;
       v = conn[conn.size(1) * kk];
       if ((v > 0) && (v2hv_[v - 1] == 0)) {
         //  Encode <eid,lvid> pair into a hvid.
@@ -483,19 +483,19 @@ namespace rdi_stencils
 
     //  buffers
     vtags_.set_size(n);
-    for (int i{0}; i < n; i++) {
+    for (coder::SizeType i{0}; i < n; i++) {
       vtags_[i] = false;
     }
 
     etags_.set_size(conn.size(0));
     loop_ub = conn.size(0);
-    for (int i{0}; i < loop_ub; i++) {
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       etags_[i] = false;
     }
 
     maxStclSize = stcls.size(1) - 1;
-    for (int b_i{0}; b_i < n; b_i++) {
-      int n0;
+    for (coder::SizeType b_i{0}; b_i < n; b_i++) {
+      coder::SizeType n0;
       obtain_nring_curv(b_i + 1, ring, conn, sibhvs_, v2hv_, ngbvs, vtags_,
                         etags_, ngbes, &nVerts, &a__1);
 
@@ -507,7 +507,7 @@ namespace rdi_stencils
 
       stcls[stcls.size(1) * b_i] = b_i + 1;
       stcls[(stcls.size(1) + stcls.size(1) * b_i) - 1] = n0;
-      for (int j{2}; j <= n0; j++) {
+      for (coder::SizeType j{2}; j <= n0; j++) {
         stcls[(j + stcls.size(1) * b_i) - 1] = ngbvs[j - 2];
       }
     }
@@ -523,10 +523,10 @@ namespace rdi_stencils
     ::coder::array<boolean_T, 1U> vtags_;
     int ngbfs[1024];
     int ngbvs[1024];
-    int N;
+    coder::SizeType N;
     int a__1;
-    int loop_ub;
-    int maxStclSize;
+    coder::SizeType loop_ub;
+    coder::SizeType maxStclSize;
     int numNbs;
 
     //  kernel for 2D
@@ -541,19 +541,19 @@ namespace rdi_stencils
 
     //  buffers
     vtags_.set_size(n);
-    for (int i{0}; i < n; i++) {
+    for (coder::SizeType i{0}; i < n; i++) {
       vtags_[i] = false;
     }
 
     etags_.set_size(conn.size(0));
     loop_ub = conn.size(0);
-    for (int i{0}; i < loop_ub; i++) {
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       etags_[i] = false;
     }
 
-    for (int b_i{0}; b_i < N; b_i++) {
-      int n0;
-      int nid;
+    for (coder::SizeType b_i{0}; b_i < N; b_i++) {
+      coder::SizeType n0;
+      coder::SizeType nid;
       if (nrange.size(0) != 0) {
         nid = nrange[b_i];
       } else {
@@ -571,7 +571,7 @@ namespace rdi_stencils
 
       stcls[stcls.size(1) * b_i] = nid;
       stcls[(stcls.size(1) + stcls.size(1) * b_i) - 1] = n0;
-      for (int j{2}; j <= n0; j++) {
+      for (coder::SizeType j{2}; j <= n0; j++) {
         stcls[(j + stcls.size(1) * b_i) - 1] = ngbvs[j - 2];
       }
     }
@@ -587,8 +587,8 @@ namespace rdi_stencils
     int ngbfs[1024];
     int ngbvs[1024];
     int a__1;
-    int loop_ub;
-    int maxStclSize;
+    coder::SizeType loop_ub;
+    coder::SizeType maxStclSize;
     int numNbs;
 
     //  kernel for 2D
@@ -598,18 +598,18 @@ namespace rdi_stencils
 
     //  buffers
     vtags_.set_size(n);
-    for (int i{0}; i < n; i++) {
+    for (coder::SizeType i{0}; i < n; i++) {
       vtags_[i] = false;
     }
 
     etags_.set_size(conn.size(0));
     loop_ub = conn.size(0);
-    for (int i{0}; i < loop_ub; i++) {
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       etags_[i] = false;
     }
 
-    for (int b_i{0}; b_i < n; b_i++) {
-      int n0;
+    for (coder::SizeType b_i{0}; b_i < n; b_i++) {
+      coder::SizeType n0;
       obtain_nring_quad(b_i + 1, ring, conn, opphes, v2he, ngbvs, vtags_, etags_,
                         ngbfs, &numNbs, &a__1);
 
@@ -621,7 +621,7 @@ namespace rdi_stencils
 
       stcls[stcls.size(1) * b_i] = b_i + 1;
       stcls[(stcls.size(1) + stcls.size(1) * b_i) - 1] = n0;
-      for (int j{2}; j <= n0; j++) {
+      for (coder::SizeType j{2}; j <= n0; j++) {
         stcls[(j + stcls.size(1) * b_i) - 1] = ngbvs[j - 2];
       }
     }
@@ -638,10 +638,10 @@ namespace rdi_stencils
     ::coder::array<boolean_T, 1U> vtags_;
     int ngbes[2048];
     int ngbvs[2048];
-    int N;
+    coder::SizeType N;
     int a__1;
-    int loop_ub;
-    int maxStclSize;
+    coder::SizeType loop_ub;
+    coder::SizeType maxStclSize;
     int nVerts;
 
     //  kernel for 3D
@@ -650,19 +650,19 @@ namespace rdi_stencils
 
     //  buffer for AHF
     vtags_.set_size(n);
-    for (int i{0}; i < n; i++) {
+    for (coder::SizeType i{0}; i < n; i++) {
       vtags_[i] = false;
     }
 
     etags_.set_size(conn.size(0));
     loop_ub = conn.size(0);
-    for (int i{0}; i < loop_ub; i++) {
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       etags_[i] = false;
     }
 
     etagsElem_.set_size(conn.size(0));
     loop_ub = conn.size(0);
-    for (int i{0}; i < loop_ub; i++) {
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       etagsElem_[i] = false;
     }
 
@@ -672,9 +672,9 @@ namespace rdi_stencils
     }
 
     maxStclSize = stcls.size(1) - 1;
-    for (int b_i{0}; b_i < N; b_i++) {
-      int n0;
-      int nid;
+    for (coder::SizeType b_i{0}; b_i < N; b_i++) {
+      coder::SizeType n0;
+      coder::SizeType nid;
       if (nrange.size(0) != 0) {
         nid = nrange[b_i];
       } else {
@@ -692,7 +692,7 @@ namespace rdi_stencils
 
       stcls[stcls.size(1) * b_i] = nid;
       stcls[(stcls.size(1) + stcls.size(1) * b_i) - 1] = n0;
-      for (int j{2}; j <= n0; j++) {
+      for (coder::SizeType j{2}; j <= n0; j++) {
         stcls[(j + stcls.size(1) * b_i) - 1] = ngbvs[j - 2];
       }
     }
@@ -709,8 +709,8 @@ namespace rdi_stencils
     int ngbes[2048];
     int ngbvs[2048];
     int a__1;
-    int loop_ub;
-    int maxStclSize;
+    coder::SizeType loop_ub;
+    coder::SizeType maxStclSize;
     int nVerts;
 
     //  kernel for 3D
@@ -719,25 +719,25 @@ namespace rdi_stencils
 
     //  buffer for AHF
     vtags_.set_size(n);
-    for (int i{0}; i < n; i++) {
+    for (coder::SizeType i{0}; i < n; i++) {
       vtags_[i] = false;
     }
 
     etags_.set_size(conn.size(0));
     loop_ub = conn.size(0);
-    for (int i{0}; i < loop_ub; i++) {
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       etags_[i] = false;
     }
 
     etagsElem_.set_size(conn.size(0));
     loop_ub = conn.size(0);
-    for (int i{0}; i < loop_ub; i++) {
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       etagsElem_[i] = false;
     }
 
     maxStclSize = stcls.size(1) - 1;
-    for (int b_i{0}; b_i < n; b_i++) {
-      int n0;
+    for (coder::SizeType b_i{0}; b_i < n; b_i++) {
+      coder::SizeType n0;
       obtain_nring_vol(b_i + 1, ring, conn, sibhfs_, v2hf_, ngbvs, ngbes, vtags_,
                        etags_, etagsElem_, &nVerts, &a__1);
 
@@ -749,7 +749,7 @@ namespace rdi_stencils
 
       stcls[stcls.size(1) * b_i] = b_i + 1;
       stcls[(stcls.size(1) + stcls.size(1) * b_i) - 1] = n0;
-      for (int j{2}; j <= n0; j++) {
+      for (coder::SizeType j{2}; j <= n0; j++) {
         stcls[(j + stcls.size(1) * b_i) - 1] = ngbvs[j - 2];
       }
     }
@@ -775,10 +775,10 @@ namespace rdi_stencils
     static const signed char hf_tet[24]{ 1, 3, 2, 7, 5, 6, 1, 2, 4, 5, 9, 8, 2,
       3, 4, 6, 10, 9, 3, 1, 4, 7, 8, 10 };
 
-    int hf_size_idx_0;
-    int hf_size_idx_1;
-    int i;
-    int nvpf;
+    coder::SizeType hf_size_idx_0;
+    coder::SizeType hf_size_idx_1;
+    coder::SizeType i;
+    coder::SizeType nvpf;
     signed char hf_data[54];
 
     //  DETERMINE_BORDER_VERTICES_VOL Determine border vertices of a volume mesh.
@@ -793,14 +793,14 @@ namespace rdi_stencils
 
     //  List vertices in counter-clockwise order, so that faces are outwards.
     if (elems.size(1) == 1) {
-      int offset;
-      int offset_o;
+      coder::SizeType offset;
+      coder::SizeType offset_o;
 
       //  Mixed elements
       offset = 0;
       offset_o = 1;
       while (offset + 1 < elems.size(0)) {
-        int i1;
+        coder::SizeType i1;
         boolean_T b;
         boolean_T b1;
         boolean_T guard1;
@@ -866,7 +866,7 @@ namespace rdi_stencils
           b1 = ((sibhfs.size(1) <= 0) || (sibhfs.size(0) <= 0));
           i = sibhfs.size(1) * sibhfs.size(0);
           hf_size_idx_0 = 0;
-          for (int jj{0}; jj < 6; jj++) {
+          for (coder::SizeType jj{0}; jj < 6; jj++) {
             i1 = offset_o + jj;
             if (b1 || (i1 < 0) || (i1 >= i)) {
               hf_size_idx_0 = 0;
@@ -889,7 +889,7 @@ namespace rdi_stencils
             }
 
             if (sibhfs[hf_size_idx_0] == 0) {
-              for (int kk{0}; kk <= nvpf; kk++) {
+              for (coder::SizeType kk{0}; kk <= nvpf; kk++) {
                 i1 = offset + hf_hex[kk + 9 * jj];
                 isborder[elems[i1 % elems.size(0) + i1 / elems.size(0)] - 1] =
                   true;
@@ -904,7 +904,7 @@ namespace rdi_stencils
           b1 = ((sibhfs.size(1) <= 0) || (sibhfs.size(0) <= 0));
           i = sibhfs.size(1) * sibhfs.size(0);
           hf_size_idx_0 = 0;
-          for (int jj{0}; jj < 5; jj++) {
+          for (coder::SizeType jj{0}; jj < 5; jj++) {
             i1 = offset_o + jj;
             if (b1 || (i1 < 0) || (i1 >= i)) {
               hf_size_idx_0 = 0;
@@ -936,7 +936,7 @@ namespace rdi_stencils
               }
 
               nvpf = ((jj + 1 < 4) + b2) + 2;
-              for (int kk{0}; kk <= nvpf; kk++) {
+              for (coder::SizeType kk{0}; kk <= nvpf; kk++) {
                 i1 = offset + hf_pri[kk + 9 * jj];
                 isborder[elems[i1 % elems.size(0) + i1 / elems.size(0)] - 1] =
                   true;
@@ -951,7 +951,7 @@ namespace rdi_stencils
           b1 = ((sibhfs.size(1) <= 0) || (sibhfs.size(0) <= 0));
           i = sibhfs.size(1) * sibhfs.size(0);
           hf_size_idx_0 = 0;
-          for (int jj{0}; jj < 5; jj++) {
+          for (coder::SizeType jj{0}; jj < 5; jj++) {
             i1 = offset_o + jj;
             if (b1 || (i1 < 0) || (i1 >= i)) {
               hf_size_idx_0 = 0;
@@ -975,7 +975,7 @@ namespace rdi_stencils
 
             if (sibhfs[hf_size_idx_0] == 0) {
               nvpf = (jj + 1 == 1) + 2;
-              for (int kk{0}; kk <= nvpf; kk++) {
+              for (coder::SizeType kk{0}; kk <= nvpf; kk++) {
                 i1 = offset + hf_pyr[kk + 9 * jj];
                 isborder[elems[i1 % elems.size(0) + i1 / elems.size(0)] - 1] =
                   true;
@@ -990,7 +990,7 @@ namespace rdi_stencils
           b1 = ((sibhfs.size(1) <= 0) || (sibhfs.size(0) <= 0));
           i = sibhfs.size(1) * sibhfs.size(0);
           hf_size_idx_0 = 0;
-          for (int jj{0}; jj < 4; jj++) {
+          for (coder::SizeType jj{0}; jj < 4; jj++) {
             i1 = offset_o + jj;
             if (b1 || (i1 < 0) || (i1 >= i)) {
               hf_size_idx_0 = 0;
@@ -1032,7 +1032,7 @@ namespace rdi_stencils
                     sibhfs.size(1) + (offset_o - 1) / sibhfs.size(0)]) + 1;
       }
     } else {
-      int ii;
+      coder::SizeType ii;
       boolean_T guard1{ false };
 
       boolean_T guard2{ false };
@@ -1142,9 +1142,9 @@ namespace rdi_stencils
 
       ii = 0;
       while ((ii + 1 <= elems.size(0)) && (elems[elems.size(1) * ii] != 0)) {
-        for (int jj{0}; jj < hf_size_idx_0; jj++) {
+        for (coder::SizeType jj{0}; jj < hf_size_idx_0; jj++) {
           if (sibhfs[jj + sibhfs.size(1) * ii] == 0) {
-            for (int kk{0}; kk <= nvpf + 3; kk++) {
+            for (coder::SizeType kk{0}; kk <= nvpf + 3; kk++) {
               isborder[elems[(hf_data[kk + hf_size_idx_1 * jj] + elems.size(1) *
                               ii) - 1] - 1] = true;
             }
@@ -1159,8 +1159,8 @@ namespace rdi_stencils
   static void determine_incident_halfedges(int nv, const ::coder::array<int, 2U>
     &elems, const ::coder::array<int, 2U> &sibhes, ::coder::array<int, 1U> &v2he)
   {
-    int i;
-    int kk;
+    coder::SizeType i;
+    coder::SizeType kk;
 
     // DETERMINE_INCIDENT_HALFEDGES Determine an incident halfedges.
     v2he.set_size(nv);
@@ -1171,8 +1171,8 @@ namespace rdi_stencils
     kk = 0;
     while ((kk <= elems.size(0) - 1) && (elems[elems.size(1) * kk] != 0)) {
       i = elems.size(1);
-      for (int lid{0}; lid < i; lid++) {
-        int v;
+      for (coder::SizeType lid{0}; lid < i; lid++) {
+        coder::SizeType v;
         v = elems[lid + elems.size(1) * kk];
         if ((v > 0) && ((v2he[v - 1] == 0) || (sibhes[lid + sibhes.size(1) * kk]
               == 0))) {
@@ -1192,9 +1192,9 @@ namespace rdi_stencils
   {
     ::coder::array<int, 2U> b_sibhfs;
     ::coder::array<boolean_T, 1U> isborder;
-    int i;
-    int ncvpE;
-    int v2f_size_idx_1;
+    coder::SizeType i;
+    coder::SizeType ncvpE;
+    coder::SizeType v2f_size_idx_1;
     signed char v2f_data[32];
 
     // DETERMINE_INCIDENT_HALFFACES Determine an incident half-faces.
@@ -1205,10 +1205,10 @@ namespace rdi_stencils
 
     //  We use three bits for local-face ID.
     if (elems.size(1) == 1) {
-      int ii;
-      int loop_ub;
-      int offset;
-      int offset_o;
+      coder::SizeType ii;
+      coder::SizeType loop_ub;
+      coder::SizeType offset;
+      coder::SizeType offset_o;
 
       //  Mixed elements
       b_sibhfs.set_size(sibhfs.size(0), sibhfs.size(1));
@@ -1222,7 +1222,7 @@ namespace rdi_stencils
       offset_o = 0;
       ii = 1;
       while (offset < elems.size(0)) {
-        int v;
+        coder::SizeType v;
         boolean_T b;
         boolean_T b1;
         boolean_T guard1;
@@ -1285,7 +1285,7 @@ namespace rdi_stencils
           b = true;
           b1 = (elems.size(0) <= 0);
           i = 0;
-          for (int jj{0}; jj < 8; jj++) {
+          for (coder::SizeType jj{0}; jj < 8; jj++) {
             loop_ub = offset + jj;
             if (b1 || (loop_ub < 0) || (loop_ub >= elems.size(0))) {
               i = 0;
@@ -1360,7 +1360,7 @@ namespace rdi_stencils
           b = true;
           b1 = (elems.size(0) <= 0);
           i = 0;
-          for (int jj{0}; jj < 6; jj++) {
+          for (coder::SizeType jj{0}; jj < 6; jj++) {
             loop_ub = offset + jj;
             if (b1 || (loop_ub < 0) || (loop_ub >= elems.size(0))) {
               i = 0;
@@ -1423,7 +1423,7 @@ namespace rdi_stencils
           b = true;
           b1 = (elems.size(0) <= 0);
           i = 0;
-          for (int jj{0}; jj < 5; jj++) {
+          for (coder::SizeType jj{0}; jj < 5; jj++) {
             loop_ub = offset + jj;
             if (b1 || (loop_ub < 0) || (loop_ub >= elems.size(0))) {
               i = 0;
@@ -1443,7 +1443,7 @@ namespace rdi_stencils
             v = elems[i] - 1;
             if (v2hf[elems[i] - 1] == 0) {
               loop_ub = (jj + 1 == 4) + 2;
-              for (int kk{0}; kk <= loop_ub; kk++) {
+              for (coder::SizeType kk{0}; kk <= loop_ub; kk++) {
                 if (!isborder[v]) {
                   //  Encode <cid,lfid> pair into a hfid.
                   v2hf[v] = ((ii << 3) + iv8[kk + (jj << 2)]) - 1;
@@ -1465,7 +1465,7 @@ namespace rdi_stencils
           b = true;
           b1 = (elems.size(0) <= 0);
           i = 0;
-          for (int jj{0}; jj < 4; jj++) {
+          for (coder::SizeType jj{0}; jj < 4; jj++) {
             loop_ub = offset + jj;
             if (b1 || (loop_ub < 0) || (loop_ub >= elems.size(0))) {
               i = 0;
@@ -1530,8 +1530,8 @@ namespace rdi_stencils
                     sibhfs.size(0)]) + 1;
       }
     } else {
-      int ii;
-      int loop_ub;
+      coder::SizeType ii;
+      coder::SizeType loop_ub;
       boolean_T guard1{ false };
 
       boolean_T guard2{ false };
@@ -1639,12 +1639,12 @@ namespace rdi_stencils
       //  Construct a vertex-to-halfface mapping.
       ii = 0;
       while ((ii + 1 <= elems.size(0)) && (elems[elems.size(1) * ii] != 0)) {
-        int jj;
+        coder::SizeType jj;
         boolean_T exitg1;
         jj = 0;
         exitg1 = false;
         while ((!exitg1) && (jj <= ncvpE)) {
-          int v;
+          coder::SizeType v;
           v = elems[jj + elems.size(1) * ii] - 1;
           if (v + 1 == 0) {
             exitg1 = true;
@@ -1658,7 +1658,7 @@ namespace rdi_stencils
               }
 
               i = b2 + 2;
-              for (int kk{0}; kk <= i; kk++) {
+              for (coder::SizeType kk{0}; kk <= i; kk++) {
                 if ((!isborder[v]) || (sibhfs[(v2f_data[kk + v2f_size_idx_1 * jj]
                       + sibhfs.size(1) * ii) - 1] == 0)) {
                   //  Encode <cid,lfid> pair into a hfid.
@@ -1686,12 +1686,12 @@ namespace rdi_stencils
     ::coder::array<int, 1U> v2he_fid;
     ::coder::array<int, 1U> v2nv;
     ::coder::array<signed char, 1U> v2he_leid;
-    int i;
-    int ii;
-    int k;
-    int nelems;
-    int nepE;
-    int unnamed_idx_0_tmp;
+    coder::SizeType i;
+    coder::SizeType ii;
+    coder::SizeType k;
+    coder::SizeType nelems;
+    coder::SizeType nepE;
+    coder::SizeType unnamed_idx_0_tmp;
     boolean_T exitg1;
     boolean_T hasthree;
 
@@ -1727,7 +1727,7 @@ namespace rdi_stencils
         }
 
         i = 3 - hasthree;
-        for (int j{0}; j <= i; j++) {
+        for (coder::SizeType j{0}; j <= i; j++) {
           k = elems[j + elems.size(1) * ii];
           is_index[k] = is_index[k] + 1;
         }
@@ -1759,7 +1759,7 @@ namespace rdi_stencils
       }
 
       i = 3 - hasthree;
-      for (int j{0}; j <= i; j++) {
+      for (coder::SizeType j{0}; j <= i; j++) {
         k = elems[j + elems.size(1) * ii] - 1;
         v2nv[is_index[k] - 1] = elems[(b_iv[j + (hasthree && (j + 1 == 3))] +
           elems.size(1) * ii) - 1];
@@ -1794,16 +1794,16 @@ namespace rdi_stencils
       }
 
       i = 3 - hasthree;
-      for (int jj{0}; jj <= i; jj++) {
+      for (coder::SizeType jj{0}; jj <= i; jj++) {
         //  Process each edge only once
         if (sibhes[jj + sibhes.size(1) * ii] == 0) {
-          int i1;
-          int i2;
-          int prev_heid_fid;
-          int prev_heid_leid;
-          int sibhes_tmp;
-          int v;
-          int vn;
+          coder::SizeType i1;
+          coder::SizeType i2;
+          coder::SizeType prev_heid_fid;
+          coder::SizeType prev_heid_leid;
+          coder::SizeType sibhes_tmp;
+          coder::SizeType v;
+          coder::SizeType vn;
           v = elems[jj + elems.size(1) * ii];
           vn = elems[(b_iv[jj + (hasthree && (jj + 1 == 3))] + elems.size(1) *
                       ii) - 1];
@@ -1813,7 +1813,7 @@ namespace rdi_stencils
           //  LOCATE: Locate index in v2nv(first:last)
           i1 = is_index[vn - 1];
           i2 = is_index[vn] - 1;
-          for (int b_index{i1}; b_index <= i2; b_index++) {
+          for (coder::SizeType b_index{i1}; b_index <= i2; b_index++) {
             if (v2nv[b_index - 1] == v) {
               //  Encode <fid,leid> pair into a heid.
               sibhes_tmp = v2he_fid[b_index - 1];
@@ -1829,7 +1829,7 @@ namespace rdi_stencils
           //  Check for halfedges in the same orientation
           i1 = is_index[v - 1];
           i2 = is_index[v] - 1;
-          for (int b_index{i1}; b_index <= i2; b_index++) {
+          for (coder::SizeType b_index{i1}; b_index <= i2; b_index++) {
             if (v2nv[b_index - 1] == vn) {
               unnamed_idx_0_tmp = v2he_fid[b_index - 1];
               if (unnamed_idx_0_tmp != ii + 1) {
@@ -1874,17 +1874,17 @@ namespace rdi_stencils
     ::coder::array<int, 1U> v2oe_v1;
     ::coder::array<int, 1U> v2oe_v2;
     ::coder::array<signed char, 1U> v2hf_lfid;
-    int b_index;
-    int ex;
-    int i;
-    int ii;
-    int iindx;
-    int jj;
-    int loop_ub;
-    int nelems;
-    int v;
-    int v1;
-    int v2;
+    coder::SizeType b_index;
+    coder::SizeType ex;
+    coder::SizeType i;
+    coder::SizeType ii;
+    coder::SizeType iindx;
+    coder::SizeType jj;
+    coder::SizeType loop_ub;
+    coder::SizeType nelems;
+    coder::SizeType v;
+    coder::SizeType v1;
+    coder::SizeType v2;
     signed char tmp_data[4];
     boolean_T exitg7;
     boolean_T found;
@@ -2061,7 +2061,7 @@ namespace rdi_stencils
       ii = 0;
       exitg6 = false;
       while ((!exitg6) && (ii <= nelems - 1)) {
-        int exitg5;
+        coder::SizeType exitg5;
         jj = 0;
         do {
           exitg5 = 0;
@@ -2118,7 +2118,7 @@ namespace rdi_stencils
               }
 
               if (!found) {
-                int exitg4;
+                coder::SizeType exitg4;
                 b_index = is_index[ex - 1] - 1;
                 do {
                   exitg4 = 0;
@@ -2157,7 +2157,7 @@ namespace rdi_stencils
     }
 
     if (guard1) {
-      int nvpf;
+      coder::SizeType nvpf;
       boolean_T exitg3;
 
       //  prism
@@ -2178,7 +2178,7 @@ namespace rdi_stencils
             loop_ub = (jj + 1 < 4) + 3;
             std::copy(&iv1[jj * 4], &iv1[jj * 4 + loop_ub], &tmp_data[0]);
             v = elems[(tmp_data[0] + elems.size(1) * ii) - 1];
-            for (int k{2}; k <= loop_ub; k++) {
+            for (coder::SizeType k{2}; k <= loop_ub; k++) {
               i = elems[(tmp_data[k - 1] + elems.size(1) * ii) - 1];
               if (v < i) {
                 v = i;
@@ -2209,7 +2209,7 @@ namespace rdi_stencils
           std::copy(&iv1[jj * 4], &iv1[jj * 4 + loop_ub], &tmp_data[0]);
           iindx = 0;
           ex = elems[(tmp_data[0] + elems.size(1) * ii) - 1] - 1;
-          for (int k{2}; k <= loop_ub; k++) {
+          for (coder::SizeType k{2}; k <= loop_ub; k++) {
             i = elems[(tmp_data[k - 1] + elems.size(1) * ii) - 1];
             if (ex + 1 < i) {
               ex = i - 1;
@@ -2245,7 +2245,7 @@ namespace rdi_stencils
       ii = 0;
       exitg3 = false;
       while ((!exitg3) && (ii <= nelems - 1)) {
-        int exitg2;
+        coder::SizeType exitg2;
         jj = 0;
         do {
           exitg2 = 0;
@@ -2263,7 +2263,7 @@ namespace rdi_stencils
               //  list of vertices of face
               iindx = 0;
               ex = elems[(tmp_data[0] + elems.size(1) * ii) - 1];
-              for (int k{2}; k <= loop_ub; k++) {
+              for (coder::SizeType k{2}; k <= loop_ub; k++) {
                 i = elems[(tmp_data[k - 1] + elems.size(1) * ii) - 1];
                 if (ex < i) {
                   ex = i;
@@ -2296,7 +2296,7 @@ namespace rdi_stencils
               }
 
               if (!found) {
-                int exitg1;
+                coder::SizeType exitg1;
                 b_index = is_index[ex - 1] - 1;
                 do {
                   exitg1 = 0;
@@ -2360,22 +2360,22 @@ namespace rdi_stencils
     int c_vs_elem[6];
     int d_vs_elem[5];
     int e_vs_elem[4];
-    int i;
-    int i1;
-    int i2;
-    int ii;
-    int jj;
-    int k;
-    int nelems;
-    int nf;
-    int nfpE;
-    int nopphf;
-    int nvpE;
-    int nvpf;
-    int offset;
-    int offset_ohf;
-    int start_index_tmp;
-    int v2oe_v1_tmp;
+    coder::SizeType i;
+    coder::SizeType i1;
+    coder::SizeType i2;
+    coder::SizeType ii;
+    coder::SizeType jj;
+    coder::SizeType k;
+    coder::SizeType nelems;
+    coder::SizeType nf;
+    coder::SizeType nfpE;
+    coder::SizeType nopphf;
+    coder::SizeType nvpE;
+    coder::SizeType nvpf;
+    coder::SizeType offset;
+    coder::SizeType offset_ohf;
+    coder::SizeType start_index_tmp;
+    coder::SizeType v2oe_v1_tmp;
     boolean_T exitg13;
     boolean_T found;
 
@@ -2465,8 +2465,8 @@ namespace rdi_stencils
     nopphf = 1;
     for (ii = 0; ii <= nelems; ii++) {
       int f_is_index_v[4];
-      int b_v2oe_v1_tmp;
-      int c_v2oe_v1_tmp;
+      coder::SizeType b_v2oe_v1_tmp;
+      coder::SizeType c_v2oe_v1_tmp;
       boolean_T guard1{ false };
 
       boolean_T guard2{ false };
@@ -2752,7 +2752,7 @@ namespace rdi_stencils
     ii = 0;
     exitg13 = false;
     while ((!exitg13) && (ii <= nelems)) {
-      int b_index;
+      coder::SizeType b_index;
       boolean_T b_guard1{ false };
 
       boolean_T b_guard2{ false };
@@ -2822,7 +2822,7 @@ namespace rdi_stencils
       }
 
       if (guard5) {
-        int exitg12;
+        coder::SizeType exitg12;
         nfpE = 6;
         i = elems.size(0);
         for (i1 = 0; i1 < 8; i1++) {
@@ -2839,7 +2839,7 @@ namespace rdi_stencils
             if (sibhfs[ii] != 0) {
               jj++;
             } else {
-              int exitg10;
+              coder::SizeType exitg10;
 
               //  list of vertices of face
               found = false;
@@ -2855,7 +2855,7 @@ namespace rdi_stencils
                     sibhfs[offset_ohf] = v2hf[b_index];
 
                     k = is_index_o[static_cast<int>(static_cast<unsigned int>
-                      (v2hf[b_index]) >> 3) - 1] + static_cast<int>(v2hf[b_index]
+                      (v2hf[b_index]) >> 3) - 1] + static_cast<coder::SizeType>(v2hf[b_index]
                       & 7U);
                     exitg10 = 1;
                   } else {
@@ -2883,13 +2883,13 @@ namespace rdi_stencils
 
             if (guard6) {
               if (!found) {
-                int exitg11;
+                coder::SizeType exitg11;
                 b_index = is_index_v[b_vs_elem[0] - 1] - 1;
                 do {
                   exitg11 = 0;
                   if (b_index + 1 <= i) {
                     if ((v2oe_v1[b_index] == b_vs_elem[3]) && (v2oe_v2[b_index] ==
-                         b_vs_elem[1]) && (static_cast<int>(static_cast<unsigned
+                         b_vs_elem[1]) && (static_cast<coder::SizeType>(static_cast<unsigned
                           int>(v2hf[b_index]) >> 3) != ii + 1)) {
                       sibhfs.set_size(0);
                       exitg11 = 1;
@@ -2923,7 +2923,7 @@ namespace rdi_stencils
       }
 
       if (b_guard4) {
-        int exitg9;
+        coder::SizeType exitg9;
         nfpE = 5;
         i = elems.size(0);
         for (i1 = 0; i1 < 6; i1++) {
@@ -2941,7 +2941,7 @@ namespace rdi_stencils
             if (sibhfs[i] != 0) {
               jj++;
             } else {
-              int exitg7;
+              coder::SizeType exitg7;
               nvpf = (jj + 1 < 4) + 3;
 
               //  list of vertices of face
@@ -2962,7 +2962,7 @@ namespace rdi_stencils
                     sibhfs[i] = v2hf[b_index];
 
                     k = is_index_o[static_cast<int>(static_cast<unsigned int>
-                      (v2hf[b_index]) >> 3) - 1] + static_cast<int>(v2hf[b_index]
+                      (v2hf[b_index]) >> 3) - 1] + static_cast<coder::SizeType>(v2hf[b_index]
                       & 7U);
                     exitg7 = 1;
                   } else {
@@ -2990,7 +2990,7 @@ namespace rdi_stencils
 
             if (guard6) {
               if (!found) {
-                int exitg8;
+                coder::SizeType exitg8;
                 b_index = is_index_v[v2oe_v1_tmp - 1] - 1;
                 do {
                   exitg8 = 0;
@@ -2998,7 +2998,7 @@ namespace rdi_stencils
                     if ((v2oe_v1[b_index] == c_vs_elem[iv1[1 % nvpf + (jj << 2)]
                          - 1]) && (v2oe_v2[b_index] == c_vs_elem[iv1[((nvpf - 1)
                           % nvpf + (nvpf - 1) / nvpf * nvpf) + (jj << 2)] - 1]) &&
-                        (static_cast<int>(static_cast<unsigned int>(v2hf[b_index])
+                        (static_cast<int>(static_cast<coder::SizeType>(v2hf[b_index])
                                           >> 3) != ii + 1)) {
                       sibhfs.set_size(0);
                       exitg8 = 1;
@@ -3032,7 +3032,7 @@ namespace rdi_stencils
       }
 
       if (b_guard3) {
-        int exitg6;
+        coder::SizeType exitg6;
         i = elems.size(0);
         for (i1 = 0; i1 < 5; i1++) {
           i2 = i1 + offset;
@@ -3050,7 +3050,7 @@ namespace rdi_stencils
             if (sibhfs[i] != 0) {
               jj++;
             } else {
-              int exitg4;
+              coder::SizeType exitg4;
               nvpf = (jj + 1 == 1) + 3;
 
               //  list of vertices of face
@@ -3071,7 +3071,7 @@ namespace rdi_stencils
                     sibhfs[i] = v2hf[b_index];
 
                     k = is_index_o[static_cast<int>(static_cast<unsigned int>
-                      (v2hf[b_index]) >> 3) - 1] + static_cast<int>(v2hf[b_index]
+                      (v2hf[b_index]) >> 3) - 1] + static_cast<coder::SizeType>(v2hf[b_index]
                       & 7U);
                     exitg4 = 1;
                   } else {
@@ -3100,7 +3100,7 @@ namespace rdi_stencils
             if (guard6) {
               //  check whether the surface is oriented
               if (!found) {
-                int exitg5;
+                coder::SizeType exitg5;
                 b_index = is_index_v[v2oe_v1_tmp - 1] - 1;
                 do {
                   exitg5 = 0;
@@ -3108,7 +3108,7 @@ namespace rdi_stencils
                     if ((v2oe_v1[b_index] == d_vs_elem[iv5[1 % nvpf + (jj << 2)]
                          - 1]) && (v2oe_v2[b_index] == d_vs_elem[iv5[((nvpf - 1)
                           % nvpf + (nvpf - 1) / nvpf * nvpf) + (jj << 2)] - 1]) &&
-                        (static_cast<int>(static_cast<unsigned int>(v2hf[b_index])
+                        (static_cast<int>(static_cast<coder::SizeType>(v2hf[b_index])
                                           >> 3) != ii + 1)) {
                       sibhfs.set_size(0);
                       exitg5 = 1;
@@ -3142,7 +3142,7 @@ namespace rdi_stencils
       }
 
       if (b_guard2) {
-        int exitg3;
+        coder::SizeType exitg3;
         e_vs_elem[0] = elems[offset % elems.size(0) * elems.size(1) + offset /
           elems.size(0)];
         e_vs_elem[1] = elems[(offset + 1) % elems.size(0) * elems.size(1) +
@@ -3162,7 +3162,7 @@ namespace rdi_stencils
             if (sibhfs[i] != 0) {
               jj++;
             } else {
-              int exitg1;
+              coder::SizeType exitg1;
 
               //  list of vertices of face
               found = false;
@@ -3179,7 +3179,7 @@ namespace rdi_stencils
                     sibhfs[i] = v2hf[b_index];
 
                     k = is_index_o[static_cast<int>(static_cast<unsigned int>
-                      (v2hf[b_index]) >> 3) - 1] + static_cast<int>(v2hf[b_index]
+                      (v2hf[b_index]) >> 3) - 1] + static_cast<coder::SizeType>(v2hf[b_index]
                       & 7U);
                     exitg1 = 1;
                   } else {
@@ -3208,14 +3208,14 @@ namespace rdi_stencils
             if (guard6) {
               //  check whether the surface is oriented
               if (!found) {
-                int exitg2;
+                coder::SizeType exitg2;
                 b_index = is_index_v[start_index_tmp - 1] - 1;
                 do {
                   exitg2 = 0;
                   if (b_index + 1 <= i1) {
                     if ((v2oe_v1[b_index] == e_vs_elem[iv4[3 * jj + 1] - 1]) &&
                         (v2oe_v2[b_index] == e_vs_elem[iv4[3 * jj + 2] - 1]) &&
-                        (static_cast<int>(static_cast<unsigned int>(v2hf[b_index])
+                        (static_cast<int>(static_cast<coder::SizeType>(v2hf[b_index])
                                           >> 3) != ii + 1)) {
                       sibhfs.set_size(0);
                       exitg2 = 1;
@@ -3269,14 +3269,14 @@ namespace rdi_stencils
     ::coder::array<int, 1U> v2oe_v1;
     ::coder::array<int, 1U> v2oe_v2;
     ::coder::array<signed char, 1U> v2hf_lfid;
-    int ex;
-    int i;
-    int ii;
-    int iindx;
-    int jj;
-    int jj_idx_0;
-    int nelems;
-    int nvpf;
+    coder::SizeType ex;
+    coder::SizeType i;
+    coder::SizeType ii;
+    coder::SizeType iindx;
+    coder::SizeType jj;
+    coder::SizeType jj_idx_0;
+    coder::SizeType nelems;
+    coder::SizeType nvpf;
     signed char tmp_data[4];
     boolean_T exitg1;
 
@@ -3295,11 +3295,11 @@ namespace rdi_stencils
         exitg1 = true;
       } else {
         for (jj = 0; jj < 5; jj++) {
-          int v;
+          coder::SizeType v;
           jj_idx_0 = (jj + 1 == 1) + 3;
           std::copy(&iv5[jj * 4], &iv5[jj * 4 + jj_idx_0], &tmp_data[0]);
           v = elems[(tmp_data[0] + elems.size(1) * ii) - 1];
-          for (int k{2}; k <= jj_idx_0; k++) {
+          for (coder::SizeType k{2}; k <= jj_idx_0; k++) {
             i = elems[(tmp_data[k - 1] + elems.size(1) * ii) - 1];
             if (v < i) {
               v = i;
@@ -3330,7 +3330,7 @@ namespace rdi_stencils
         std::copy(&iv5[jj * 4], &iv5[jj * 4 + jj_idx_0], &tmp_data[0]);
         iindx = 0;
         ex = elems[(tmp_data[0] + elems.size(1) * ii) - 1] - 1;
-        for (int k{2}; k <= jj_idx_0; k++) {
+        for (coder::SizeType k{2}; k <= jj_idx_0; k++) {
           i = elems[(tmp_data[k - 1] + elems.size(1) * ii) - 1];
           if (ex + 1 < i) {
             ex = i - 1;
@@ -3368,7 +3368,7 @@ namespace rdi_stencils
     ii = 0;
     exitg1 = false;
     while ((!exitg1) && (ii <= nelems)) {
-      int exitg3;
+      coder::SizeType exitg3;
       jj = 0;
       do {
         exitg3 = 0;
@@ -3377,9 +3377,9 @@ namespace rdi_stencils
           if (sibhfs[jj + sibhfs.size(1) * ii] != 0) {
             jj++;
           } else {
-            int b_index;
-            int v1;
-            int v2;
+            coder::SizeType b_index;
+            coder::SizeType v1;
+            coder::SizeType v2;
             boolean_T exitg4;
             boolean_T found;
             nvpf = (jj + 1 == 1);
@@ -3391,7 +3391,7 @@ namespace rdi_stencils
             //  list of vertices of face
             iindx = 0;
             ex = elems[(tmp_data[0] + elems.size(1) * ii) - 1];
-            for (int k{2}; k <= jj_idx_0; k++) {
+            for (coder::SizeType k{2}; k <= jj_idx_0; k++) {
               i = elems[(tmp_data[k - 1] + elems.size(1) * ii) - 1];
               if (ex < i) {
                 ex = i;
@@ -3424,7 +3424,7 @@ namespace rdi_stencils
             }
 
             if (!found) {
-              int exitg2;
+              coder::SizeType exitg2;
               b_index = is_index[ex - 1] - 1;
               do {
                 exitg2 = 0;
@@ -3475,13 +3475,13 @@ namespace rdi_stencils
     ::coder::array<int, 1U> v2oe_v1;
     ::coder::array<int, 1U> v2oe_v2;
     ::coder::array<signed char, 1U> v2hf_lfid;
-    int i;
-    int i1;
-    int i2;
-    int ii;
-    int nelems;
-    int unnamed_idx_0;
-    int v;
+    coder::SizeType i;
+    coder::SizeType i1;
+    coder::SizeType i2;
+    coder::SizeType ii;
+    coder::SizeType nelems;
+    coder::SizeType unnamed_idx_0;
+    coder::SizeType v;
     boolean_T exitg1;
 
     // DETERMINE_SIBLING_HALFFACE_TET Determine the sibling half-faces.
@@ -3502,7 +3502,7 @@ namespace rdi_stencils
         nelems = ii;
         exitg1 = true;
       } else {
-        for (int jj{0}; jj < 4; jj++) {
+        for (coder::SizeType jj{0}; jj < 4; jj++) {
           v = elems[(iv4[3 * jj] + elems.size(1) * ii) - 1];
           i = elems[(iv4[3 * jj + 1] + elems.size(1) * ii) - 1];
           if (v < i) {
@@ -3533,7 +3533,7 @@ namespace rdi_stencils
     v2oe_v1.set_size(unnamed_idx_0);
     v2oe_v2.set_size(unnamed_idx_0);
     for (ii = 0; ii < nelems; ii++) {
-      for (int jj{0}; jj < 4; jj++) {
+      for (coder::SizeType jj{0}; jj < 4; jj++) {
         v = elems[jj + elems.size(1) * ii] - 1;
         i = elems[(iv2[3 * jj] + elems.size(1) * ii) - 1];
         if (v + 1 > i) {
@@ -3587,12 +3587,12 @@ namespace rdi_stencils
     }
 
     for (ii = 0; ii < nelems; ii++) {
-      for (int jj{0}; jj < 4; jj++) {
+      for (coder::SizeType jj{0}; jj < 4; jj++) {
         //  local face ID
         if (sibhfs[jj + sibhfs.size(1) * ii] == 0) {
-          int iindx;
-          int nhfs;
-          int prev_cid;
+          coder::SizeType iindx;
+          coder::SizeType nhfs;
+          coder::SizeType prev_cid;
           signed char prev_lfid;
           signed char sibhfs_tmp;
 
@@ -3618,7 +3618,7 @@ namespace rdi_stencils
           //  Search for half-face in the opposite orientation
           i = is_index[unnamed_idx_0 - 1];
           i1 = is_index[unnamed_idx_0] - 1;
-          for (int b_index{i}; b_index <= i1; b_index++) {
+          for (coder::SizeType b_index{i}; b_index <= i1; b_index++) {
             if ((v2oe_v1[b_index - 1] == elems[(iv4[(b_iv[iindx] + 3 * jj) - 1]
                   + elems.size(1) * ii) - 1]) && (v2oe_v2[b_index - 1] == elems
                  [(iv4[(b_iv1[iindx] + 3 * jj) - 1] + elems.size(1) * ii) - 1]))
@@ -3635,7 +3635,7 @@ namespace rdi_stencils
           }
 
           //  Check for halfface in the same orientation
-          for (int b_index{i}; b_index <= i1; b_index++) {
+          for (coder::SizeType b_index{i}; b_index <= i1; b_index++) {
             if ((v2oe_v1[b_index - 1] == elems[(iv4[(b_iv1[iindx] + 3 * jj) - 1]
                   + elems.size(1) * ii) - 1]) && (v2oe_v2[b_index - 1] == elems
                  [(iv4[(b_iv[iindx] + 3 * jj) - 1] + elems.size(1) * ii) - 1]))
@@ -3675,11 +3675,11 @@ namespace rdi_stencils
   {
     ::coder::array<int, 1U> is_index;
     ::coder::array<int, 1U> v2hv;
-    int b_v2hv_tmp;
-    int i;
-    int ii;
-    int nedgs;
-    int v2hv_tmp;
+    coder::SizeType b_v2hv_tmp;
+    coder::SizeType i;
+    coder::SizeType ii;
+    coder::SizeType nedgs;
+    coder::SizeType v2hv_tmp;
     boolean_T exitg1;
 
     //  DETERMINE_SIBLING_HALFVERTS determines the sibling half-vertices for each vertex.
@@ -3741,19 +3741,19 @@ namespace rdi_stencils
       sibhvs[i] = 0;
     }
 
-    for (int v{0}; v < nv; v++) {
+    for (coder::SizeType v{0}; v < nv; v++) {
       v2hv_tmp = is_index[v + 1];
       b_v2hv_tmp = v2hv_tmp - 1;
       i = is_index[v];
       if (v2hv_tmp - 1 > is_index[v]) {
-        int hvid_prev;
+        coder::SizeType hvid_prev;
 
         //  The vertex has two or more incident halfedges
         hvid_prev = v2hv[v2hv_tmp - 2];
         for (ii = i; ii <= b_v2hv_tmp; ii++) {
           v2hv_tmp = v2hv[ii - 1];
           sibhvs[static_cast<int>(hvid_prev & 1U) + 2 * (static_cast<int>(
-            static_cast<unsigned int>(hvid_prev) >> 1) - 1)] = v2hv_tmp;
+            static_cast<coder::SizeType>(hvid_prev) >> 1) - 1)] = v2hv_tmp;
           hvid_prev = v2hv_tmp;
         }
       }
@@ -3765,16 +3765,16 @@ namespace rdi_stencils
     array<boolean_T, 1U> &etags, int ngbes[128])
   {
     int stack[128];
-    int nelems;
+    coder::SizeType nelems;
     nelems = 0;
 
     //  This is similar to append_one_ring.m but this function only finds the 1-ring of elements.
     if (v2hf[vid - 1] != 0) {
-      int size_stack;
+      coder::SizeType size_stack;
       boolean_T exitg1;
       boolean_T overflow;
 
-      stack[0] = static_cast<int>(static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
+      stack[0] = static_cast<int>(static_cast<coder::SizeType>(v2hf[vid - 1]) >> 3);
 
       //  Element (region) ID
       overflow = false;
@@ -3785,7 +3785,7 @@ namespace rdi_stencils
       //  sibhfs_tet(lvid, :) gives the faces that border on local vertex lvid.
       exitg1 = false;
       while ((!exitg1) && (size_stack > 0)) {
-        int rid;
+        coder::SizeType rid;
 
         //  Pop the element from top of stack
         rid = stack[size_stack - 1] - 1;
@@ -3797,8 +3797,8 @@ namespace rdi_stencils
           fflush(stdout);
           overflow = true;
         } else if (!etags[rid]) {
-          int ii;
-          int lvid;
+          coder::SizeType ii;
+          coder::SizeType lvid;
           etags[rid] = true;
           nelems++;
           ngbes[nelems - 1] = rid + 1;
@@ -3826,9 +3826,9 @@ namespace rdi_stencils
           while ((ii < 3) && (lvid + 1 != 0)) {
             unsigned int c;
 
-            c = static_cast<unsigned int>(sibhfs[(iv9[ii + 3 * lvid] +
+            c = static_cast<coder::SizeType>(sibhfs[(iv9[ii + 3 * lvid] +
               sibhfs.size(1) * rid) - 1]) >> 3;
-            if ((static_cast<int>(c) != 0) && (!etags[static_cast<int>(c) - 1]))
+            if ((static_cast<int>(c) != 0) && (!etags[static_cast<coder::SizeType>(c) - 1]))
             {
               if (size_stack >= 128) {
                 m2cPrintf("Overflow in stack in append_one_ring.m \n");
@@ -3859,7 +3859,7 @@ namespace rdi_stencils
     array<boolean_T, 1U> &etags, int ngbes[128], int *nverts, int *nedges)
   {
     int ebuf[13];
-    int b_c;
+    coder::SizeType b_c;
     unsigned int c;
 
     // OBTAIN_NRING_CURV Collect n-ring vertices and edges.
@@ -3870,22 +3870,22 @@ namespace rdi_stencils
     *nedges = 0;
     if (static_cast<int>(c) != 0) {
       int hvbuf[13];
-      int opp;
+      coder::SizeType opp;
 
       //  Collect one-ring vertices and edges
-      ngbvs[0] = edgs[(edgs.size(1) * (static_cast<int>(c) - 1) - b_c) + 1];
+      ngbvs[0] = edgs[(edgs.size(1) * (static_cast<coder::SizeType>(c) - 1) - b_c) + 1];
       *nverts = 1;
-      hvbuf[0] = sibhvs[(2 * (static_cast<int>(c) - 1) - b_c) + 1];
+      hvbuf[0] = sibhvs[(2 * (static_cast<coder::SizeType>(c) - 1) - b_c) + 1];
       ebuf[0] = static_cast<int>(c);
       *nedges = 1;
-      opp = sibhvs[b_c + 2 * (static_cast<int>(c) - 1)];
+      opp = sibhvs[b_c + 2 * (static_cast<coder::SizeType>(c) - 1)];
       if (opp != 0) {
         c = static_cast<unsigned int>(opp) >> 1;
 
         b_c = static_cast<int>(opp & 1U);
-        ngbvs[1] = edgs[(edgs.size(1) * (static_cast<int>(c) - 1) - b_c) + 1];
+        ngbvs[1] = edgs[(edgs.size(1) * (static_cast<coder::SizeType>(c) - 1) - b_c) + 1];
         *nverts = 2;
-        hvbuf[1] = sibhvs[(2 * (static_cast<int>(c) - 1) - b_c) + 1];
+        hvbuf[1] = sibhvs[(2 * (static_cast<coder::SizeType>(c) - 1) - b_c) + 1];
         ebuf[1] = static_cast<int>(c);
         *nedges = 2;
       }
@@ -3893,9 +3893,9 @@ namespace rdi_stencils
       if (ring <= 1.0) {
         std::copy(&ebuf[0], &ebuf[*nedges], &ngbes[0]);
       } else {
-        int cur_ring;
-        int i;
-        int nverts_pre;
+        coder::SizeType cur_ring;
+        coder::SizeType i;
+        coder::SizeType nverts_pre;
         vtags[vid - 1] = true;
         for (i = 0; i < *nverts; i++) {
           vtags[ngbvs[i] - 1] = true;
@@ -3911,9 +3911,9 @@ namespace rdi_stencils
         //  Second, build full-size ring
         cur_ring = 1;
         ring = std::fmin(6.0, ring);
-        int exitg1;
-        int nedges_pre;
-        int nverts_last;
+        coder::SizeType exitg1;
+        coder::SizeType nedges_pre;
+        coder::SizeType nverts_last;
         do {
           exitg1 = 0;
 
@@ -3921,28 +3921,28 @@ namespace rdi_stencils
           nverts_last = *nverts;
           nedges_pre = *nedges;
           i = nverts_pre + 1;
-          for (int ii{i}; ii <= nverts_last; ii++) {
+          for (coder::SizeType ii{i}; ii <= nverts_last; ii++) {
             c = static_cast<unsigned int>(hvbuf[ii - 1]) >> 1;
 
             //  If the edge has already been inserted, then the vertex must be
-            if ((static_cast<int>(c) != 0) && (!etags[static_cast<int>(c) - 1]))
+            if ((static_cast<int>(c) != 0) && (!etags[static_cast<coder::SizeType>(c) - 1]))
             {
-              int v;
+              coder::SizeType v;
 
               //  Insert edge into list
               (*nedges)++;
               ebuf[*nedges - 1] = static_cast<int>(c);
-              etags[static_cast<int>(c) - 1] = true;
+              etags[static_cast<coder::SizeType>(c) - 1] = true;
 
               b_c = static_cast<int>(hvbuf[ii - 1] & 1U);
-              v = edgs[(edgs.size(1) * (static_cast<int>(c) - 1) - b_c) + 1];
+              v = edgs[(edgs.size(1) * (static_cast<coder::SizeType>(c) - 1) - b_c) + 1];
               if (!vtags[v - 1]) {
                 (*nverts)++;
                 ngbvs[*nverts - 1] = v;
                 vtags[v - 1] = true;
 
                 //  Insert opposite halfvertex
-                hvbuf[*nverts - 1] = sibhvs[(2 * (static_cast<int>(c) - 1) - b_c)
+                hvbuf[*nverts - 1] = sibhvs[(2 * (static_cast<coder::SizeType>(c) - 1) - b_c)
                   + 1];
               }
             }
@@ -3983,9 +3983,9 @@ namespace rdi_stencils
     static const signed char prv[8]{ 3, 1, 2, 0, 4, 1, 2, 3 };
 
     unsigned int c;
-    int c_tmp;
-    int fid;
-    int lid;
+    coder::SizeType c_tmp;
+    coder::SizeType fid;
+    coder::SizeType lid;
     boolean_T overflow;
 
     //  OBTAIN_NRING_QUAD Collect n-ring vertices of a quad or mixed mesh.
@@ -3999,20 +3999,20 @@ namespace rdi_stencils
     overflow = false;
     if (static_cast<int>(c) != 0) {
       int hebuf[1024];
-      int exitg1;
-      int fid_in;
-      int lid_prv;
-      int opp;
+      coder::SizeType exitg1;
+      coder::SizeType fid_in;
+      coder::SizeType lid_prv;
+      coder::SizeType opp;
       boolean_T b;
 
       //  Optimized version for collecting one-ring vertices
-      if (sibhes[c_tmp + sibhes.size(1) * (static_cast<int>(c) - 1)] != 0) {
+      if (sibhes[c_tmp + sibhes.size(1) * (static_cast<coder::SizeType>(c) - 1)] != 0) {
         fid_in = static_cast<int>(c);
       } else {
         fid_in = 0;
 
         //  If vertex is border edge, insert its incident border vertex.
-        if ((elems.size(1) == 4) && (elems[elems.size(1) * (static_cast<int>(c)
+        if ((elems.size(1) == 4) && (elems[elems.size(1) * (static_cast<coder::SizeType>(c)
               - 1) + 3] != 0)) {
           b = true;
         } else {
@@ -4020,7 +4020,7 @@ namespace rdi_stencils
         }
 
         ngbvs[0] = elems[(nxt[c_tmp + (b << 2)] + elems.size(1) * (static_cast<
-          int>(c) - 1)) - 1];
+          coder::SizeType>(c) - 1)) - 1];
         *nverts = 1;
         hebuf[0] = 0;
       }
@@ -4063,16 +4063,16 @@ namespace rdi_stencils
       if ((ring != 1.0) || ((*nverts < 1) && (*nfaces < 1024))) {
         double cur_ring;
         double ring_full;
-        int nfaces_pre;
-        int nverts_pre;
+        coder::SizeType nfaces_pre;
+        coder::SizeType nverts_pre;
 
         // assert(nargin==9);
         vtags[vid - 1] = true;
-        for (int i{0}; i < *nverts; i++) {
+        for (coder::SizeType i{0}; i < *nverts; i++) {
           vtags[ngbvs[i] - 1] = true;
         }
 
-        for (int i{0}; i < *nfaces; i++) {
+        for (coder::SizeType i{0}; i < *nfaces; i++) {
           ftags[ngbfs[i] - 1] = true;
         }
 
@@ -4086,23 +4086,23 @@ namespace rdi_stencils
         boolean_T guard1{ false };
 
         do {
-          int b_i;
-          int nverts_last;
-          int v;
+          coder::SizeType b_i;
+          coder::SizeType nverts_last;
+          coder::SizeType v;
           boolean_T guard2{ false };
 
           exitg1 = 0;
           guard1 = false;
           if ((cur_ring > ring_full) || ((cur_ring == ring_full) && (ring_full
                 != ring))) {
-            int nfaces_last;
+            coder::SizeType nfaces_last;
 
             //  Collect halfring
             nfaces_last = *nfaces;
             nverts_last = *nverts;
             b_i = nfaces_pre + 1;
-            for (int ii{b_i}; ii <= nfaces_last; ii++) {
-              int jj;
+            for (coder::SizeType ii{b_i}; ii <= nfaces_last; ii++) {
+              coder::SizeType jj;
               guard2 = false;
               if (elems.size(1) == 4) {
                 c_tmp = ngbfs[ii - 1] - 1;
@@ -4142,22 +4142,22 @@ namespace rdi_stencils
                 jj = 0;
                 exitg3 = false;
                 while ((!exitg3) && (jj < 3)) {
-                  int oppe;
+                  coder::SizeType oppe;
                   oppe = sibhes[jj + sibhes.size(1) * (ngbfs[ii - 1] - 1)];
 
                   c = static_cast<unsigned int>(oppe) >> 4;
                   if (oppe != 0) {
-                    b = ftags[static_cast<int>(c) - 1];
+                    b = ftags[static_cast<coder::SizeType>(c) - 1];
                     if (!b) {
                       if ((elems.size(1) == 4) && (elems[elems.size(1) * (
-                            static_cast<int>(c) - 1) + 3] != 0)) {
+                            static_cast<coder::SizeType>(c) - 1) + 3] != 0)) {
                         b = true;
                       } else {
                         b = false;
                       }
 
                       v = elems[(prv[static_cast<int>(oppe & 15U) + (b << 2)] +
-                                 elems.size(1) * (static_cast<int>(c) - 1)) - 1]
+                                 elems.size(1) * (static_cast<coder::SizeType>(c) - 1)) - 1]
                         - 1;
                       if (overflow || ((!vtags[v]) && (*nverts >= 1024)) ||
                           (*nfaces >= 1024)) {
@@ -4169,7 +4169,7 @@ namespace rdi_stencils
                       if (!overflow) {
                         (*nfaces)++;
                         ngbfs[*nfaces - 1] = static_cast<int>(c);
-                        ftags[static_cast<int>(c) - 1] = true;
+                        ftags[static_cast<coder::SizeType>(c) - 1] = true;
                       }
 
                       if ((!vtags[v]) && (!overflow)) {
@@ -4196,7 +4196,7 @@ namespace rdi_stencils
               //  If needs to expand, then undo the last half ring
               *nverts = nverts_last;
               b_i = nfaces_last + 1;
-              for (int i{b_i}; i <= *nfaces; i++) {
+              for (coder::SizeType i{b_i}; i <= *nfaces; i++) {
                 ftags[ngbfs[i - 1] - 1] = false;
               }
 
@@ -4212,8 +4212,8 @@ namespace rdi_stencils
             nverts_last = *nverts;
             nfaces_pre = *nfaces;
             b_i = nverts_pre + 1;
-            for (int ii{b_i}; ii <= nverts_last; ii++) {
-              int nedges;
+            for (coder::SizeType ii{b_i}; ii <= nverts_last; ii++) {
+              coder::SizeType nedges;
               boolean_T allow_early_term;
               boolean_T isfirst;
 
@@ -4223,7 +4223,7 @@ namespace rdi_stencils
 
               lid = static_cast<int>(v2he[ngbvs[ii - 1] - 1] & 15U);
               if ((elems.size(1) == 4) && (elems[elems.size(1) * (static_cast<
-                    int>(c) - 1) + 3] != 0)) {
+                    coder::SizeType>(c) - 1) + 3] != 0)) {
                 b = true;
               } else {
                 b = false;
@@ -4234,7 +4234,7 @@ namespace rdi_stencils
               //  Allow early termination of the loop if an incident halfedge
               c_tmp = hebuf[ii - 1];
               if ((c_tmp != 0) && (sibhes[static_cast<int>(v2he[ngbvs[ii - 1] -
-                    1] & 15U) + sibhes.size(1) * (static_cast<int>(c) - 1)] != 0))
+                    1] & 15U) + sibhes.size(1) * (static_cast<coder::SizeType>(c) - 1)] != 0))
               {
                 allow_early_term = true;
 
@@ -4243,7 +4243,7 @@ namespace rdi_stencils
 
                 lid = static_cast<int>(c_tmp & 15U);
                 if ((elems.size(1) == 4) && (elems[elems.size(1) * (static_cast<
-                      int>(static_cast<unsigned int>(hebuf[ii - 1]) >> 4) - 1) +
+                      int>(static_cast<coder::SizeType>(hebuf[ii - 1]) >> 4) - 1) +
                      3] != 0)) {
                   b = true;
                 } else {
@@ -4282,7 +4282,7 @@ namespace rdi_stencils
 
               //  Rotate counterclockwise around the vertex.
               isfirst = true;
-              int exitg2;
+              coder::SizeType exitg2;
               do {
                 exitg2 = 0;
 
@@ -4362,11 +4362,11 @@ namespace rdi_stencils
 
         //  Reset flags
         vtags[vid - 1] = false;
-        for (int i{0}; i < *nverts; i++) {
+        for (coder::SizeType i{0}; i < *nverts; i++) {
           vtags[ngbvs[i] - 1] = false;
         }
 
-        for (int i{0}; i < *nfaces; i++) {
+        for (coder::SizeType i{0}; i < *nfaces; i++) {
           ftags[ngbfs[i] - 1] = false;
         }
       }
@@ -4393,8 +4393,8 @@ namespace rdi_stencils
 
     //  nverts is number of vertices in the neighborhood (not in entire mesh)
     if (v2hf[vid - 1] != 0) {
-      int i;
-      int nverts_idx_0;
+      coder::SizeType i;
+      coder::SizeType nverts_idx_0;
       boolean_T guard1{ false };
 
       //  Obtain the 1-ring
@@ -4431,8 +4431,8 @@ namespace rdi_stencils
       if (guard1) {
         double cur_ring;
         double ring_full;
-        int nelems_pre;
-        int nverts_pre;
+        coder::SizeType nelems_pre;
+        coder::SizeType nverts_pre;
         boolean_T onethird;
         boolean_T twothird;
 
@@ -4452,19 +4452,19 @@ namespace rdi_stencils
           }
         }
 
-        int exitg1;
+        coder::SizeType exitg1;
         boolean_T b_guard1{ false };
 
         boolean_T guard2{ false };
 
         do {
-          int MAX_temp_verts;
-          int eid;
-          int ii;
-          int jj;
-          int nelems_lcl;
-          int ntemp;
-          int nverts_last;
+          coder::SizeType MAX_temp_verts;
+          coder::SizeType eid;
+          coder::SizeType ii;
+          coder::SizeType jj;
+          coder::SizeType nelems_lcl;
+          coder::SizeType ntemp;
+          coder::SizeType nverts_last;
           boolean_T exitg2;
           exitg1 = 0;
           b_guard1 = false;
@@ -4483,9 +4483,9 @@ namespace rdi_stencils
             // Check currently listed neighboring elements
             i = nelems_pre + 1;
             for (ii = i; ii <= *nelems; ii++) {
-              int i1;
-              int i2;
-              int i3;
+              coder::SizeType i1;
+              coder::SizeType i2;
+              coder::SizeType i3;
               nverts_idx_0 = tets[tets.size(1) * (ii - 1)];
               i1 = tets[tets.size(1) * (ii - 1) + 1];
               i2 = tets[tets.size(1) * (ii - 1) + 2];
@@ -4587,7 +4587,7 @@ namespace rdi_stencils
           if (guard2) {
             if ((cur_ring > ring_full) || ((cur_ring == ring_full) && twothird))
             {
-              int numv;
+              coder::SizeType numv;
 
               //  Collect two-third-ring
               nverts_last = *nverts;
@@ -4730,7 +4730,7 @@ namespace rdi_stencils
           }
 
           if (b_guard1) {
-            int b_nverts_last;
+            coder::SizeType b_nverts_last;
  
             // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             nverts_last = *nverts + 1;
@@ -4804,8 +4804,8 @@ namespace rdi_stencils
   {
     double tEnd;
     double tStart;
-    int i;
-    int maxStcl;
+    coder::SizeType i;
+    coder::SizeType maxStcl;
 
     // Rrdi_compute_stencils - Compute stencils using AHF
     tStart = 0.0;
@@ -4814,14 +4814,14 @@ namespace rdi_stencils
 
     tStart = omp_get_wtime();
 
-#endif                                 //_OPENMP(&tStart)
+#endif // _OPENMP
 
     //  topological dimension
     maxStcl = params->maxStclSize;
 
     //  maximum stencil per node
     if (params->maxStclSize == 0) {
-      int c;
+      coder::SizeType c;
       c = static_cast<int>(std::ceil(params->ring));
       if (c < 5) {
         maxStcl = iv[(c + ((params->dim - 1) << 2)) - 1];
@@ -4845,7 +4845,7 @@ namespace rdi_stencils
         fflush(stdout);
       } else {
         m2cPrintf(" Update stencil for %d nodes with %g ring in %dD...\n",
-               nrange.size(0), params->ring, params->dim);
+               (int)nrange.size(0), params->ring, params->dim);
         fflush(stdout);
       }
     }
@@ -4872,7 +4872,7 @@ namespace rdi_stencils
 
     tEnd = omp_get_wtime();
 
-#endif                                 //_OPENMP(&tEnd)
+#endif // _OPENMP
 
     if (params->verbose > 1) {
       m2cPrintf(" Stencil computation finished in %gs...\n", tEnd - tStart);
@@ -4885,7 +4885,7 @@ namespace rdi_stencils
   {
     double tEnd;
     double tStart;
-    int maxStcl;
+    coder::SizeType maxStcl;
 
     // Rrdi_compute_stencils - Compute stencils using AHF
     tStart = 0.0;
@@ -4894,14 +4894,14 @@ namespace rdi_stencils
 
     tStart = omp_get_wtime();
 
-#endif                                 //_OPENMP(&tStart)
+#endif // _OPENMP
 
     //  topological dimension
     maxStcl = params->maxStclSize;
 
     //  maximum stencil per node
     if (params->maxStclSize == 0) {
-      int c;
+      coder::SizeType c;
       c = static_cast<int>(std::ceil(params->ring));
       if (c < 5) {
         maxStcl = iv[(c + ((params->dim - 1) << 2)) - 1];
@@ -4939,20 +4939,12 @@ namespace rdi_stencils
 
     tEnd = omp_get_wtime();
 
-#endif                                 //_OPENMP(&tEnd)
+#endif // _OPENMP
 
     if (params->verbose > 1) {
       m2cPrintf(" Stencil computation finished in %gs...\n", tEnd - tStart);
       fflush(stdout);
     }
-  }
-
-  void rdi_compute_stencils_initialize()
-  {
-  }
-
-  void rdi_compute_stencils_terminate()
-  {
   }
 }
 
