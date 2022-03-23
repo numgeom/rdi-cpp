@@ -101,11 +101,11 @@ namespace rdi_kernel
     1U> &rdNodes, const RdiParams *params);
   static inline
   int assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
-    coder::array<int, 2U> &stcls, int degree, int iend, WlsDataStruct *wls);
+    coder::array<int, 2U> &stcls, coder::SizeType degree, coder::SizeType iend, WlsDataStruct *wls);
   static inline
   void assemble_body_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -115,7 +115,7 @@ namespace rdi_kernel
   static inline
   void assemble_body_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -125,10 +125,10 @@ namespace rdi_kernel
   void assemble_body_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
+    &n2cList, coder::SizeType degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
     array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::coder::
-    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, int
-    mypart, int lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
+    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType
+    mypart, coder::SizeType lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
     boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts);
   static inline
   void assemble_surf(const ::coder::array<double, 2U> &mesh_xs, const ::
@@ -142,17 +142,17 @@ namespace rdi_kernel
   static inline
   int assemble_surf_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, const ::coder::array<double, 2U> &nrms, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms, const ::coder::
     array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::
     array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::
-    array<int, 1U> &nrange, int iend, WlsDataStruct *wls, ::coder::array<
+    array<int, 1U> &nrange, coder::SizeType iend, WlsDataStruct *wls, ::coder::array<
     boolean_T, 1U> &rdTags);
   static inline
   void assemble_surf_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, boolean_T interp0, boolean_T useDag, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, boolean_T interp0, boolean_T useDag, const ::coder::
     array<double, 2U> &nrms, const ::coder::array<int, 1U> &rowPtr, const ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::
     coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, ::
@@ -161,8 +161,8 @@ namespace rdi_kernel
   static inline
   void assemble_surf_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, boolean_T interp0, boolean_T useDag, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, boolean_T interp0, boolean_T useDag, const ::coder::
     array<double, 2U> &nrms, const ::coder::array<int, 1U> &rowPtr, const ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::
     coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, ::
@@ -172,23 +172,23 @@ namespace rdi_kernel
   void assemble_surf_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int surfType, int degree, const ::coder::array<double, 2U> &nrms,
+    &n2cList, coder::SizeType surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms,
     const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd,
     ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr,
-    const ::coder::array<Omp4mPart, 1U> &parts, int mypart, int lvl, ::coder::
+    const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType mypart, coder::SizeType lvl, ::coder::
     array<WlsDataStruct, 1U> &wls, ::coder::array<boolean_T, 1U> &rdTags, ::
     coder::array<int, 1U> &rdCounts);
   static inline
-  void b_WlsDataStruct(int degree, boolean_T interp0, boolean_T useDag,
+  void b_WlsDataStruct(coder::SizeType degree, boolean_T interp0, boolean_T useDag,
     WlsObject *wls_wlsObj, WlsWeight *wls_wlsWgts, ::coder::array<double, 2U>
     &wls_coeffs, boolean_T *wls_interp0, boolean_T *wls_useDag);
   static inline
   int b_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
-    coder::array<int, 2U> &stcls, int degree, int iend, WlsDataStruct *wls);
+    coder::array<int, 2U> &stcls, coder::SizeType degree, coder::SizeType iend, WlsDataStruct *wls);
   static inline
   void b_assemble_body_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -198,7 +198,7 @@ namespace rdi_kernel
   static inline
   void b_assemble_body_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -208,25 +208,25 @@ namespace rdi_kernel
   void b_assemble_body_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
+    &n2cList, coder::SizeType degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
     array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::coder::
-    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, int
-    mypart, int lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
+    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType
+    mypart, coder::SizeType lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
     boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts);
   static inline
   void b_assemble_surf_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, const ::coder::array<double, 2U> &nrms, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms, const ::coder::
     array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::
     array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::
-    array<int, 1U> &nrange, int istart, int iend, WlsDataStruct *wls, ::coder::
+    array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend, WlsDataStruct *wls, ::coder::
     array<boolean_T, 1U> &rdTags, int *rdCounts);
   static inline
   void b_assemble_surf_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, boolean_T interp0, boolean_T useDag, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, boolean_T interp0, boolean_T useDag, const ::coder::
     array<double, 2U> &nrms, const ::coder::array<int, 1U> &rowPtr, const ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::
     coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, ::
@@ -235,8 +235,8 @@ namespace rdi_kernel
   static inline
   void b_assemble_surf_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, boolean_T interp0, boolean_T useDag, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, boolean_T interp0, boolean_T useDag, const ::coder::
     array<double, 2U> &nrms, const ::coder::array<int, 1U> &rowPtr, const ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::
     coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, ::
@@ -246,33 +246,33 @@ namespace rdi_kernel
   void b_assemble_surf_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int surfType, int degree, const ::coder::array<double, 2U> &nrms,
+    &n2cList, coder::SizeType surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms,
     const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd,
     ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr,
-    const ::coder::array<Omp4mPart, 1U> &parts, int mypart, int lvl, ::coder::
+    const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType mypart, coder::SizeType lvl, ::coder::
     array<WlsDataStruct, 1U> &wls, ::coder::array<boolean_T, 1U> &rdTags, ::
     coder::array<int, 1U> &rdCounts);
   static inline
-  void b_wls_init(WlsObject *wls, const double us_data[], int us_size,
+  void b_wls_init(WlsObject *wls, const double us_data[], coder::SizeType us_size,
     const char weight_name_data[], const double weight_params_pointwise_data[],
-    const coder::SizeType weight_params_pointwise_size[2], int degree, boolean_T interp0,
-    boolean_T use_dag, int npoints);
+    const coder::SizeType weight_params_pointwise_size[2], coder::SizeType degree, boolean_T interp0,
+    boolean_T use_dag, coder::SizeType npoints);
   static inline
-  void b_wls_resize(WlsObject *wls, int npoints, int degree, boolean_T
+  void b_wls_resize(WlsObject *wls, coder::SizeType npoints, coder::SizeType degree, boolean_T
     use_dag);
   static inline
-  void build_part(int nParts, const ::coder::array<int, 1U> &nparts,
+  void build_part(coder::SizeType nParts, const ::coder::array<int, 1U> &nparts,
     const ::coder::array<int, 1U> &cparts, const ::coder::array<int, 1U> &eptr,
     const ::coder::array<int, 1U> &eind, ::coder::array<boolean_T, 1U> &ctags, ::
     coder::array<int, 1U> &iwork, ::coder::array<int, 1U> &partptr, ::coder::
     array<int, 1U> &partlist, ::coder::array<int, 1U> &sharedents);
   static inline
   int c_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
-    coder::array<int, 2U> &stcls, int degree, int iend, WlsDataStruct *wls);
+    coder::array<int, 2U> &stcls, coder::SizeType degree, coder::SizeType iend, WlsDataStruct *wls);
   static inline
   void c_assemble_body_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -282,7 +282,7 @@ namespace rdi_kernel
   static inline
   void c_assemble_body_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -292,19 +292,19 @@ namespace rdi_kernel
   void c_assemble_body_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
+    &n2cList, coder::SizeType degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
     array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::coder::
-    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, int
-    mypart, int lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
+    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType
+    mypart, coder::SizeType lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
     boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts);
   static inline
   int c_assemble_surf_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, const ::coder::array<double, 2U> &nrms, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms, const ::coder::
     array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::
     array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::
-    array<int, 1U> &nrange, int iend, WlsDataStruct *wls, ::coder::array<
+    array<int, 1U> &nrange, coder::SizeType iend, WlsDataStruct *wls, ::coder::array<
     boolean_T, 1U> &rdTags);
   static inline
   void call_metis_mesh(int n, ::coder::array<int, 1U> &eptr, ::coder::
@@ -312,60 +312,60 @@ namespace rdi_kernel
     array<int, 1U> &cparts);
   static inline
   void compute_area(const ::coder::array<double, 2U> &xs, const ::coder::
-    array<int, 2U> &conn, ::coder::array<double, 1U> &A, int nThreads);
+    array<int, 2U> &conn, ::coder::array<double, 1U> &A, coder::SizeType nThreads);
   static inline
-  void compute_area_kernel(int m, int dim, const ::coder::array<double,
+  void compute_area_kernel(coder::SizeType m, coder::SizeType dim, const ::coder::array<double,
     2U> &xs, const ::coder::array<int, 2U> &conn, ::coder::array<double, 1U> &A,
-    int nThreads);
+    coder::SizeType nThreads);
   static inline
-  void compute_beta_kernel(int n, double epsBeta, double hGlobal, const ::
+  void compute_beta_kernel(coder::SizeType n, double epsBeta, double hGlobal, const ::
     coder::array<double, 2U> &dfGlobal, const ::coder::array<double, 2U>
     &alphaCell, const ::coder::array<double, 1U> &mesh_cellWeights, const ::
     coder::array<int, 1U> &mesh_n2cPtr, const ::coder::array<int, 1U>
-    &mesh_n2cList, int nRhs, ::coder::array<double, 2U> &beta);
+    &mesh_n2cList, coder::SizeType nRhs, ::coder::array<double, 2U> &beta);
   static inline
   void compute_body_h(const ::coder::array<double, 2U> &xs, const ::coder::
-    array<int, 2U> &conn, ::coder::array<double, 1U> &h, int nThreads);
+    array<int, 2U> &conn, ::coder::array<double, 1U> &h, coder::SizeType nThreads);
   static inline
-  void compute_body_h_kernel(int m, int dim, const ::coder::array<double,
+  void compute_body_h_kernel(coder::SizeType m, coder::SizeType dim, const ::coder::array<double,
     2U> &xs, const ::coder::array<int, 2U> &conn, ::coder::array<double, 1U> &h,
-    int nThreads);
+    coder::SizeType nThreads);
   static inline
-  void compute_nodal_alpha(int n, const ::coder::array<double, 2U>
+  void compute_nodal_alpha(coder::SizeType n, const ::coder::array<double, 2U>
     &alphaCell, const ::coder::array<int, 1U> &mesh_n2cPtr, const ::coder::array<
-    int, 1U> &mesh_n2cList, int nRhs, ::coder::array<double, 2U> &alphaNode);
+    int, 1U> &mesh_n2cList, coder::SizeType nRhs, ::coder::array<double, 2U> &alphaNode);
   static inline
   void compute_surf_h(const ::coder::array<double, 2U> &xs, const ::coder::
     array<int, 2U> &conn, const ::coder::array<int, 1U> &n2nPtr, const ::coder::
-    array<int, 1U> &n2nList, int surfType, ::coder::array<double, 1U> &h, int
+    array<int, 1U> &n2nList, coder::SizeType surfType, ::coder::array<double, 1U> &h, coder::SizeType
     nThreads);
   static inline
   void compute_surf_h(const ::coder::array<double, 2U> &xs, const ::coder::
     array<int, 2U> &conn, const ::coder::array<int, 1U> &n2nPtr, const ::coder::
-    array<int, 1U> &n2nList, const ::coder::array<double, 2U> &nrms, int
-    surfType, ::coder::array<double, 1U> &h, int nThreads);
+    array<int, 1U> &n2nList, const ::coder::array<double, 2U> &nrms, coder::SizeType
+    surfType, ::coder::array<double, 1U> &h, coder::SizeType nThreads);
   static inline
-  void compute_surf_h_kernel(int n, int m, int dim, const ::coder::array<
+  void compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim, const ::coder::array<
     double, 2U> &xs, const ::coder::array<int, 2U> &conn, const ::coder::array<
-    int, 1U> &n2nPtr, const ::coder::array<int, 1U> &n2nList, int surfType, ::
-    coder::array<double, 1U> &h, ::coder::array<double, 1U> &buf, int nThreads);
+    int, 1U> &n2nPtr, const ::coder::array<int, 1U> &n2nList, coder::SizeType surfType, ::
+    coder::array<double, 1U> &h, ::coder::array<double, 1U> &buf, coder::SizeType nThreads);
   static inline
-  void compute_surf_h_kernel(int n, int m, int dim, const ::coder::array<
+  void compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim, const ::coder::array<
     double, 2U> &xs, const ::coder::array<int, 2U> &conn, const ::coder::array<
     int, 1U> &n2nPtr, const ::coder::array<int, 1U> &n2nList, const ::coder::
-    array<double, 2U> &nrms, int surfType, ::coder::array<double, 1U> &h, ::
-    coder::array<double, 1U> &buf, int nThreads);
+    array<double, 2U> &nrms, coder::SizeType surfType, ::coder::array<double, 1U> &h, ::
+    coder::array<double, 1U> &buf, coder::SizeType nThreads);
   static inline
   void compute_volume_tet(const ::coder::array<double, 2U> &xs, const ::
-    coder::array<int, 2U> &conn, ::coder::array<double, 1U> &V, int nThreads);
+    coder::array<int, 2U> &conn, ::coder::array<double, 1U> &V, coder::SizeType nThreads);
   static inline
-  void compute_volume_tet_kernel(int m, const ::coder::array<double, 2U>
-    &xs, const ::coder::array<int, 2U> &conn, ::coder::array<double, 1U> &V, int
+  void compute_volume_tet_kernel(coder::SizeType m, const ::coder::array<double, 2U>
+    &xs, const ::coder::array<int, 2U> &conn, ::coder::array<double, 1U> &V, coder::SizeType
     nThreads);
   static inline
   void crsAx_kernel(const ::coder::array<int, 1U> &row_ptr, const ::coder::
-    array<int, 1U> &col_ind, const ::coder::array<double, 1U> &val, int nrows,
-    const ::coder::array<double, 2U> &x, int nrhs, ::coder::array<double, 2U> &b);
+    array<int, 1U> &col_ind, const ::coder::array<double, 1U> &val, coder::SizeType nrows,
+    const ::coder::array<double, 2U> &x, coder::SizeType nrhs, ::coder::array<double, 2U> &b);
   static inline
   void crs_prod_mat_vec(const ::coder::array<int, 1U> &A_rowptr, const ::
     coder::array<int, 1U> &A_colind, const ::coder::array<double, 1U> &A_val,
@@ -373,129 +373,129 @@ namespace rdi_kernel
   static inline
   void d_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags, int *rdCounts);
   static inline
   void d_assemble_surf_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, const ::coder::array<double, 2U> &nrms, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms, const ::coder::
     array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::
     array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::
-    array<int, 1U> &nrange, int istart, int iend, WlsDataStruct *wls, ::coder::
+    array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend, WlsDataStruct *wls, ::coder::
     array<boolean_T, 1U> &rdTags, int *rdCounts);
   static inline
   void e_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags, int *rdCounts);
   static inline
-  void extract_sub(int n, const ::coder::array<int, 1U> &crange, const ::
+  void extract_sub(coder::SizeType n, const ::coder::array<int, 1U> &crange, const ::
     coder::array<int, 1U> &eptr, const ::coder::array<int, 1U> &eind, ::coder::
     array<int, 1U> &iwork, ::coder::array<boolean_T, 1U> &ntags, ::coder::array<
     int, 1U> &eptrloc, ::coder::array<int, 1U> &eindloc, int *nnodes);
   static inline
   void f_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags, int *rdCounts);
   static inline
-  double find_kth_shortest_dist(::coder::array<double, 1U> &arr, int k,
-    int l, int r);
+  double find_kth_shortest_dist(::coder::array<double, 1U> &arr, coder::SizeType k,
+    coder::SizeType l, coder::SizeType r);
   static inline
   int g_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags);
   static inline
-  void gen_vander(const ::coder::array<double, 2U> &us, int npoints, int
+  void gen_vander(const ::coder::array<double, 2U> &us, coder::SizeType npoints, coder::SizeType
     degree, const ::coder::array<double, 1U> &weights, ::coder::array<double, 2U>
     &V);
   static inline
-  void gen_vander(const ::coder::array<double, 2U> &us, int npoints, int
+  void gen_vander(const ::coder::array<double, 2U> &us, coder::SizeType npoints, coder::SizeType
     degree, ::coder::array<double, 2U> &V);
   static inline
-  void gen_vander_1d_dag(int degree, ::coder::array<unsigned char, 1U>
+  void gen_vander_1d_dag(coder::SizeType degree, ::coder::array<unsigned char, 1U>
     &dag);
   static inline
-  void gen_vander_2d(const ::coder::array<double, 2U> &us, int npoints,
-    int degree, const ::coder::array<double, 1U> &weights, ::coder::array<double,
+  void gen_vander_2d(const ::coder::array<double, 2U> &us, coder::SizeType npoints,
+    coder::SizeType degree, const ::coder::array<double, 1U> &weights, ::coder::array<double,
     2U> &V);
   static inline
-  void gen_vander_2d(const ::coder::array<double, 2U> &us, int npoints,
-    int degree, ::coder::array<double, 2U> &V);
+  void gen_vander_2d(const ::coder::array<double, 2U> &us, coder::SizeType npoints,
+    coder::SizeType degree, ::coder::array<double, 2U> &V);
   static inline
-  void gen_vander_2d_dag(int degree, ::coder::array<unsigned char, 2U>
+  void gen_vander_2d_dag(coder::SizeType degree, ::coder::array<unsigned char, 2U>
     &dag);
   static inline
-  void gen_vander_3d(const ::coder::array<double, 2U> &us, int npoints,
-    int degree, const ::coder::array<double, 1U> &weights, ::coder::array<double,
+  void gen_vander_3d(const ::coder::array<double, 2U> &us, coder::SizeType npoints,
+    coder::SizeType degree, const ::coder::array<double, 1U> &weights, ::coder::array<double,
     2U> &V);
   static inline
-  void gen_vander_3d(const ::coder::array<double, 2U> &us, int npoints,
-    int degree, ::coder::array<double, 2U> &V);
+  void gen_vander_3d(const ::coder::array<double, 2U> &us, coder::SizeType npoints,
+    coder::SizeType degree, ::coder::array<double, 2U> &V);
   static inline
-  void gen_vander_3d_dag(int degree, ::coder::array<unsigned char, 2U>
+  void gen_vander_3d_dag(coder::SizeType degree, ::coder::array<unsigned char, 2U>
     &dag);
   static inline
   int h_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags);
   static inline
   int i_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags);
   static inline
   void init_osusop(const ::coder::array<int, 2U> &conn, const ::coder::
-    array<int, 2U> &stcls, int maxNnzPr, ::coder::array<int, 1U> &rowPtr, ::
+    array<int, 2U> &stcls, coder::SizeType maxNnzPr, ::coder::array<int, 1U> &rowPtr, ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, ::coder::
     array<int, 1U> &nnzPr);
   static inline
-  void mark_kernel(int n, double hGlobal, double cGlobal, double cLocal,
+  void mark_kernel(coder::SizeType n, double hGlobal, double cGlobal, double cLocal,
     double kappa1, double kappa0, const ::coder::array<double, 2U> &fs, const ::
     coder::array<double, 2U> &alphaCell, const ::coder::array<double, 2U> &beta,
     const ::coder::array<double, 2U> &dfGlobal, const ::coder::array<int, 2U>
     &mesh_conn, const ::coder::array<double, 1U> &mesh_cellSizes, const ::coder::
     array<int, 1U> &mesh_n2cPtr, const ::coder::array<int, 1U> &mesh_n2cList,
-    int nRhs, ::coder::array<signed char, 2U> &disTags);
+    coder::SizeType nRhs, ::coder::array<signed char, 2U> &disTags);
   static inline
-  void mark_kernel(int n, double hGlobal, double cGlobal, double cLocal,
+  void mark_kernel(coder::SizeType n, double hGlobal, double cGlobal, double cLocal,
     double kappa1, double kappa0, const ::coder::array<double, 2U> &fs, const ::
     coder::array<double, 2U> &alphaCell, const ::coder::array<double, 2U> &beta,
     const ::coder::array<double, 2U> &dfGlobal, const ::coder::array<int, 2U>
     &mesh_conn, const ::coder::array<double, 1U> &mesh_cellSizes, const ::coder::
     array<int, 1U> &mesh_n2cPtr, const ::coder::array<int, 1U> &mesh_n2cList,
     const ::coder::array<int, 1U> &mesh_n2nPtr, const ::coder::array<int, 1U>
-    &mesh_n2nList, int nRhs, ::coder::array<signed char, 2U> &disTags);
+    &mesh_n2nList, coder::SizeType nRhs, ::coder::array<signed char, 2U> &disTags);
   static inline
-  void omp4mRecurPartMesh(int n, const ::coder::array<int, 2U> &cells,
-    int dim, int nLevels, int nParts, ::coder::array<Omp4mPart, 1U> &parts);
+  void omp4mRecurPartMesh(coder::SizeType n, const ::coder::array<int, 2U> &cells,
+    coder::SizeType dim, coder::SizeType nLevels, coder::SizeType nParts, ::coder::array<Omp4mPart, 1U> &parts);
   static inline
   void rdi_compute_oscind(const ::coder::array<double, 2U> &dfGlobal,
     const ::coder::array<double, 2U> &alphaCell, const ::coder::array<double, 2U>
     &mesh_xs, double mesh_hGlobal, const ::coder::array<double, 1U>
     &mesh_cellWeights, const ::coder::array<int, 1U> &mesh_n2cPtr, const ::coder::
-    array<int, 1U> &mesh_n2cList, int params_dim, double params_epsBeta, ::coder::
+    array<int, 1U> &mesh_n2cList, coder::SizeType params_dim, double params_epsBeta, ::coder::
     array<double, 2U> &beta);
   static inline
   void rdi_compute_osusind(const ::coder::array<int, 1U> &rowPtr, const ::
@@ -504,48 +504,48 @@ namespace rdi_kernel
     const ::coder::array<int, 1U> &mesh_n2cList, ::coder::array<double, 2U>
     &alphaCell, ::coder::array<double, 2U> &alphaNode);
   static inline
-  void rrqr_factor(const ::coder::array<double, 2U> &A, double thres, int
-    rowoffset, int coloffset, int m, int n, ::coder::array<double, 2U> &QR, ::
+  void rrqr_factor(const ::coder::array<double, 2U> &A, double thres, coder::SizeType
+    rowoffset, coder::SizeType coloffset, coder::SizeType m, coder::SizeType n, ::coder::array<double, 2U> &QR, ::
     coder::array<int, 1U> &p, int *rank, ::coder::array<double, 1U> &work);
   static inline
-  void rrqr_qmulti(const ::coder::array<double, 2U> &QR, int m, int n,
-    int rank, ::coder::array<double, 2U> &bs, int nrhs, ::coder::array<double,
+  void rrqr_qmulti(const ::coder::array<double, 2U> &QR, coder::SizeType m, coder::SizeType n,
+    coder::SizeType rank, ::coder::array<double, 2U> &bs, coder::SizeType nrhs, ::coder::array<double,
     1U> &work);
   static inline
-  void rrqr_rtsolve(const ::coder::array<double, 2U> &QR, int n, int rank,
-    ::coder::array<double, 2U> &bs, int nrhs);
+  void rrqr_rtsolve(const ::coder::array<double, 2U> &QR, coder::SizeType n, coder::SizeType rank,
+    ::coder::array<double, 2U> &bs, coder::SizeType nrhs);
   static inline
-  void update_osusop(int n, const ::coder::array<int, 2U> &stcls, const ::
+  void update_osusop(coder::SizeType n, const ::coder::array<int, 2U> &stcls, const ::
     coder::array<int, 1U> &nrange, const ::coder::array<int, 1U> &n2cPtr, const ::
     coder::array<int, 1U> &n2cList, ::coder::array<int, 1U> &rowPtr, ::coder::
     array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, ::coder::array<int,
     1U> &nnzPr);
   static inline
-  void wls_buhmann_weights(const ::coder::array<double, 2U> &us, int
-    npoints, int degree, const double params_pw_data[], const coder::SizeType
+  void wls_buhmann_weights(const ::coder::array<double, 2U> &us, coder::SizeType
+    npoints, coder::SizeType degree, const double params_pw_data[], const coder::SizeType
     params_pw_size[2], ::coder::array<double, 1U> &ws);
   static inline
   void wls_func(WlsObject *wls, const double pnts_data[], const coder::SizeType
-                       pnts_size[2], int npoints, ::coder::array<double, 2U>
+                       pnts_size[2], coder::SizeType npoints, ::coder::array<double, 2U>
                        &vdops);
   static inline
-  void wls_func(WlsObject *wls, const double pnts_data[], int npoints, ::
+  void wls_func(WlsObject *wls, const double pnts_data[], coder::SizeType npoints, ::
                        coder::array<double, 2U> &vdops);
   static inline
   void wls_init(WlsObject *wls, const double us_data[], const coder::SizeType
                        us_size[2], const char weight_name_data[], const double
                        weight_params_pointwise_data[], const coder::SizeType
-                       weight_params_pointwise_size[2], int degree, boolean_T
-                       interp0, boolean_T use_dag, int npoints);
+                       weight_params_pointwise_size[2], coder::SizeType degree, boolean_T
+                       interp0, boolean_T use_dag, coder::SizeType npoints);
   static inline
-  void wls_invdist_weights(const ::coder::array<double, 2U> &us, int
+  void wls_invdist_weights(const ::coder::array<double, 2U> &us, coder::SizeType
     npoints, double degree, ::coder::array<double, 1U> &ws);
   static inline
-  void wls_invdist_weights(const ::coder::array<double, 2U> &us, int
-    npoints, int degree, const double params_pw_data[], const coder::SizeType
+  void wls_invdist_weights(const ::coder::array<double, 2U> &us, coder::SizeType
+    npoints, coder::SizeType degree, const double params_pw_data[], const coder::SizeType
     params_pw_size[2], ::coder::array<double, 1U> &ws);
   static inline
-  void wls_resize(WlsObject *wls, int dim, int npoints, int degree,
+  void wls_resize(WlsObject *wls, coder::SizeType dim, coder::SizeType npoints, coder::SizeType degree,
     boolean_T use_dag);
 }
 
@@ -773,7 +773,7 @@ namespace rdi_kernel
   }
 
   static int assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
-    coder::array<int, 2U> &stcls, int degree, int iend, WlsDataStruct *wls)
+    coder::array<int, 2U> &stcls, coder::SizeType degree, coder::SizeType iend, WlsDataStruct *wls)
   {
     double xsLocal[3072];
     int gIDs[1024];
@@ -839,7 +839,7 @@ namespace rdi_kernel
 
   static void assemble_body_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -951,7 +951,7 @@ namespace rdi_kernel
 
   static void assemble_body_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -1030,10 +1030,10 @@ namespace rdi_kernel
   static void assemble_body_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
+    &n2cList, coder::SizeType degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
     array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::coder::
-    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, int
-    mypart, int lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
+    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType
+    mypart, coder::SizeType lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
     boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts)
   {
     coder::SizeType n;
@@ -1373,11 +1373,11 @@ namespace rdi_kernel
 
   static int assemble_surf_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, const ::coder::array<double, 2U> &nrms, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms, const ::coder::
     array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::
     array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::
-    array<int, 1U> &nrange, int iend, WlsDataStruct *wls, ::coder::array<
+    array<int, 1U> &nrange, coder::SizeType iend, WlsDataStruct *wls, ::coder::array<
     boolean_T, 1U> &rdTags)
   {
     double xsLocal[1536];
@@ -1698,8 +1698,8 @@ namespace rdi_kernel
 
   static void assemble_surf_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, boolean_T interp0, boolean_T useDag, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, boolean_T interp0, boolean_T useDag, const ::coder::
     array<double, 2U> &nrms, const ::coder::array<int, 1U> &rowPtr, const ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::
     coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, ::
@@ -1809,8 +1809,8 @@ namespace rdi_kernel
 
   static void assemble_surf_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, boolean_T interp0, boolean_T useDag, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, boolean_T interp0, boolean_T useDag, const ::coder::
     array<double, 2U> &nrms, const ::coder::array<int, 1U> &rowPtr, const ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::
     coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, ::
@@ -1889,10 +1889,10 @@ namespace rdi_kernel
   static void assemble_surf_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int surfType, int degree, const ::coder::array<double, 2U> &nrms,
+    &n2cList, coder::SizeType surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms,
     const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd,
     ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr,
-    const ::coder::array<Omp4mPart, 1U> &parts, int mypart, int lvl, ::coder::
+    const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType mypart, coder::SizeType lvl, ::coder::
     array<WlsDataStruct, 1U> &wls, ::coder::array<boolean_T, 1U> &rdTags, ::
     coder::array<int, 1U> &rdCounts)
   {
@@ -1925,7 +1925,7 @@ namespace rdi_kernel
     }
   }
 
-  static void b_WlsDataStruct(int degree, boolean_T interp0, boolean_T useDag,
+  static void b_WlsDataStruct(coder::SizeType degree, boolean_T interp0, boolean_T useDag,
     WlsObject *wls_wlsObj, WlsWeight *wls_wlsWgts, ::coder::array<double, 2U>
     &wls_coeffs, boolean_T *wls_interp0, boolean_T *wls_useDag)
   {
@@ -1976,7 +1976,7 @@ namespace rdi_kernel
   }
 
   static int b_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
-    coder::array<int, 2U> &stcls, int degree, int iend, WlsDataStruct *wls)
+    coder::array<int, 2U> &stcls, coder::SizeType degree, coder::SizeType iend, WlsDataStruct *wls)
   {
     double xsLocal[1024];
     int gIDs[512];
@@ -2039,7 +2039,7 @@ namespace rdi_kernel
 
   static void b_assemble_body_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -2151,7 +2151,7 @@ namespace rdi_kernel
 
   static void b_assemble_body_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -2230,10 +2230,10 @@ namespace rdi_kernel
   static void b_assemble_body_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
+    &n2cList, coder::SizeType degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
     array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::coder::
-    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, int
-    mypart, int lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
+    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType
+    mypart, coder::SizeType lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
     boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts)
   {
     coder::SizeType n;
@@ -2267,11 +2267,11 @@ namespace rdi_kernel
 
   static void b_assemble_surf_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, const ::coder::array<double, 2U> &nrms, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms, const ::coder::
     array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::
     array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::
-    array<int, 1U> &nrange, int istart, int iend, WlsDataStruct *wls, ::coder::
+    array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend, WlsDataStruct *wls, ::coder::
     array<boolean_T, 1U> &rdTags, int *rdCounts)
   {
     double xsLocal[1536];
@@ -2587,8 +2587,8 @@ namespace rdi_kernel
 
   static void b_assemble_surf_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, boolean_T interp0, boolean_T useDag, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, boolean_T interp0, boolean_T useDag, const ::coder::
     array<double, 2U> &nrms, const ::coder::array<int, 1U> &rowPtr, const ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::
     coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, ::
@@ -2698,8 +2698,8 @@ namespace rdi_kernel
 
   static void b_assemble_surf_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, boolean_T interp0, boolean_T useDag, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, boolean_T interp0, boolean_T useDag, const ::coder::
     array<double, 2U> &nrms, const ::coder::array<int, 1U> &rowPtr, const ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::
     coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, ::
@@ -2778,10 +2778,10 @@ namespace rdi_kernel
   static void b_assemble_surf_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int surfType, int degree, const ::coder::array<double, 2U> &nrms,
+    &n2cList, coder::SizeType surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms,
     const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd,
     ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr,
-    const ::coder::array<Omp4mPart, 1U> &parts, int mypart, int lvl, ::coder::
+    const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType mypart, coder::SizeType lvl, ::coder::
     array<WlsDataStruct, 1U> &wls, ::coder::array<boolean_T, 1U> &rdTags, ::
     coder::array<int, 1U> &rdCounts)
   {
@@ -2814,10 +2814,10 @@ namespace rdi_kernel
     }
   }
 
-  static void b_wls_init(WlsObject *wls, const double us_data[], int us_size,
+  static void b_wls_init(WlsObject *wls, const double us_data[], coder::SizeType us_size,
     const char weight_name_data[], const double weight_params_pointwise_data[],
-    const coder::SizeType weight_params_pointwise_size[2], int degree, boolean_T interp0,
-    boolean_T use_dag, int npoints)
+    const coder::SizeType weight_params_pointwise_size[2], coder::SizeType degree, boolean_T interp0,
+    boolean_T use_dag, coder::SizeType npoints)
   {
     ::coder::array<unsigned char, 1U> r;
     double maxx;
@@ -2984,7 +2984,7 @@ namespace rdi_kernel
     wls->fullrank = (wls->rank == wls->ncols - b_interp0);
   }
 
-  static void b_wls_resize(WlsObject *wls, int npoints, int degree, boolean_T
+  static void b_wls_resize(WlsObject *wls, coder::SizeType npoints, coder::SizeType degree, boolean_T
     use_dag)
   {
     coder::SizeType stride;
@@ -3044,7 +3044,7 @@ namespace rdi_kernel
     wls->work.set_size((y << 5) + stride_idx_0);
   }
 
-  static void build_part(int nParts, const ::coder::array<int, 1U> &nparts,
+  static void build_part(coder::SizeType nParts, const ::coder::array<int, 1U> &nparts,
     const ::coder::array<int, 1U> &cparts, const ::coder::array<int, 1U> &eptr,
     const ::coder::array<int, 1U> &eind, ::coder::array<boolean_T, 1U> &ctags, ::
     coder::array<int, 1U> &iwork, ::coder::array<int, 1U> &partptr, ::coder::
@@ -3160,7 +3160,7 @@ namespace rdi_kernel
   }
 
   static int c_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
-    coder::array<int, 2U> &stcls, int degree, int iend, WlsDataStruct *wls)
+    coder::array<int, 2U> &stcls, coder::SizeType degree, coder::SizeType iend, WlsDataStruct *wls)
   {
     double xsLocal[64];
     int gIDs[64];
@@ -3211,7 +3211,7 @@ namespace rdi_kernel
 
   static void c_assemble_body_par(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -3323,7 +3323,7 @@ namespace rdi_kernel
 
   static void c_assemble_body_task(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, boolean_T interp0, boolean_T useDag, const ::coder::array<int, 1U>
     &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U>
     &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart,
@@ -3402,10 +3402,10 @@ namespace rdi_kernel
   static void c_assemble_body_task_kernel(const ::coder::array<double, 2U> &xs,
     const ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
-    &n2cList, int degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
+    &n2cList, coder::SizeType degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::
     array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, const ::coder::
-    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, int
-    mypart, int lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
+    array<int, 1U> &nnzPr, const ::coder::array<Omp4mPart, 1U> &parts, coder::SizeType
+    mypart, coder::SizeType lvl, ::coder::array<WlsDataStruct, 1U> &wls, ::coder::array<
     boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts)
   {
     coder::SizeType n;
@@ -3439,11 +3439,11 @@ namespace rdi_kernel
 
   static int c_assemble_surf_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, const ::coder::array<double, 2U> &nrms, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms, const ::coder::
     array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::
     array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::
-    array<int, 1U> &nrange, int iend, WlsDataStruct *wls, ::coder::array<
+    array<int, 1U> &nrange, coder::SizeType iend, WlsDataStruct *wls, ::coder::array<
     boolean_T, 1U> &rdTags)
   {
     double xsLocal[1024];
@@ -3743,7 +3743,7 @@ namespace rdi_kernel
   }
 
   static void compute_area(const ::coder::array<double, 2U> &xs, const ::coder::
-    array<int, 2U> &conn, ::coder::array<double, 1U> &A, int nThreads)
+    array<int, 2U> &conn, ::coder::array<double, 1U> &A, coder::SizeType nThreads)
   {
     coder::SizeType m2cTryBlkErrCode;
     coder::SizeType nthreads;
@@ -3800,9 +3800,9 @@ namespace rdi_kernel
     }
   }
 
-  static void compute_area_kernel(int m, int dim, const ::coder::array<double,
+  static void compute_area_kernel(coder::SizeType m, coder::SizeType dim, const ::coder::array<double,
     2U> &xs, const ::coder::array<int, 2U> &conn, ::coder::array<double, 1U> &A,
-    int nThreads)
+    coder::SizeType nThreads)
   {
     coder::SizeType iend;
     coder::SizeType istart;
@@ -3946,11 +3946,11 @@ namespace rdi_kernel
     }
   }
 
-  static void compute_beta_kernel(int n, double epsBeta, double hGlobal, const ::
+  static void compute_beta_kernel(coder::SizeType n, double epsBeta, double hGlobal, const ::
     coder::array<double, 2U> &dfGlobal, const ::coder::array<double, 2U>
     &alphaCell, const ::coder::array<double, 1U> &mesh_cellWeights, const ::
     coder::array<int, 1U> &mesh_n2cPtr, const ::coder::array<int, 1U>
-    &mesh_n2cList, int nRhs, ::coder::array<double, 2U> &beta)
+    &mesh_n2cList, coder::SizeType nRhs, ::coder::array<double, 2U> &beta)
   {
     double epsh2;
     coder::SizeType iend;
@@ -4041,7 +4041,7 @@ namespace rdi_kernel
   }
 
   static void compute_body_h(const ::coder::array<double, 2U> &xs, const ::coder::
-    array<int, 2U> &conn, ::coder::array<double, 1U> &h, int nThreads)
+    array<int, 2U> &conn, ::coder::array<double, 1U> &h, coder::SizeType nThreads)
   {
     coder::SizeType m2cTryBlkErrCode;
     coder::SizeType nthreads;
@@ -4098,9 +4098,9 @@ namespace rdi_kernel
     }
   }
 
-  static void compute_body_h_kernel(int m, int dim, const ::coder::array<double,
+  static void compute_body_h_kernel(coder::SizeType m, coder::SizeType dim, const ::coder::array<double,
     2U> &xs, const ::coder::array<int, 2U> &conn, ::coder::array<double, 1U> &h,
-    int nThreads)
+    coder::SizeType nThreads)
   {
     coder::SizeType iend;
     coder::SizeType istart;
@@ -4306,9 +4306,9 @@ namespace rdi_kernel
     }
   }
 
-  static void compute_nodal_alpha(int n, const ::coder::array<double, 2U>
+  static void compute_nodal_alpha(coder::SizeType n, const ::coder::array<double, 2U>
     &alphaCell, const ::coder::array<int, 1U> &mesh_n2cPtr, const ::coder::array<
-    int, 1U> &mesh_n2cList, int nRhs, ::coder::array<double, 2U> &alphaNode)
+    int, 1U> &mesh_n2cList, coder::SizeType nRhs, ::coder::array<double, 2U> &alphaNode)
   {
     coder::SizeType iend;
     coder::SizeType istart;
@@ -4383,8 +4383,8 @@ namespace rdi_kernel
 
   static void compute_surf_h(const ::coder::array<double, 2U> &xs, const ::coder::
     array<int, 2U> &conn, const ::coder::array<int, 1U> &n2nPtr, const ::coder::
-    array<int, 1U> &n2nList, const ::coder::array<double, 2U> &nrms, int
-    surfType, ::coder::array<double, 1U> &h, int nThreads)
+    array<int, 1U> &n2nList, const ::coder::array<double, 2U> &nrms, coder::SizeType
+    surfType, ::coder::array<double, 1U> &h, coder::SizeType nThreads)
   {
     coder::SizeType m2cTryBlkErrCode;
     ::coder::array<double, 1U> buf_;
@@ -4452,7 +4452,7 @@ namespace rdi_kernel
 
   static void compute_surf_h(const ::coder::array<double, 2U> &xs, const ::coder::
     array<int, 2U> &conn, const ::coder::array<int, 1U> &n2nPtr, const ::coder::
-    array<int, 1U> &n2nList, int surfType, ::coder::array<double, 1U> &h, int
+    array<int, 1U> &n2nList, coder::SizeType surfType, ::coder::array<double, 1U> &h, coder::SizeType
     nThreads)
   {
     coder::SizeType m2cTryBlkErrCode;
@@ -4519,10 +4519,10 @@ namespace rdi_kernel
 
   }
 
-  static void compute_surf_h_kernel(int n, int m, int dim, const ::coder::array<
+  static void compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim, const ::coder::array<
     double, 2U> &xs, const ::coder::array<int, 2U> &conn, const ::coder::array<
-    int, 1U> &n2nPtr, const ::coder::array<int, 1U> &n2nList, int surfType, ::
-    coder::array<double, 1U> &h, ::coder::array<double, 1U> &buf, int nThreads)
+    int, 1U> &n2nPtr, const ::coder::array<int, 1U> &n2nList, coder::SizeType surfType, ::
+    coder::array<double, 1U> &h, ::coder::array<double, 1U> &buf, coder::SizeType nThreads)
   {
     double d1;
     double h0;
@@ -4815,11 +4815,11 @@ namespace rdi_kernel
     }
   }
 
-  static void compute_surf_h_kernel(int n, int m, int dim, const ::coder::array<
+  static void compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim, const ::coder::array<
     double, 2U> &xs, const ::coder::array<int, 2U> &conn, const ::coder::array<
     int, 1U> &n2nPtr, const ::coder::array<int, 1U> &n2nList, const ::coder::
-    array<double, 2U> &nrms, int surfType, ::coder::array<double, 1U> &h, ::
-    coder::array<double, 1U> &buf, int nThreads)
+    array<double, 2U> &nrms, coder::SizeType surfType, ::coder::array<double, 1U> &h, ::
+    coder::array<double, 1U> &buf, coder::SizeType nThreads)
   {
     double d1;
     double h0;
@@ -5120,7 +5120,7 @@ namespace rdi_kernel
   }
 
   static void compute_volume_tet(const ::coder::array<double, 2U> &xs, const ::
-    coder::array<int, 2U> &conn, ::coder::array<double, 1U> &V, int nThreads)
+    coder::array<int, 2U> &conn, ::coder::array<double, 1U> &V, coder::SizeType nThreads)
   {
     coder::SizeType m2cTryBlkErrCode;
     coder::SizeType nthreads;
@@ -5177,8 +5177,8 @@ namespace rdi_kernel
     }
   }
 
-  static void compute_volume_tet_kernel(int m, const ::coder::array<double, 2U>
-    &xs, const ::coder::array<int, 2U> &conn, ::coder::array<double, 1U> &V, int
+  static void compute_volume_tet_kernel(coder::SizeType m, const ::coder::array<double, 2U>
+    &xs, const ::coder::array<int, 2U> &conn, ::coder::array<double, 1U> &V, coder::SizeType
     nThreads)
   {
     coder::SizeType iend;
@@ -5267,8 +5267,8 @@ namespace rdi_kernel
   }
 
   static void crsAx_kernel(const ::coder::array<int, 1U> &row_ptr, const ::coder::
-    array<int, 1U> &col_ind, const ::coder::array<double, 1U> &val, int nrows,
-    const ::coder::array<double, 2U> &x, int nrhs, ::coder::array<double, 2U> &b)
+    array<int, 1U> &col_ind, const ::coder::array<double, 1U> &val, coder::SizeType nrows,
+    const ::coder::array<double, 2U> &x, coder::SizeType nrhs, ::coder::array<double, 2U> &b)
   {
     coder::SizeType iend;
     coder::SizeType istart;
@@ -5351,10 +5351,10 @@ namespace rdi_kernel
 
   static void d_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags, int *rdCounts)
   {
     double xsLocal[3072];
@@ -5536,11 +5536,11 @@ namespace rdi_kernel
 
   static void d_assemble_surf_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
-    surfType, int degree, const ::coder::array<double, 2U> &nrms, const ::coder::
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
+    surfType, coder::SizeType degree, const ::coder::array<double, 2U> &nrms, const ::coder::
     array<int, 1U> &rowPtr, const ::coder::array<int, 1U> &colInd, ::coder::
     array<double, 1U> &vals, const ::coder::array<int, 1U> &nnzPr, const ::coder::
-    array<int, 1U> &nrange, int istart, int iend, WlsDataStruct *wls, ::coder::
+    array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend, WlsDataStruct *wls, ::coder::
     array<boolean_T, 1U> &rdTags, int *rdCounts)
   {
     double xsLocal[1024];
@@ -5788,10 +5788,10 @@ namespace rdi_kernel
 
   static void e_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags, int *rdCounts)
   {
     double xsLocal[1024];
@@ -5959,7 +5959,7 @@ namespace rdi_kernel
     }
   }
 
-  static void extract_sub(int n, const ::coder::array<int, 1U> &crange, const ::
+  static void extract_sub(coder::SizeType n, const ::coder::array<int, 1U> &crange, const ::
     coder::array<int, 1U> &eptr, const ::coder::array<int, 1U> &eind, ::coder::
     array<int, 1U> &iwork, ::coder::array<boolean_T, 1U> &ntags, ::coder::array<
     int, 1U> &eptrloc, ::coder::array<int, 1U> &eindloc, int *nnodes)
@@ -6047,10 +6047,10 @@ namespace rdi_kernel
 
   static void f_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const
     ::coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags, int *rdCounts)
   {
     double Ns[64];
@@ -6192,8 +6192,8 @@ namespace rdi_kernel
     }
   }
 
-  static double find_kth_shortest_dist(::coder::array<double, 1U> &arr, int k,
-    int l, int r)
+  static double find_kth_shortest_dist(::coder::array<double, 1U> &arr, coder::SizeType k,
+    coder::SizeType l, coder::SizeType r)
   {
     double dist;
     double val;
@@ -6257,10 +6257,10 @@ namespace rdi_kernel
 
   static int g_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags)
   {
     double xsLocal[3072];
@@ -6444,7 +6444,7 @@ namespace rdi_kernel
     return rdCounts;
   }
 
-  static void gen_vander(const ::coder::array<double, 2U> &us, int npoints, int
+  static void gen_vander(const ::coder::array<double, 2U> &us, coder::SizeType npoints, coder::SizeType
     degree, const ::coder::array<double, 1U> &weights, ::coder::array<double, 2U>
     &V)
   {
@@ -6584,7 +6584,7 @@ namespace rdi_kernel
     }
   }
 
-  static void gen_vander(const ::coder::array<double, 2U> &us, int npoints, int
+  static void gen_vander(const ::coder::array<double, 2U> &us, coder::SizeType npoints, coder::SizeType
     degree, ::coder::array<double, 2U> &V)
   {
     //  Wrapper function for computing confluent Vandermonde matrix in 1D, 2D, or 3D.
@@ -6697,7 +6697,7 @@ namespace rdi_kernel
   }
 
   static inline
-  void gen_vander_1d_dag(int degree, ::coder::array<unsigned char, 1U>
+  void gen_vander_1d_dag(coder::SizeType degree, ::coder::array<unsigned char, 1U>
     &dag)
   {
     //  Build a dag for Vandermonde matrix in 1D.
@@ -6712,8 +6712,8 @@ namespace rdi_kernel
     dag[dag.size(0) - 1] = static_cast<unsigned char>(degree + 127);
   }
 
-  static void gen_vander_2d(const ::coder::array<double, 2U> &us, int npoints,
-    int degree, const ::coder::array<double, 1U> &weights, ::coder::array<double,
+  static void gen_vander_2d(const ::coder::array<double, 2U> &us, coder::SizeType npoints,
+    coder::SizeType degree, const ::coder::array<double, 1U> &weights, ::coder::array<double,
     2U> &V)
   {
     coder::SizeType b_degree;
@@ -6803,8 +6803,8 @@ namespace rdi_kernel
     //  compute higher order confluent Vandermonde matrix blocks incrementally
   }
 
-  static void gen_vander_2d(const ::coder::array<double, 2U> &us, int npoints,
-    int degree, ::coder::array<double, 2U> &V)
+  static void gen_vander_2d(const ::coder::array<double, 2U> &us, coder::SizeType npoints,
+    coder::SizeType degree, ::coder::array<double, 2U> &V)
   {
     coder::SizeType b_degree;
     coder::SizeType c;
@@ -6883,7 +6883,7 @@ namespace rdi_kernel
     //  compute higher order confluent Vandermonde matrix blocks incrementally
   }
 
-  static void gen_vander_2d_dag(int degree, ::coder::array<unsigned char, 2U>
+  static void gen_vander_2d_dag(coder::SizeType degree, ::coder::array<unsigned char, 2U>
     &dag)
   {
     coder::SizeType b_degree;
@@ -6990,8 +6990,8 @@ namespace rdi_kernel
       unsigned char>(degree + 127);
   }
 
-  static void gen_vander_3d(const ::coder::array<double, 2U> &us, int npoints,
-    int degree, const ::coder::array<double, 1U> &weights, ::coder::array<double,
+  static void gen_vander_3d(const ::coder::array<double, 2U> &us, coder::SizeType npoints,
+    coder::SizeType degree, const ::coder::array<double, 1U> &weights, ::coder::array<double,
     2U> &V)
   {
     coder::SizeType b_degree;
@@ -7149,8 +7149,8 @@ namespace rdi_kernel
     m2cAssert(true, "");
   }
 
-  static void gen_vander_3d(const ::coder::array<double, 2U> &us, int npoints,
-    int degree, ::coder::array<double, 2U> &V)
+  static void gen_vander_3d(const ::coder::array<double, 2U> &us, coder::SizeType npoints,
+    coder::SizeType degree, ::coder::array<double, 2U> &V)
   {
     coder::SizeType b_degree;
     coder::SizeType c;
@@ -7296,7 +7296,7 @@ namespace rdi_kernel
     m2cAssert(true, "");
   }
 
-  static void gen_vander_3d_dag(int degree, ::coder::array<unsigned char, 2U>
+  static void gen_vander_3d_dag(coder::SizeType degree, ::coder::array<unsigned char, 2U>
     &dag)
   {
     coder::SizeType b_degree;
@@ -7452,10 +7452,10 @@ namespace rdi_kernel
 
   static int h_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags)
   {
     double xsLocal[1024];
@@ -7629,10 +7629,10 @@ namespace rdi_kernel
 
   static int i_assemble_body_kernel(const ::coder::array<double, 2U> &xs, const ::
     coder::array<int, 2U> &conn, const ::coder::array<int, 2U> &stcls, const ::
-    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, int
+    coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U> &n2cList, coder::SizeType
     degree, const ::coder::array<int, 1U> &rowPtr, const ::coder::array<int, 1U>
     &colInd, ::coder::array<double, 1U> &vals, const ::coder::array<int, 1U>
-    &nnzPr, const ::coder::array<int, 1U> &nrange, int istart, int iend,
+    &nnzPr, const ::coder::array<int, 1U> &nrange, coder::SizeType istart, coder::SizeType iend,
     WlsDataStruct *wls, ::coder::array<boolean_T, 1U> &rdTags)
   {
     double Ns[64];
@@ -7779,7 +7779,7 @@ namespace rdi_kernel
   }
 
   static void init_osusop(const ::coder::array<int, 2U> &conn, const ::coder::
-    array<int, 2U> &stcls, int maxNnzPr, ::coder::array<int, 1U> &rowPtr, ::
+    array<int, 2U> &stcls, coder::SizeType maxNnzPr, ::coder::array<int, 1U> &rowPtr, ::
     coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, ::coder::
     array<int, 1U> &nnzPr)
   {
@@ -7890,13 +7890,13 @@ namespace rdi_kernel
     }
   }
 
-  static void mark_kernel(int n, double hGlobal, double cGlobal, double cLocal,
+  static void mark_kernel(coder::SizeType n, double hGlobal, double cGlobal, double cLocal,
     double kappa1, double kappa0, const ::coder::array<double, 2U> &fs, const ::
     coder::array<double, 2U> &alphaCell, const ::coder::array<double, 2U> &beta,
     const ::coder::array<double, 2U> &dfGlobal, const ::coder::array<int, 2U>
     &mesh_conn, const ::coder::array<double, 1U> &mesh_cellSizes, const ::coder::
     array<int, 1U> &mesh_n2cPtr, const ::coder::array<int, 1U> &mesh_n2cList,
-    int nRhs, ::coder::array<signed char, 2U> &disTags)
+    coder::SizeType nRhs, ::coder::array<signed char, 2U> &disTags)
   {
     double thres;
     coder::SizeType iend;
@@ -8017,14 +8017,14 @@ namespace rdi_kernel
     }
   }
 
-  static void mark_kernel(int n, double hGlobal, double cGlobal, double cLocal,
+  static void mark_kernel(coder::SizeType n, double hGlobal, double cGlobal, double cLocal,
     double kappa1, double kappa0, const ::coder::array<double, 2U> &fs, const ::
     coder::array<double, 2U> &alphaCell, const ::coder::array<double, 2U> &beta,
     const ::coder::array<double, 2U> &dfGlobal, const ::coder::array<int, 2U>
     &mesh_conn, const ::coder::array<double, 1U> &mesh_cellSizes, const ::coder::
     array<int, 1U> &mesh_n2cPtr, const ::coder::array<int, 1U> &mesh_n2cList,
     const ::coder::array<int, 1U> &mesh_n2nPtr, const ::coder::array<int, 1U>
-    &mesh_n2nList, int nRhs, ::coder::array<signed char, 2U> &disTags)
+    &mesh_n2nList, coder::SizeType nRhs, ::coder::array<signed char, 2U> &disTags)
   {
     double thres;
     disTags.set_size(n, nRhs);
@@ -8117,8 +8117,8 @@ namespace rdi_kernel
     }
   }
 
-  static void omp4mRecurPartMesh(int n, const ::coder::array<int, 2U> &cells,
-    int dim, int nLevels, int nParts, ::coder::array<Omp4mPart, 1U> &parts)
+  static void omp4mRecurPartMesh(coder::SizeType n, const ::coder::array<int, 2U> &cells,
+    coder::SizeType dim, coder::SizeType nLevels, coder::SizeType nParts, ::coder::array<Omp4mPart, 1U> &parts)
   {
     ::coder::array<int, 1U> cparts_;
     ::coder::array<int, 1U> eind_;
@@ -8325,7 +8325,7 @@ namespace rdi_kernel
     const ::coder::array<double, 2U> &alphaCell, const ::coder::array<double, 2U>
     &mesh_xs, double mesh_hGlobal, const ::coder::array<double, 1U>
     &mesh_cellWeights, const ::coder::array<int, 1U> &mesh_n2cPtr, const ::coder::
-    array<int, 1U> &mesh_n2cList, int params_dim, double params_epsBeta, ::coder::
+    array<int, 1U> &mesh_n2cList, coder::SizeType params_dim, double params_epsBeta, ::coder::
     array<double, 2U> &beta)
   {
     double epsBeta;
@@ -8381,8 +8381,8 @@ namespace rdi_kernel
                         fs.size(1), alphaNode);
   }
 
-  static void rrqr_factor(const ::coder::array<double, 2U> &A, double thres, int
-    rowoffset, int coloffset, int m, int n, ::coder::array<double, 2U> &QR, ::
+  static void rrqr_factor(const ::coder::array<double, 2U> &A, double thres, coder::SizeType
+    rowoffset, coder::SizeType coloffset, coder::SizeType m, coder::SizeType n, ::coder::array<double, 2U> &QR, ::
     coder::array<int, 1U> &p, int *rank, ::coder::array<double, 1U> &work)
   {
     coder::SizeType i;
@@ -8425,8 +8425,8 @@ namespace rdi_kernel
       thres, m, n, &QR[0], &(p.data())[0], &(work.data())[0], wsize, A.size(1));
   }
 
-  static void rrqr_qmulti(const ::coder::array<double, 2U> &QR, int m, int n,
-    int rank, ::coder::array<double, 2U> &bs, int nrhs, ::coder::array<double,
+  static void rrqr_qmulti(const ::coder::array<double, 2U> &QR, coder::SizeType m, coder::SizeType n,
+    coder::SizeType rank, ::coder::array<double, 2U> &bs, coder::SizeType nrhs, ::coder::array<double,
     1U> &work)
   {
     coder::SizeType stride_bs;
@@ -8457,7 +8457,7 @@ namespace rdi_kernel
     if ((rank > u1) || (rank < 1)) {
       m2cErrMsgIdAndTxt("wlslib:WrongRank",
                         "Rank %d must be a positive value no greater than min(%d, %d).",
-                        rank, m, n);
+                        (int)rank, (int)m, (int)n);
     }
 
     if (nrhs == 0) {
@@ -8481,8 +8481,8 @@ namespace rdi_kernel
                      &(work.data())[0], wsize);
   }
 
-  static void rrqr_rtsolve(const ::coder::array<double, 2U> &QR, int n, int rank,
-    ::coder::array<double, 2U> &bs, int nrhs)
+  static void rrqr_rtsolve(const ::coder::array<double, 2U> &QR, coder::SizeType n, coder::SizeType rank,
+    ::coder::array<double, 2U> &bs, coder::SizeType nrhs)
   {
     coder::SizeType i;
 
@@ -8504,7 +8504,7 @@ namespace rdi_kernel
     if ((rank > i) || (rank < 1)) {
       m2cErrMsgIdAndTxt("wlslib:WrongRank",
                         "Rank %d must be a positive value no greater than min(%d, %d).",
-                        rank, (int)QR.size(1), n);
+                        (int)rank, (int)QR.size(1), (int)n);
     }
 
     if (nrhs == 0) {
@@ -8515,7 +8515,7 @@ namespace rdi_kernel
     wls::rrqr_rtsolve(&QR[0], n, rank, QR.size(1), nrhs, &bs[0], bs.size(1));
   }
 
-  static void update_osusop(int n, const ::coder::array<int, 2U> &stcls, const ::
+  static void update_osusop(coder::SizeType n, const ::coder::array<int, 2U> &stcls, const ::
     coder::array<int, 1U> &nrange, const ::coder::array<int, 1U> &n2cPtr, const ::
     coder::array<int, 1U> &n2cList, ::coder::array<int, 1U> &rowPtr, ::coder::
     array<int, 1U> &colInd, ::coder::array<double, 1U> &vals, ::coder::array<int,
@@ -8657,8 +8657,8 @@ namespace rdi_kernel
     }
   }
 
-  static void wls_buhmann_weights(const ::coder::array<double, 2U> &us, int
-    npoints, int degree, const double params_pw_data[], const coder::SizeType
+  static void wls_buhmann_weights(const ::coder::array<double, 2U> &us, coder::SizeType
+    npoints, coder::SizeType degree, const double params_pw_data[], const coder::SizeType
     params_pw_size[2], ::coder::array<double, 1U> &ws)
   {
     static const double b_dv[7]{ 2.6, 2.0, 1.6, 1.6, 1.6, 1.5, 1.4 };
@@ -8823,7 +8823,7 @@ namespace rdi_kernel
   }
 
   static void wls_func(WlsObject *wls, const double pnts_data[], const coder::SizeType
-                       pnts_size[2], int npoints, ::coder::array<double, 2U>
+                       pnts_size[2], coder::SizeType npoints, ::coder::array<double, 2U>
                        &vdops)
   {
     coder::SizeType j;
@@ -8918,7 +8918,7 @@ namespace rdi_kernel
     }
   }
 
-  static void wls_func(WlsObject *wls, const double pnts_data[], int npoints, ::
+  static void wls_func(WlsObject *wls, const double pnts_data[], coder::SizeType npoints, ::
                        coder::array<double, 2U> &vdops)
   {
     coder::SizeType j;
@@ -9008,8 +9008,8 @@ namespace rdi_kernel
   static void wls_init(WlsObject *wls, const double us_data[], const coder::SizeType
                        us_size[2], const char weight_name_data[], const double
                        weight_params_pointwise_data[], const coder::SizeType
-                       weight_params_pointwise_size[2], int degree, boolean_T
-                       interp0, boolean_T use_dag, int npoints)
+                       weight_params_pointwise_size[2], coder::SizeType degree, boolean_T
+                       interp0, boolean_T use_dag, coder::SizeType npoints)
   {
     double maxx;
     double maxx_inv;
@@ -9246,7 +9246,7 @@ namespace rdi_kernel
     wls->fullrank = (wls->rank == wls->ncols - b_interp0);
   }
 
-  static void wls_invdist_weights(const ::coder::array<double, 2U> &us, int
+  static void wls_invdist_weights(const ::coder::array<double, 2U> &us, coder::SizeType
     npoints, double degree, ::coder::array<double, 1U> &ws)
   {
     double alpha;
@@ -9294,8 +9294,8 @@ namespace rdi_kernel
     }
   }
 
-  static void wls_invdist_weights(const ::coder::array<double, 2U> &us, int
-    npoints, int degree, const double params_pw_data[], const coder::SizeType
+  static void wls_invdist_weights(const ::coder::array<double, 2U> &us, coder::SizeType
+    npoints, coder::SizeType degree, const double params_pw_data[], const coder::SizeType
     params_pw_size[2], ::coder::array<double, 1U> &ws)
   {
     double alpha;
@@ -9391,7 +9391,7 @@ namespace rdi_kernel
     }
   }
 
-  static void wls_resize(WlsObject *wls, int dim, int npoints, int degree,
+  static void wls_resize(WlsObject *wls, coder::SizeType dim, coder::SizeType npoints, coder::SizeType degree,
     boolean_T use_dag)
   {
     coder::SizeType ncols;
@@ -9746,7 +9746,7 @@ namespace rdi_kernel
     }
   }
 
-  void rdi_build_node2cell(int n, const ::coder::array<int, 2U> &conn, ::coder::
+  void rdi_build_node2cell(coder::SizeType n, const ::coder::array<int, 2U> &conn, ::coder::
     array<int, 1U> &n2cPtr, ::coder::array<int, 1U> &n2cList)
   {
     coder::SizeType idx;
@@ -9800,7 +9800,7 @@ namespace rdi_kernel
     n2cPtr[0] = 1;
   }
 
-  void rdi_build_node2node(int n, const ::coder::array<int, 2U> &conn, int dim,
+  void rdi_build_node2node(coder::SizeType n, const ::coder::array<int, 2U> &conn, coder::SizeType dim,
     const ::coder::array<int, 1U> &n2cPtr, const ::coder::array<int, 1U>
     &n2cList, ::coder::array<int, 1U> &n2nPtr, ::coder::array<int, 1U> &n2nList)
   {
@@ -10706,11 +10706,11 @@ namespace rdi_kernel
   }
 
   static inline
-  void rdi_default_params(int dim, int nThreads, RdiParams *params)
+  void rdi_default_params(coder::SizeType dim, coder::SizeType nThreads, RdiParams *params)
   {
     if ((dim < 1) || (dim > 3)) {
       m2cErrMsgIdAndTxt("rdi_default_params:badDim",
-                        "wrong (topological) dimension %d", dim);
+                        "wrong (topological) dimension %d", (int)dim);
     }
 
     params->dim = dim;
@@ -10743,11 +10743,11 @@ namespace rdi_kernel
   }
 
   static inline
-  void rdi_default_params2(int dim, int nThreads, RdiParams *params)
+  void rdi_default_params2(coder::SizeType dim, coder::SizeType nThreads, RdiParams *params)
   {
     if ((dim < 1) || (dim > 3)) {
       m2cErrMsgIdAndTxt("rdi_default_params:badDim",
-                        "wrong (topological) dimension %d", dim);
+                        "wrong (topological) dimension %d", (int)dim);
     }
 
     params->hGlobal = 0.0;
@@ -10782,13 +10782,13 @@ namespace rdi_kernel
     params->parTask = true;
   }
 
-  void rdi_default_params(int dim, RdiParams *params)
+  void rdi_default_params(coder::SizeType dim, RdiParams *params)
   {
     coder::SizeType nThreads;
 
     if ((dim < 1) || (dim > 3)) {
       m2cErrMsgIdAndTxt("rdi_default_params:badDim",
-                        "wrong (topological) dimension %d", dim);
+                        "wrong (topological) dimension %d", (int)dim);
     }
 
     params->hGlobal = 0.0;

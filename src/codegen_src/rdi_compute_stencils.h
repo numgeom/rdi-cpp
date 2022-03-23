@@ -19,12 +19,12 @@
 
 // Function Declarations
 namespace rdi_stencils {
-static inline void rdi_compute_stencils(int n, const ::coder::array<int, 2U> &conn,
+static inline void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn,
                                   const RdiParams *params,
                                   const ::coder::array<int, 1U> &nrange,
                                   ::coder::array<int, 2U> &stcls);
 
-static inline void rdi_compute_stencils(int n, const ::coder::array<int, 2U> &conn,
+static inline void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn,
                                   const RdiParams *params,
                                   ::coder::array<int, 2U> &stcls);
 

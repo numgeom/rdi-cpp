@@ -13,11 +13,11 @@
 #ifndef CODER_ARRAY_SIZE_TYPE_DEFINED
 #define CODER_ARRAY_SIZE_TYPE_DEFINED
 namespace coder {
-#ifdef M2C_USE64
+#ifdef M2C_USE_SIZETYPE64
 typedef int64_T SizeType;
 #else
 typedef int SizeType;
-#endif // M2C_USE64
+#endif // M2C_USE_SIZETYPE64
 } // namespace coder
 #endif // CODER_ARRAY_SIZE_TYPE_DEFINED
 

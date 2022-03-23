@@ -57,81 +57,81 @@ namespace rdi_stencils
 namespace rdi_stencils
 {
   static inline
-  void append_one_ring(int vid, const ::coder::array<int, 2U> &tets,
+  void append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
     const ::coder::array<int, 2U> &sibhfs, const ::coder::array<int, 1U> &v2hf,
     int ngbvs[2048], ::coder::array<boolean_T, 1U> &vtags, ::coder::array<
     boolean_T, 1U> &etags, int ngbes[2048], int *nverts, int *nelems);
   static inline
-  int b_append_one_ring(int vid, const ::coder::array<int, 2U> &tets,
+  int b_append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
     const ::coder::array<int, 2U> &sibhfs, const ::coder::array<int, 1U> &v2hf,
     int ngbvs[2048], int *nverts, ::coder::array<boolean_T, 1U> &vtags, ::coder::
     array<boolean_T, 1U> &etags, int ngbes[128]);
   static inline
-  void compute_stcl_kernel1(int n, const ::coder::array<int, 2U> &conn,
+  void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls, const ::coder::array<int, 1U>
     &nrange);
   static inline
-  void compute_stcl_kernel1(int n, const ::coder::array<int, 2U> &conn,
+  void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls);
   static inline
-  void compute_stcl_kernel2(int n, const ::coder::array<int, 2U> &conn,
+  void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls, const ::coder::array<int, 1U>
     &nrange);
   static inline
-  void compute_stcl_kernel2(int n, const ::coder::array<int, 2U> &conn,
+  void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls);
   static inline
-  void compute_stcl_kernel_tet(int n, const ::coder::array<int, 2U> &conn,
+  void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls, const ::coder::array<int, 1U>
     &nrange);
   static inline
-  void compute_stcl_kernel_tet(int n, const ::coder::array<int, 2U> &conn,
+  void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls);
   static inline
-  void determine_border_vertices_vol(int nv, const ::coder::array<int, 2U>
+  void determine_border_vertices_vol(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, ::coder::array<int, 2U> &sibhfs, ::coder::array<boolean_T, 1U>
     &isborder);
   static inline
-  void determine_incident_halfedges(int nv, const ::coder::array<int, 2U>
+  void determine_incident_halfedges(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, const ::coder::array<int, 2U> &sibhes, ::coder::array<int, 1U> &v2he);
   static inline
-  void determine_incident_halffaces(int nv, const ::coder::array<int, 2U>
+  void determine_incident_halffaces(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, const ::coder::array<int, 2U> &sibhfs, ::coder::array<int, 1U> &v2hf);
   static inline
-  void determine_sibling_halfedges(int nv, const ::coder::array<int, 2U>
+  void determine_sibling_halfedges(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, ::coder::array<int, 2U> &sibhes);
   static inline
-  void determine_sibling_halffaces(int nv, const ::coder::array<int, 2U>
+  void determine_sibling_halffaces(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, ::coder::array<int, 2U> &sibhfs);
   static inline
-  void determine_sibling_halffaces_mixed(int nv, const ::coder::array<int,
+  void determine_sibling_halffaces_mixed(coder::SizeType nv, const ::coder::array<int,
     2U> &elems, ::coder::array<int, 1U> &sibhfs);
   static inline
-  void determine_sibling_halffaces_pyramid(int nv, const ::coder::array<
+  void determine_sibling_halffaces_pyramid(coder::SizeType nv, const ::coder::array<
     int, 2U> &elems, ::coder::array<int, 2U> &sibhfs);
   static inline
-  void determine_sibling_halffaces_tet(int nv, const ::coder::array<int,
+  void determine_sibling_halffaces_tet(coder::SizeType nv, const ::coder::array<int,
     2U> &elems, ::coder::array<int, 2U> &sibhfs, boolean_T *manifold, boolean_T *
     oriented);
   static inline
-  void determine_sibling_halfverts(int nv, const ::coder::array<int, 2U>
+  void determine_sibling_halfverts(coder::SizeType nv, const ::coder::array<int, 2U>
     &edges, ::coder::array<int, 2U> &sibhvs);
   static inline
-  int elem_one_ring(int vid, const ::coder::array<int, 2U> &tets, const ::
+  int elem_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets, const ::
     coder::array<int, 2U> &sibhfs, const ::coder::array<int, 1U> &v2hf, ::coder::
     array<boolean_T, 1U> &etags, int ngbes[128]);
   static inline
-  void obtain_nring_curv(int vid, double ring, const ::coder::array<int,
+  void obtain_nring_curv(coder::SizeType vid, double ring, const ::coder::array<int,
     2U> &edgs, const ::coder::array<int, 2U> &sibhvs, const ::coder::array<int,
     1U> &v2hv, int ngbvs[128], ::coder::array<boolean_T, 1U> &vtags, ::coder::
     array<boolean_T, 1U> &etags, int ngbes[128], int *nverts, int *nedges);
   static inline
-  void obtain_nring_quad(int vid, double ring, const ::coder::array<int,
+  void obtain_nring_quad(coder::SizeType vid, double ring, const ::coder::array<int,
     2U> &elems, const ::coder::array<int, 2U> &sibhes, const ::coder::array<int,
     1U> &v2he, int ngbvs[1024], ::coder::array<boolean_T, 1U> &vtags, ::coder::
     array<boolean_T, 1U> &ftags, int ngbfs[1024], int *nverts, int *nfaces);
   static inline
-  void obtain_nring_vol(int vid, double ring, const ::coder::array<int,
+  void obtain_nring_vol(coder::SizeType vid, double ring, const ::coder::array<int,
     2U> &tets, const ::coder::array<int, 2U> &sibhfs, const ::coder::array<int,
     1U> &v2hf, int ngbvs[2048], int ngbes[2048], ::coder::array<boolean_T, 1U>
     &vtags, ::coder::array<boolean_T, 1U> &etags, ::coder::array<boolean_T, 1U>
@@ -141,7 +141,7 @@ namespace rdi_stencils
 // Function Definitions
 namespace rdi_stencils
 {
-  static void append_one_ring(int vid, const ::coder::array<int, 2U> &tets,
+  static void append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
     const ::coder::array<int, 2U> &sibhfs, const ::coder::array<int, 1U> &v2hf,
     int ngbvs[2048], ::coder::array<boolean_T, 1U> &vtags, ::coder::array<
     boolean_T, 1U> &etags, int ngbes[2048], int *nverts, int *nelems)
@@ -244,7 +244,7 @@ namespace rdi_stencils
     }
   }
 
-  static int b_append_one_ring(int vid, const ::coder::array<int, 2U> &tets,
+  static int b_append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
     const ::coder::array<int, 2U> &sibhfs, const ::coder::array<int, 1U> &v2hf,
     int ngbvs[2048], int *nverts, ::coder::array<boolean_T, 1U> &vtags, ::coder::
     array<boolean_T, 1U> &etags, int ngbes[128])
@@ -349,7 +349,7 @@ namespace rdi_stencils
     return nelems;
   }
 
-  static void compute_stcl_kernel1(int n, const ::coder::array<int, 2U> &conn,
+  static void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls, const ::coder::array<int, 1U>
     &nrange)
   {
@@ -438,7 +438,7 @@ namespace rdi_stencils
     }
   }
 
-  static void compute_stcl_kernel1(int n, const ::coder::array<int, 2U> &conn,
+  static void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls)
   {
     ::coder::array<int, 2U> sibhvs_;
@@ -513,7 +513,7 @@ namespace rdi_stencils
     }
   }
 
-  static void compute_stcl_kernel2(int n, const ::coder::array<int, 2U> &conn,
+  static void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls, const ::coder::array<int, 1U>
     &nrange)
   {
@@ -577,7 +577,7 @@ namespace rdi_stencils
     }
   }
 
-  static void compute_stcl_kernel2(int n, const ::coder::array<int, 2U> &conn,
+  static void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls)
   {
     ::coder::array<int, 2U> opphes;
@@ -627,7 +627,7 @@ namespace rdi_stencils
     }
   }
 
-  static void compute_stcl_kernel_tet(int n, const ::coder::array<int, 2U> &conn,
+  static void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls, const ::coder::array<int, 1U>
     &nrange)
   {
@@ -698,7 +698,7 @@ namespace rdi_stencils
     }
   }
 
-  static void compute_stcl_kernel_tet(int n, const ::coder::array<int, 2U> &conn,
+  static void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
     double ring, ::coder::array<int, 2U> &stcls)
   {
     ::coder::array<int, 2U> sibhfs_;
@@ -755,7 +755,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_border_vertices_vol(int nv, const ::coder::array<int, 2U>
+  static void determine_border_vertices_vol(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, ::coder::array<int, 2U> &sibhfs, ::coder::array<boolean_T, 1U>
     &isborder)
   {
@@ -1156,7 +1156,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_incident_halfedges(int nv, const ::coder::array<int, 2U>
+  static void determine_incident_halfedges(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, const ::coder::array<int, 2U> &sibhes, ::coder::array<int, 1U> &v2he)
   {
     coder::SizeType i;
@@ -1187,7 +1187,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_incident_halffaces(int nv, const ::coder::array<int, 2U>
+  static void determine_incident_halffaces(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, const ::coder::array<int, 2U> &sibhfs, ::coder::array<int, 1U> &v2hf)
   {
     ::coder::array<int, 2U> b_sibhfs;
@@ -1677,7 +1677,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_sibling_halfedges(int nv, const ::coder::array<int, 2U>
+  static void determine_sibling_halfedges(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, ::coder::array<int, 2U> &sibhes)
   {
     static const signed char b_iv[4]{ 2, 3, 4, 1 };
@@ -1854,7 +1854,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_sibling_halffaces(int nv, const ::coder::array<int, 2U>
+  static void determine_sibling_halffaces(coder::SizeType nv, const ::coder::array<int, 2U>
     &elems, ::coder::array<int, 2U> &sibhfs)
   {
     static const signed char hf_hex[24]{ 1, 4, 3, 2, 1, 2, 6, 5, 2, 3, 7, 6, 3,
@@ -2335,7 +2335,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_sibling_halffaces_mixed(int nv, const ::coder::array<int,
+  static void determine_sibling_halffaces_mixed(coder::SizeType nv, const ::coder::array<int,
     2U> &elems, ::coder::array<int, 1U> &sibhfs)
   {
     static const signed char v2av_hex[24]{ 2, 5, 4, 3, 6, 1, 4, 7, 2, 1, 8, 3, 6,
@@ -3257,7 +3257,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_sibling_halffaces_pyramid(int nv, const ::coder::array<
+  static void determine_sibling_halffaces_pyramid(coder::SizeType nv, const ::coder::array<
     int, 2U> &elems, ::coder::array<int, 2U> &sibhfs)
   {
     static const signed char next[8]{ 2, 3, 1, 0, 2, 3, 4, 1 };
@@ -3462,7 +3462,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_sibling_halffaces_tet(int nv, const ::coder::array<int,
+  static void determine_sibling_halffaces_tet(coder::SizeType nv, const ::coder::array<int,
     2U> &elems, ::coder::array<int, 2U> &sibhfs, boolean_T *manifold, boolean_T *
     oriented)
   {
@@ -3670,7 +3670,7 @@ namespace rdi_stencils
     }
   }
 
-  static void determine_sibling_halfverts(int nv, const ::coder::array<int, 2U>
+  static void determine_sibling_halfverts(coder::SizeType nv, const ::coder::array<int, 2U>
     &edges, ::coder::array<int, 2U> &sibhvs)
   {
     ::coder::array<int, 1U> is_index;
@@ -3760,7 +3760,7 @@ namespace rdi_stencils
     }
   }
 
-  static int elem_one_ring(int vid, const ::coder::array<int, 2U> &tets, const ::
+  static int elem_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets, const ::
     coder::array<int, 2U> &sibhfs, const ::coder::array<int, 1U> &v2hf, ::coder::
     array<boolean_T, 1U> &etags, int ngbes[128])
   {
@@ -3853,7 +3853,7 @@ namespace rdi_stencils
     return nelems;
   }
 
-  static void obtain_nring_curv(int vid, double ring, const ::coder::array<int,
+  static void obtain_nring_curv(coder::SizeType vid, double ring, const ::coder::array<int,
     2U> &edgs, const ::coder::array<int, 2U> &sibhvs, const ::coder::array<int,
     1U> &v2hv, int ngbvs[128], ::coder::array<boolean_T, 1U> &vtags, ::coder::
     array<boolean_T, 1U> &etags, int ngbes[128], int *nverts, int *nedges)
@@ -3973,7 +3973,7 @@ namespace rdi_stencils
     }
   }
 
-  static void obtain_nring_quad(int vid, double ring, const ::coder::array<int,
+  static void obtain_nring_quad(coder::SizeType vid, double ring, const ::coder::array<int,
     2U> &elems, const ::coder::array<int, 2U> &sibhes, const ::coder::array<int,
     1U> &v2he, int ngbvs[1024], ::coder::array<boolean_T, 1U> &vtags, ::coder::
     array<boolean_T, 1U> &ftags, int ngbfs[1024], int *nverts, int *nfaces)
@@ -4373,7 +4373,7 @@ namespace rdi_stencils
     }
   }
 
-  static void obtain_nring_vol(int vid, double ring, const ::coder::array<int,
+  static void obtain_nring_vol(coder::SizeType vid, double ring, const ::coder::array<int,
     2U> &tets, const ::coder::array<int, 2U> &sibhfs, const ::coder::array<int,
     1U> &v2hf, int ngbvs[2048], int ngbes[2048], ::coder::array<boolean_T, 1U>
     &vtags, ::coder::array<boolean_T, 1U> &etags, ::coder::array<boolean_T, 1U>
@@ -4798,7 +4798,7 @@ namespace rdi_stencils
     }
   }
 
-  void rdi_compute_stencils(int n, const ::coder::array<int, 2U> &conn, const
+  void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn, const
     RdiParams *params, const ::coder::array<int, 1U> &nrange, ::coder::array<int,
     2U> &stcls)
   {
@@ -4880,7 +4880,7 @@ namespace rdi_stencils
     }
   }
 
-  void rdi_compute_stencils(int n, const ::coder::array<int, 2U> &conn, const
+  void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn, const
     RdiParams *params, ::coder::array<int, 2U> &stcls)
   {
     double tEnd;
