@@ -11,6 +11,7 @@
 // Include files
 #include "rtwtypes.h"
 #include "m2c_lib.h"
+#include "librdi_types.h"
 #include "coder_array.h"
 #include "rdi_params.hpp"
 #include <cstddef>
@@ -24,9 +25,6 @@ struct RdiMesh;
 
 // Function Declarations
 namespace rdi_kernel {
-static inline void librdi_initialize();
-
-static inline void librdi_terminate();
 
 static inline void rdi_assemble_osusop(
     const RdiMesh *mesh, const ::coder::array<int, 2U> &stcls,
@@ -40,12 +38,12 @@ static inline void rdi_assemble_osusop2(
     ::coder::array<int, 1U> &colInd, ::coder::array<double, 1U> &vals,
     ::coder::array<int, 1U> &nnzPr, ::coder::array<int, 1U> &rdNodes);
 
-static inline void rdi_build_node2cell(int n, const ::coder::array<int, 2U> &conn,
+static inline void rdi_build_node2cell(coder::SizeType n, const ::coder::array<int, 2U> &conn,
                                  ::coder::array<int, 1U> &n2cPtr,
                                  ::coder::array<int, 1U> &n2cList);
 
-static inline void rdi_build_node2node(int n, const ::coder::array<int, 2U> &conn,
-                                 int dim, const ::coder::array<int, 1U> &n2cPtr,
+static inline void rdi_build_node2node(coder::SizeType n, const ::coder::array<int, 2U> &conn,
+                                 coder::SizeType dim, const ::coder::array<int, 1U> &n2cPtr,
                                  const ::coder::array<int, 1U> &n2cList,
                                  ::coder::array<int, 1U> &n2nPtr,
                                  ::coder::array<int, 1U> &n2nList);
@@ -129,11 +127,11 @@ static inline void rdi_compute_osusind2(const ::coder::array<int, 1U> &rowPtr,
                                  ::coder::array<double, 2U> &alphaCell,
                                  ::coder::array<double, 2U> &alphaNode);
 
-static inline void rdi_default_params(int dim, int nThreads, RdiParams *params);
+static inline void rdi_default_params(coder::SizeType dim, coder::SizeType nThreads, RdiParams *params);
 
-static inline void rdi_default_params2(int dim, int nThreads, RdiParams *params);
+static inline void rdi_default_params2(coder::SizeType dim, coder::SizeType nThreads, RdiParams *params);
 
-static inline void rdi_default_params(int dim, RdiParams *params);
+static inline void rdi_default_params(coder::SizeType dim, RdiParams *params);
 
 static inline void
 rdi_mark_discontinuities(const ::coder::array<double, 2U> &fs,

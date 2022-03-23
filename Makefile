@@ -7,6 +7,10 @@ WLSLIB_HOME = ../../wlslib
 MOMP2CPP_HOME = ../../momp2cpp
 CPPFLAGS = -Isrc -I${WLSLIB_HOME}/cpp/src -I${WLSLIB_HOME}/cpp/extern
 
+ifeq (${M2C_USE64},1)
+CPPFLAGS += -DM2C_USE64
+endif
+
 ifeq (${DEBUG},)
 OPTFLAGS = -O3 -DNDEBUG
 else ifeq (${DEBUG},1)
