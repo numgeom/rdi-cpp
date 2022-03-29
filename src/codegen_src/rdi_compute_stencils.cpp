@@ -3,6 +3,8 @@
 //     rdilib: Qiao Chen
 //     momp2cpp: Xiangmin Jiao, Qiao Chen
 //     wlslib: Xiangmin Jiao, Qiao Chen, Jacob Jones
+//     ahmesh: Qiao Chen, Xiangmin Jiao, Vladimir Dedov
+//     sfelib: Qiao Chen, Xiangmin Jiao
 //
 // rdi_compute_stencils.cpp
 //
