@@ -9,24 +9,26 @@
 #define RDI_COMPUTE_STENCILS_H
 
 // Include files
-#include "rtwtypes.h"
+#include "coder_array.h"
 #include "m2c_lib.h"
 #include "rdi_compute_stencils_types.h"
-#include "coder_array.h"
 #include "rdi_params.hpp"
+#include "rtwtypes.h"
 #include <cstddef>
 #include <cstdlib>
 
 // Function Declarations
 namespace rdi_stencils {
-static inline void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                                  const RdiParams *params,
-                                  const ::coder::array<int, 1U> &nrange,
-                                  ::coder::array<int, 2U> &stcls);
+static inline void rdi_compute_stencils(coder::SizeType n,
+                                        const ::coder::array<int, 2U> &conn,
+                                        const RdiParams *params,
+                                        const ::coder::array<int, 1U> &nrange,
+                                        ::coder::array<int, 2U> &stcls);
 
-static inline void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                                  const RdiParams *params,
-                                  ::coder::array<int, 2U> &stcls);
+static inline void rdi_compute_stencils(coder::SizeType n,
+                                        const ::coder::array<int, 2U> &conn,
+                                        const RdiParams *params,
+                                        ::coder::array<int, 2U> &stcls);
 
 } // namespace rdi_stencils
 

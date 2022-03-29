@@ -21,6 +21,5 @@ typedef int SizeType;
 } // namespace coder
 #endif // CODER_ARRAY_SIZE_TYPE_DEFINED
 
-
 #endif
 // End of code generation (rdi_compute_stencils_types.h)

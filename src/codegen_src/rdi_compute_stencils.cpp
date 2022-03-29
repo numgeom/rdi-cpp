@@ -13,7 +13,6 @@
 
 // Include files
 #include "rdi_compute_stencils.h"
-#include "m2c_lib.h"
 #include "coder_array.h"
 #include "m2c_lib.h"
 #include "rdi_params.hpp"
@@ -57,128 +56,120 @@ static const signed char iv9[12]{1, 2, 4, 1, 2, 3, 1, 3, 4, 2, 3, 4};
 
 // Function Declarations
 namespace rdi_stencils {
-static inline
-void append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
-                            const ::coder::array<int, 2U> &sibhfs,
-                            const ::coder::array<int, 1U> &v2hf,
-                            int ngbvs[2048],
-                            ::coder::array<boolean_T, 1U> &vtags,
-                            ::coder::array<boolean_T, 1U> &etags,
-                            int ngbes[2048], int *nverts, int *nelems);
+static inline void append_one_ring(coder::SizeType vid,
+                                   const ::coder::array<int, 2U> &tets,
+                                   const ::coder::array<int, 2U> &sibhfs,
+                                   const ::coder::array<int, 1U> &v2hf,
+                                   int ngbvs[2048],
+                                   ::coder::array<boolean_T, 1U> &vtags,
+                                   ::coder::array<boolean_T, 1U> &etags,
+                                   int ngbes[2048], int *nverts, int *nelems);
 
-static coder::SizeType b_append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
-                             const ::coder::array<int, 2U> &sibhfs,
-                             const ::coder::array<int, 1U> &v2hf,
-                             int ngbvs[2048], int *nverts,
-                             ::coder::array<boolean_T, 1U> &vtags,
-                             ::coder::array<boolean_T, 1U> &etags,
-                             int ngbes[128]);
+static inline coder::SizeType
+b_append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
+                  const ::coder::array<int, 2U> &sibhfs,
+                  const ::coder::array<int, 1U> &v2hf, int ngbvs[2048],
+                  int *nverts, ::coder::array<boolean_T, 1U> &vtags,
+                  ::coder::array<boolean_T, 1U> &etags, int ngbes[128]);
 
-static inline
-void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                                 double ring, ::coder::array<int, 2U> &stcls,
-                                 const ::coder::array<int, 1U> &nrange);
+static inline void compute_stcl_kernel1(coder::SizeType n,
+                                        const ::coder::array<int, 2U> &conn,
+                                        double ring,
+                                        ::coder::array<int, 2U> &stcls,
+                                        const ::coder::array<int, 1U> &nrange);
 
-static inline
-void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                                 double ring, ::coder::array<int, 2U> &stcls);
+static inline void compute_stcl_kernel1(coder::SizeType n,
+                                        const ::coder::array<int, 2U> &conn,
+                                        double ring,
+                                        ::coder::array<int, 2U> &stcls);
 
-static inline
-void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                                 double ring, ::coder::array<int, 2U> &stcls,
-                                 const ::coder::array<int, 1U> &nrange);
+static inline void compute_stcl_kernel2(coder::SizeType n,
+                                        const ::coder::array<int, 2U> &conn,
+                                        double ring,
+                                        ::coder::array<int, 2U> &stcls,
+                                        const ::coder::array<int, 1U> &nrange);
 
-static inline
-void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                                 double ring, ::coder::array<int, 2U> &stcls);
+static inline void compute_stcl_kernel2(coder::SizeType n,
+                                        const ::coder::array<int, 2U> &conn,
+                                        double ring,
+                                        ::coder::array<int, 2U> &stcls);
 
-static inline
-void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                                    double ring, ::coder::array<int, 2U> &stcls,
-                                    const ::coder::array<int, 1U> &nrange);
+static inline void
+compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
+                        double ring, ::coder::array<int, 2U> &stcls,
+                        const ::coder::array<int, 1U> &nrange);
 
-static inline
-void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                                    double ring,
-                                    ::coder::array<int, 2U> &stcls);
+static inline void compute_stcl_kernel_tet(coder::SizeType n,
+                                           const ::coder::array<int, 2U> &conn,
+                                           double ring,
+                                           ::coder::array<int, 2U> &stcls);
 
-static inline
-void
-determine_border_vertices_vol(coder::SizeType nv, const ::coder::array<int, 2U> &elems,
-                              ::coder::array<int, 2U> &sibhfs,
-                              ::coder::array<boolean_T, 1U> &isborder);
+static inline void determine_border_vertices_vol(
+    coder::SizeType nv, const ::coder::array<int, 2U> &elems,
+    ::coder::array<int, 2U> &sibhfs, ::coder::array<boolean_T, 1U> &isborder);
 
-static inline
-void determine_incident_halfedges(coder::SizeType nv,
-                                         const ::coder::array<int, 2U> &elems,
-                                         const ::coder::array<int, 2U> &sibhes,
-                                         ::coder::array<int, 1U> &v2he);
+static inline void determine_incident_halfedges(
+    coder::SizeType nv, const ::coder::array<int, 2U> &elems,
+    const ::coder::array<int, 2U> &sibhes, ::coder::array<int, 1U> &v2he);
 
-static inline
-void determine_incident_halffaces(coder::SizeType nv,
-                                         const ::coder::array<int, 2U> &elems,
-                                         const ::coder::array<int, 2U> &sibhfs,
-                                         ::coder::array<int, 1U> &v2hf);
+static inline void determine_incident_halffaces(
+    coder::SizeType nv, const ::coder::array<int, 2U> &elems,
+    const ::coder::array<int, 2U> &sibhfs, ::coder::array<int, 1U> &v2hf);
 
-static inline
-void determine_sibling_halfedges(coder::SizeType nv,
-                                        const ::coder::array<int, 2U> &elems,
-                                        ::coder::array<int, 2U> &sibhes);
+static inline void
+determine_sibling_halfedges(coder::SizeType nv,
+                            const ::coder::array<int, 2U> &elems,
+                            ::coder::array<int, 2U> &sibhes);
 
-static inline
-void determine_sibling_halffaces(coder::SizeType nv,
-                                        const ::coder::array<int, 2U> &elems,
-                                        ::coder::array<int, 2U> &sibhfs);
+static inline void
+determine_sibling_halffaces(coder::SizeType nv,
+                            const ::coder::array<int, 2U> &elems,
+                            ::coder::array<int, 2U> &sibhfs);
 
-static inline
-void
-determine_sibling_halffaces_mixed(coder::SizeType nv, const ::coder::array<int, 2U> &elems,
+static inline void
+determine_sibling_halffaces_mixed(coder::SizeType nv,
+                                  const ::coder::array<int, 2U> &elems,
                                   ::coder::array<int, 1U> &sibhfs);
 
-static inline
-void
+static inline void
 determine_sibling_halffaces_pyramid(coder::SizeType nv,
                                     const ::coder::array<int, 2U> &elems,
                                     ::coder::array<int, 2U> &sibhfs);
 
-static inline
-void
-determine_sibling_halffaces_tet(coder::SizeType nv, const ::coder::array<int, 2U> &elems,
-                                ::coder::array<int, 2U> &sibhfs,
-                                boolean_T *manifold, boolean_T *oriented);
+static inline void determine_sibling_halffaces_tet(
+    coder::SizeType nv, const ::coder::array<int, 2U> &elems,
+    ::coder::array<int, 2U> &sibhfs, boolean_T *manifold, boolean_T *oriented);
 
-static inline
-void determine_sibling_halfverts(coder::SizeType nv,
-                                        const ::coder::array<int, 2U> &edges,
-                                        ::coder::array<int, 2U> &sibhvs);
+static inline void
+determine_sibling_halfverts(coder::SizeType nv,
+                            const ::coder::array<int, 2U> &edges,
+                            ::coder::array<int, 2U> &sibhvs);
 
-static coder::SizeType elem_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
-                         const ::coder::array<int, 2U> &sibhfs,
-                         const ::coder::array<int, 1U> &v2hf,
-                         ::coder::array<boolean_T, 1U> &etags, int ngbes[128]);
+static inline coder::SizeType
+elem_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
+              const ::coder::array<int, 2U> &sibhfs,
+              const ::coder::array<int, 1U> &v2hf,
+              ::coder::array<boolean_T, 1U> &etags, int ngbes[128]);
 
-static inline
-void obtain_nring_curv(coder::SizeType vid, double ring,
-                              const ::coder::array<int, 2U> &edgs,
-                              const ::coder::array<int, 2U> &sibhvs,
-                              const ::coder::array<int, 1U> &v2hv,
-                              int ngbvs[128],
-                              ::coder::array<boolean_T, 1U> &vtags,
-                              ::coder::array<boolean_T, 1U> &etags,
-                              int ngbes[128], int *nverts, int *nedges);
+static inline void obtain_nring_curv(coder::SizeType vid, double ring,
+                                     const ::coder::array<int, 2U> &edgs,
+                                     const ::coder::array<int, 2U> &sibhvs,
+                                     const ::coder::array<int, 1U> &v2hv,
+                                     int ngbvs[128],
+                                     ::coder::array<boolean_T, 1U> &vtags,
+                                     ::coder::array<boolean_T, 1U> &etags,
+                                     int ngbes[128], int *nverts, int *nedges);
 
-static inline
-void obtain_nring_quad(coder::SizeType vid, double ring,
-                              const ::coder::array<int, 2U> &elems,
-                              const ::coder::array<int, 2U> &sibhes,
-                              const ::coder::array<int, 1U> &v2he,
-                              int ngbvs[1024],
-                              ::coder::array<boolean_T, 1U> &vtags,
-                              ::coder::array<boolean_T, 1U> &ftags,
-                              int ngbfs[1024], int *nverts, int *nfaces);
+static inline void obtain_nring_quad(coder::SizeType vid, double ring,
+                                     const ::coder::array<int, 2U> &elems,
+                                     const ::coder::array<int, 2U> &sibhes,
+                                     const ::coder::array<int, 1U> &v2he,
+                                     int ngbvs[1024],
+                                     ::coder::array<boolean_T, 1U> &vtags,
+                                     ::coder::array<boolean_T, 1U> &ftags,
+                                     int ngbfs[1024], int *nverts, int *nfaces);
 
-static inline
-void obtain_nring_vol(
+static inline void obtain_nring_vol(
     coder::SizeType vid, double ring, const ::coder::array<int, 2U> &tets,
     const ::coder::array<int, 2U> &sibhfs, const ::coder::array<int, 1U> &v2hf,
     int ngbvs[2048], int ngbes[2048], ::coder::array<boolean_T, 1U> &vtags,
@@ -189,7 +180,8 @@ void obtain_nring_vol(
 
 // Function Definitions
 namespace rdi_stencils {
-static void append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
+static void append_one_ring(coder::SizeType vid,
+                            const ::coder::array<int, 2U> &tets,
                             const ::coder::array<int, 2U> &sibhfs,
                             const ::coder::array<int, 1U> &v2hf,
                             int ngbvs[2048],
@@ -205,7 +197,8 @@ static void append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &
     coder::SizeType size_stack;
     boolean_T exitg1;
     boolean_T overflow;
-    stack[0] = static_cast<coder::SizeType>(static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
+    stack[0] = static_cast<coder::SizeType>(
+        static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
     //  Element (region) ID
     overflow = false;
     //  Create a stack for storing tets
@@ -262,8 +255,7 @@ static void append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &
                     sibhfs[(iv9[ii + 3 * (lvid - 1)] + sibhfs.size(1) * rid) -
                            1]) >>
                 3;
-            if ((static_cast<int>(c) != 0) &&
-                (!etags[c - 1])) {
+            if ((static_cast<int>(c) != 0) && (!etags[c - 1])) {
               if (size_stack >= 1024) {
                 m2cPrintf("Overflow in stack in append_one_ring.m \n");
                 fflush(stdout);
@@ -284,13 +276,12 @@ static void append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &
   }
 }
 
-static coder::SizeType b_append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
-                             const ::coder::array<int, 2U> &sibhfs,
-                             const ::coder::array<int, 1U> &v2hf,
-                             int ngbvs[2048], int *nverts,
-                             ::coder::array<boolean_T, 1U> &vtags,
-                             ::coder::array<boolean_T, 1U> &etags,
-                             int ngbes[128])
+static coder::SizeType
+b_append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
+                  const ::coder::array<int, 2U> &sibhfs,
+                  const ::coder::array<int, 1U> &v2hf, int ngbvs[2048],
+                  int *nverts, ::coder::array<boolean_T, 1U> &vtags,
+                  ::coder::array<boolean_T, 1U> &etags, int ngbes[128])
 {
   int stack[128];
   coder::SizeType nelems;
@@ -300,7 +291,8 @@ static coder::SizeType b_append_one_ring(coder::SizeType vid, const ::coder::arr
     coder::SizeType size_stack;
     boolean_T exitg1;
     boolean_T overflow;
-    stack[0] = static_cast<coder::SizeType>(static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
+    stack[0] = static_cast<coder::SizeType>(
+        static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
     //  Element (region) ID
     overflow = false;
     //  Create a stack for storing tets
@@ -357,8 +349,7 @@ static coder::SizeType b_append_one_ring(coder::SizeType vid, const ::coder::arr
                     sibhfs[(iv9[ii + 3 * (lvid - 1)] + sibhfs.size(1) * rid) -
                            1]) >>
                 3;
-            if ((static_cast<int>(c) != 0) &&
-                (!etags[c - 1])) {
+            if ((static_cast<int>(c) != 0) && (!etags[c - 1])) {
               if (size_stack >= 128) {
                 m2cPrintf("Overflow in stack in append_one_ring.m \n");
                 fflush(stdout);
@@ -380,7 +371,8 @@ static coder::SizeType b_append_one_ring(coder::SizeType vid, const ::coder::arr
   return nelems;
 }
 
-static void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U> &conn,
+static void compute_stcl_kernel1(coder::SizeType n,
+                                 const ::coder::array<int, 2U> &conn,
                                  double ring, ::coder::array<int, 2U> &stcls,
                                  const ::coder::array<int, 1U> &nrange)
 {
@@ -457,7 +449,8 @@ static void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U
   }
 }
 
-static void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U> &conn,
+static void compute_stcl_kernel1(coder::SizeType n,
+                                 const ::coder::array<int, 2U> &conn,
                                  double ring, ::coder::array<int, 2U> &stcls)
 {
   ::coder::array<int, 2U> sibhvs_;
@@ -522,7 +515,8 @@ static void compute_stcl_kernel1(coder::SizeType n, const ::coder::array<int, 2U
   }
 }
 
-static void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U> &conn,
+static void compute_stcl_kernel2(coder::SizeType n,
+                                 const ::coder::array<int, 2U> &conn,
                                  double ring, ::coder::array<int, 2U> &stcls,
                                  const ::coder::array<int, 1U> &nrange)
 {
@@ -578,7 +572,8 @@ static void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U
   }
 }
 
-static void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U> &conn,
+static void compute_stcl_kernel2(coder::SizeType n,
+                                 const ::coder::array<int, 2U> &conn,
                                  double ring, ::coder::array<int, 2U> &stcls)
 {
   ::coder::array<int, 2U> opphes;
@@ -622,7 +617,8 @@ static void compute_stcl_kernel2(coder::SizeType n, const ::coder::array<int, 2U
   }
 }
 
-static void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
+static void compute_stcl_kernel_tet(coder::SizeType n,
+                                    const ::coder::array<int, 2U> &conn,
                                     double ring, ::coder::array<int, 2U> &stcls,
                                     const ::coder::array<int, 1U> &nrange)
 {
@@ -684,7 +680,8 @@ static void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int,
   }
 }
 
-static void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int, 2U> &conn,
+static void compute_stcl_kernel_tet(coder::SizeType n,
+                                    const ::coder::array<int, 2U> &conn,
                                     double ring, ::coder::array<int, 2U> &stcls)
 {
   ::coder::array<int, 2U> sibhfs_;
@@ -734,10 +731,9 @@ static void compute_stcl_kernel_tet(coder::SizeType n, const ::coder::array<int,
   }
 }
 
-static void
-determine_border_vertices_vol(coder::SizeType nv, const ::coder::array<int, 2U> &elems,
-                              ::coder::array<int, 2U> &sibhfs,
-                              ::coder::array<boolean_T, 1U> &isborder)
+static void determine_border_vertices_vol(
+    coder::SizeType nv, const ::coder::array<int, 2U> &elems,
+    ::coder::array<int, 2U> &sibhfs, ::coder::array<boolean_T, 1U> &isborder)
 {
   static const signed char hf_hex[54]{
       1, 4, 3, 2, 12, 11, 10, 9,  21, 1, 2, 6, 5, 9,  14, 17, 13, 22,
@@ -1107,8 +1103,9 @@ static void determine_incident_halfedges(coder::SizeType nv,
       if ((v > 0) &&
           ((v2he[v - 1] == 0) || (sibhes[lid + sibhes.size(1) * kk] == 0))) {
         //  Encode <fid,leid> pair into a heid.
-        v2he[v - 1] =
-            static_cast<coder::SizeType>(static_cast<unsigned int>(kk + 1) << 4) + lid;
+        v2he[v - 1] = static_cast<coder::SizeType>(
+                          static_cast<unsigned int>(kk + 1) << 4) +
+                      lid;
       } else {
       }
     }
@@ -1683,9 +1680,7 @@ static void determine_sibling_halfedges(coder::SizeType nv,
             sibhes_tmp = v2he_fid[b_index - 1];
             unnamed_idx_0_tmp = v2he_leid[b_index - 1];
             sibhes[prev_heid_leid + sibhes.size(1) * prev_heid_fid] =
-                (static_cast<int>(sibhes_tmp << 4) +
-                 unnamed_idx_0_tmp) -
-                1;
+                (static_cast<int>(sibhes_tmp << 4) + unnamed_idx_0_tmp) - 1;
             prev_heid_fid = sibhes_tmp - 1;
             prev_heid_leid = unnamed_idx_0_tmp - 1;
           }
@@ -1700,10 +1695,7 @@ static void determine_sibling_halfedges(coder::SizeType nv,
               //  Encode <fid,leid> pair into a heid.
               sibhes_tmp = v2he_leid[b_index - 1];
               sibhes[prev_heid_leid + sibhes.size(1) * prev_heid_fid] =
-                  (static_cast<int>(unnamed_idx_0_tmp
-                                    << 4) +
-                   sibhes_tmp) -
-                  1;
+                  (static_cast<int>(unnamed_idx_0_tmp << 4) + sibhes_tmp) - 1;
               prev_heid_fid = unnamed_idx_0_tmp - 1;
               prev_heid_leid = sibhes_tmp - 1;
             }
@@ -1712,7 +1704,9 @@ static void determine_sibling_halfedges(coder::SizeType nv,
         if (prev_heid_fid != ii) {
           //  Close up the cycle
           sibhes[prev_heid_leid + sibhes.size(1) * prev_heid_fid] =
-              static_cast<coder::SizeType>(static_cast<unsigned int>(ii + 1) << 4) + jj;
+              static_cast<coder::SizeType>(static_cast<unsigned int>(ii + 1)
+                                           << 4) +
+              jj;
         }
       }
     }
@@ -2143,7 +2137,8 @@ static void determine_sibling_halffaces(coder::SizeType nv,
 }
 
 static void
-determine_sibling_halffaces_mixed(coder::SizeType nv, const ::coder::array<int, 2U> &elems,
+determine_sibling_halffaces_mixed(coder::SizeType nv,
+                                  const ::coder::array<int, 2U> &elems,
                                   ::coder::array<int, 1U> &sibhfs)
 {
   static const signed char v2av_hex[24]{2, 5, 4, 3, 6, 1, 4, 7, 2, 1, 8, 3,
@@ -2588,9 +2583,8 @@ determine_sibling_halffaces_mixed(coder::SizeType nv, const ::coder::array<int, 
                 if ((v2oe_v1[b_index] == b_vs_elem[1]) &&
                     (v2oe_v2[b_index] == b_vs_elem[3])) {
                   sibhfs[offset_ohf] = v2hf[b_index];
-                  k = is_index_o[static_cast<coder::SizeType>(
-                                     (v2hf[b_index]) >>
-                                     3) -
+                  k = is_index_o[static_cast<coder::SizeType>((v2hf[b_index]) >>
+                                                              3) -
                                  1] +
                       static_cast<int>(v2hf[b_index] & 7U);
                   exitg10 = 1;
@@ -2693,9 +2687,8 @@ determine_sibling_halffaces_mixed(coder::SizeType nv, const ::coder::array<int, 
                     (v2oe_v2[b_index] ==
                      c_vs_elem[iv1[1 % nvpf + start_index_tmp] - 1])) {
                   sibhfs[i] = v2hf[b_index];
-                  k = is_index_o[static_cast<coder::SizeType>(
-                                     (v2hf[b_index]) >>
-                                     3) -
+                  k = is_index_o[static_cast<coder::SizeType>((v2hf[b_index]) >>
+                                                              3) -
                                  1] +
                       static_cast<int>(v2hf[b_index] & 7U);
                   exitg7 = 1;
@@ -2803,9 +2796,8 @@ determine_sibling_halffaces_mixed(coder::SizeType nv, const ::coder::array<int, 
                     (v2oe_v2[b_index] ==
                      d_vs_elem[iv5[1 % nvpf + start_index_tmp] - 1])) {
                   sibhfs[i] = v2hf[b_index];
-                  k = is_index_o[static_cast<coder::SizeType>(
-                                     (v2hf[b_index]) >>
-                                     3) -
+                  k = is_index_o[static_cast<coder::SizeType>((v2hf[b_index]) >>
+                                                              3) -
                                  1] +
                       static_cast<int>(v2hf[b_index] & 7U);
                   exitg4 = 1;
@@ -2910,9 +2902,8 @@ determine_sibling_halffaces_mixed(coder::SizeType nv, const ::coder::array<int, 
                 if ((v2oe_v1[b_index] == e_vs_elem[iv4[3 * jj + 2] - 1]) &&
                     (v2oe_v2[b_index] == e_vs_elem[iv4[3 * jj + 1] - 1])) {
                   sibhfs[i] = v2hf[b_index];
-                  k = is_index_o[static_cast<coder::SizeType>(
-                                     (v2hf[b_index]) >>
-                                     3) -
+                  k = is_index_o[static_cast<coder::SizeType>((v2hf[b_index]) >>
+                                                              3) -
                                  1] +
                       static_cast<int>(v2hf[b_index] & 7U);
                   exitg1 = 1;
@@ -3174,10 +3165,9 @@ determine_sibling_halffaces_pyramid(coder::SizeType nv,
   }
 }
 
-static void
-determine_sibling_halffaces_tet(coder::SizeType nv, const ::coder::array<int, 2U> &elems,
-                                ::coder::array<int, 2U> &sibhfs,
-                                boolean_T *manifold, boolean_T *oriented)
+static void determine_sibling_halffaces_tet(
+    coder::SizeType nv, const ::coder::array<int, 2U> &elems,
+    ::coder::array<int, 2U> &sibhfs, boolean_T *manifold, boolean_T *oriented)
 {
   static const signed char b_iv[3]{3, 1, 2};
   static const signed char b_iv1[3]{2, 3, 1};
@@ -3436,20 +3426,19 @@ static void determine_sibling_halfverts(coder::SizeType nv,
       hvid_prev = v2hv[v2hv_tmp - 2];
       for (ii = i; ii <= b_v2hv_tmp; ii++) {
         v2hv_tmp = v2hv[ii - 1];
-        sibhvs[(hvid_prev & 1U) +
-               2 * ((hvid_prev >>
-                                     1) -
-                    1)] = v2hv_tmp;
+        sibhvs[(hvid_prev & 1U) + 2 * ((hvid_prev >> 1) - 1)] = v2hv_tmp;
         hvid_prev = v2hv_tmp;
       }
     }
   }
 }
 
-static coder::SizeType elem_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
-                         const ::coder::array<int, 2U> &sibhfs,
-                         const ::coder::array<int, 1U> &v2hf,
-                         ::coder::array<boolean_T, 1U> &etags, int ngbes[128])
+static coder::SizeType elem_one_ring(coder::SizeType vid,
+                                     const ::coder::array<int, 2U> &tets,
+                                     const ::coder::array<int, 2U> &sibhfs,
+                                     const ::coder::array<int, 1U> &v2hf,
+                                     ::coder::array<boolean_T, 1U> &etags,
+                                     int ngbes[128])
 {
   int stack[128];
   coder::SizeType nelems;
@@ -3459,7 +3448,8 @@ static coder::SizeType elem_one_ring(coder::SizeType vid, const ::coder::array<i
     coder::SizeType size_stack;
     boolean_T exitg1;
     boolean_T overflow;
-    stack[0] = static_cast<coder::SizeType>(static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
+    stack[0] = static_cast<coder::SizeType>(
+        static_cast<unsigned int>(v2hf[vid - 1]) >> 3);
     //  Element (region) ID
     overflow = false;
     //  Create a stack for storing tets
@@ -3603,8 +3593,7 @@ static void obtain_nring_curv(coder::SizeType vid, double ring,
               ngbvs[*nverts - 1] = v;
               vtags[v - 1] = true;
               //  Insert opposite halfvertex
-              hvbuf[*nverts - 1] =
-                  sibhvs[(2 * (c - 1) - b_c) + 1];
+              hvbuf[*nverts - 1] = sibhvs[(2 * (c - 1) - b_c) + 1];
             }
           }
         }
@@ -3648,7 +3637,8 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
   boolean_T overflow;
   //  OBTAIN_NRING_QUAD Collect n-ring vertices of a quad or mixed mesh.
   c = (v2he[vid - 1]) >> 4;
-  fid = static_cast<coder::SizeType>(static_cast<unsigned int>(v2he[vid - 1]) >> 4);
+  fid = static_cast<coder::SizeType>(static_cast<unsigned int>(v2he[vid - 1]) >>
+                                     4);
   c_tmp = v2he[vid - 1] & 15U;
   lid = c_tmp;
   *nverts = 0;
@@ -3667,8 +3657,7 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
     } else {
       fid_in = 0;
       //  If vertex is border edge, insert its incident border vertex.
-      if ((elems.size(1) == 4) &&
-          (elems[elems.size(1) * (c - 1) + 3] != 0)) {
+      if ((elems.size(1) == 4) && (elems[elems.size(1) * (c - 1) + 3] != 0)) {
         b = true;
       } else {
         b = false;
@@ -3692,8 +3681,7 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
         (*nverts)++;
         ngbvs[*nverts - 1] = elems[lid_prv + elems.size(1) * (fid - 1)];
         //  Save a starting edge for newly inserted vertex to allow early
-        hebuf[*nverts - 1] =
-            (fid << 4) + lid_prv;
+        hebuf[*nverts - 1] = (fid << 4) + lid_prv;
         (*nfaces)++;
         ngbfs[*nfaces - 1] = fid;
       } else {
@@ -3786,8 +3774,7 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
                   b = ftags[c - 1];
                   if (!b) {
                     if ((elems.size(1) == 4) &&
-                        (elems[elems.size(1) * (c - 1) + 3] !=
-                         0)) {
+                        (elems[elems.size(1) * (c - 1) + 3] != 0)) {
                       b = true;
                     } else {
                       b = false;
@@ -3864,16 +3851,14 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
                 (sibhes[(v2he[ngbvs[ii - 1] - 1] & 15U) +
                         sibhes.size(1) * (static_cast<int>(c) - 1)] != 0)) {
               allow_early_term = true;
-              fid = static_cast<coder::SizeType>(static_cast<unsigned int>(hebuf[ii - 1]) >>
-                                     4) -
+              fid = static_cast<coder::SizeType>(
+                        static_cast<unsigned int>(hebuf[ii - 1]) >> 4) -
                     1;
               lid = c_tmp & 15U;
               if ((elems.size(1) == 4) &&
-                  (elems[elems.size(1) *
-                             (static_cast<coder::SizeType>(
-                                  (hebuf[ii - 1]) >>
-                                  4) -
-                              1) +
+                  (elems[elems.size(1) * (static_cast<coder::SizeType>(
+                                              (hebuf[ii - 1]) >> 4) -
+                                          1) +
                          3] != 0)) {
                 b = true;
               } else {
@@ -3942,8 +3927,8 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
                   vtags[v] = true;
                   //  Save starting position for next ring
                   hebuf[*nverts - 1] =
-                      static_cast<coder::SizeType>(static_cast<unsigned int>(fid + 1)
-                                       << 4) +
+                      static_cast<coder::SizeType>(
+                          static_cast<unsigned int>(fid + 1) << 4) +
                       lid_prv;
                 }
                 if ((!ftags[fid]) && (!overflow)) {
@@ -3957,8 +3942,7 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
               if (guard2) {
                 opp = sibhes[lid_prv + sibhes.size(1) * fid];
                 fid = (opp >> 4) - 1;
-                if (static_cast<int>(opp >> 4) ==
-                    fid_in + 1) {
+                if (static_cast<int>(opp >> 4) == fid_in + 1) {
                   //  Finished cycle
                   exitg2 = 1;
                 } else {
@@ -4147,7 +4131,7 @@ static void obtain_nring_vol(
                   } else {
                     overflow = true;
                     m2cPrintf("Overflow for variable temp_verts when obtaining "
-                           "1/3 ring in obtain_n_third_ring_tet.m \n");
+                              "1/3 ring in obtain_n_third_ring_tet.m \n");
                     fflush(stdout);
                     exitg3 = true;
                   }
@@ -4210,8 +4194,9 @@ static void obtain_nring_vol(
                   ii++;
                 } else {
                   overflow = true;
-                  m2cPrintf("Overflow for variable temp_verts when obtaining 2/3 "
-                         "ring in obtain_n_third_ring_tet.m \n");
+                  m2cPrintf(
+                      "Overflow for variable temp_verts when obtaining 2/3 "
+                      "ring in obtain_n_third_ring_tet.m \n");
                   fflush(stdout);
                   exitg2 = true;
                 }
@@ -4264,8 +4249,9 @@ static void obtain_nring_vol(
                       jj++;
                     } else {
                       overflow = true;
-                      m2cPrintf("Overflow for variable temp_verts when obtaining "
-                             "2/3 ring in obtain_nring_vol_edited.m \n");
+                      m2cPrintf(
+                          "Overflow for variable temp_verts when obtaining "
+                          "2/3 ring in obtain_nring_vol_edited.m \n");
                       fflush(stdout);
                       if (nelems_lcl < 1) {
                         nverts_idx_0 = 0;
@@ -4289,7 +4275,8 @@ static void obtain_nring_vol(
             exitg2 = false;
             while ((!exitg2) && (ii <= ntemp)) {
               if (*nverts >= 2048) {
-                m2cPrintf("Overflow in 2/3 ring in obtain_n_third_ring_tet.m \n");
+                m2cPrintf(
+                    "Overflow in 2/3 ring in obtain_n_third_ring_tet.m \n");
                 fflush(stdout);
                 overflow = true;
                 exitg2 = true;
@@ -4315,7 +4302,7 @@ static void obtain_nring_vol(
         }
         if (b_guard1) {
           coder::SizeType b_nverts_last;
-           // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+          // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           nverts_last = *nverts + 1;
           nelems_pre = *nelems;
           b_nverts_last = *nverts;
@@ -4337,7 +4324,7 @@ static void obtain_nring_vol(
                 } else {
                   overflow = true;
                   m2cPrintf("Overflow in %g ring in obtain_nring_ring_tet.m \n",
-                         cur_ring);
+                            cur_ring);
                   fflush(stdout);
                   exitg2 = true;
                 }
@@ -4377,10 +4364,11 @@ static void obtain_nring_vol(
   }
 }
 
-void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                           const RdiParams *params,
-                           const ::coder::array<int, 1U> &nrange,
-                           ::coder::array<int, 2U> &stcls)
+void rdi_compute_stencils(coder::SizeType n,
+                          const ::coder::array<int, 2U> &conn,
+                          const RdiParams *params,
+                          const ::coder::array<int, 1U> &nrange,
+                          ::coder::array<int, 2U> &stcls)
 {
   double tEnd;
   double tStart;
@@ -4413,11 +4401,11 @@ void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn
   if (params->verbose > 1) {
     if (nrange.size(0) == 0) {
       m2cPrintf(" Compute stencil with %g ring in %dD...\n", params->ring,
-             params->dim);
+                params->dim);
       fflush(stdout);
     } else {
       m2cPrintf(" Update stencil for %d nodes with %g ring in %dD...\n",
-             (int)nrange.size(0), params->ring, params->dim);
+                (int)nrange.size(0), params->ring, params->dim);
       fflush(stdout);
     }
   }
@@ -4445,9 +4433,10 @@ void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn
   }
 }
 
-void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn,
-                           const RdiParams *params,
-                           ::coder::array<int, 2U> &stcls)
+void rdi_compute_stencils(coder::SizeType n,
+                          const ::coder::array<int, 2U> &conn,
+                          const RdiParams *params,
+                          ::coder::array<int, 2U> &stcls)
 {
   double tEnd;
   double tStart;
@@ -4472,7 +4461,7 @@ void rdi_compute_stencils(coder::SizeType n, const ::coder::array<int, 2U> &conn
   stcls.set_size(n, maxStcl + 1);
   if (params->verbose > 1) {
     m2cPrintf(" Compute stencil with %g ring in %dD...\n", params->ring,
-           params->dim);
+              params->dim);
     fflush(stdout);
   }
   //  build stencils
