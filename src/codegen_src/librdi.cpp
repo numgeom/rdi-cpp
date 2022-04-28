@@ -1,10 +1,10 @@
 // Copyright 2022 The NumGeom Group, Stony Brook University
 // Main developers:
-//     rdilib: Qiao Chen
+//     rdilib: Qiao Chen, Xiangmin Jiao
 //     momp2cpp: Xiangmin Jiao, Qiao Chen
 //     wlslib: Xiangmin Jiao, Qiao Chen, Jacob Jones
-//     ahmesh: Qiao Chen, Xiangmin Jiao, Vladimir Dedov
-//     sfelib: Qiao Chen, Xiangmin Jiao
+//     sfelib: Qiao Chen, Xiangmin Jiao, Jacob Jones
+//     ahmesh: Qiao Chen, Xiangmin Jiao, Jacob Jones, Vladimir Dedov
 //
 // librdi.cpp
 //
@@ -21,6 +21,7 @@
 #endif
 #include "rdi_params.hpp"
 #include "wls_lapack.hpp"
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -534,11 +535,11 @@ static inline coder::SizeType g_assemble_body_kernel(
 
 static inline void gen_vander(const ::coder::array<double, 2U> &us,
                               coder::SizeType npoints, coder::SizeType degree,
-                              const ::coder::array<double, 1U> &weights,
                               ::coder::array<double, 2U> &V);
 
 static inline void gen_vander(const ::coder::array<double, 2U> &us,
                               coder::SizeType npoints, coder::SizeType degree,
+                              const ::coder::array<double, 1U> &weights,
                               ::coder::array<double, 2U> &V);
 
 static inline void gen_vander_1d_dag(coder::SizeType degree,
@@ -631,6 +632,8 @@ static inline void omp4mRecurPartMesh(coder::SizeType n,
                                       coder::SizeType nParts,
                                       ::coder::array<Omp4mPart, 1U> &parts);
 
+static inline coder::SizeType ompAtomicCapture(int *x);
+
 static inline void rdi_compute_oscind(
     const ::coder::array<double, 2U> &dfGlobal,
     const ::coder::array<double, 2U> &alphaCell,
@@ -701,11 +704,11 @@ static inline void wls_eno_weights(const ::coder::array<double, 2U> &us,
                                    ::coder::array<double, 1U> &ws);
 
 static inline void wls_func(WlsObject *wls, const double pnts_data[],
+                            const coder::SizeType pnts_size[2],
                             coder::SizeType npoints,
                             ::coder::array<double, 2U> &vdops);
 
 static inline void wls_func(WlsObject *wls, const double pnts_data[],
-                            const coder::SizeType pnts_size[2],
                             coder::SizeType npoints,
                             ::coder::array<double, 2U> &vdops);
 
@@ -718,14 +721,14 @@ wls_init(WlsObject *wls, const double us_data[],
          coder::SizeType npoints);
 
 static inline void wls_invdist_weights(const ::coder::array<double, 2U> &us,
+                                       coder::SizeType npoints, double degree,
+                                       ::coder::array<double, 1U> &ws);
+
+static inline void wls_invdist_weights(const ::coder::array<double, 2U> &us,
                                        coder::SizeType npoints,
                                        coder::SizeType degree,
                                        const double params_pw_data[],
                                        const coder::SizeType params_pw_size[2],
-                                       ::coder::array<double, 1U> &ws);
-
-static inline void wls_invdist_weights(const ::coder::array<double, 2U> &us,
-                                       coder::SizeType npoints, double degree,
                                        ::coder::array<double, 1U> &ws);
 
 static inline void wls_resize(WlsObject *wls, coder::SizeType dim,
@@ -788,16 +791,18 @@ static void assemble_body(const ::coder::array<double, 2U> &mesh_xs,
     wls_.set_size(params->nThreads);
     rdCounts_.set_size(params->nThreads);
     if (!params->parTask) {
-      coder::SizeType m2cTryBlkErrCode;
-      loop_ub = params->nThreads;
+      boolean_T m2cTryBlkErrFlag;
+      coder::SizeType nthreads;
       if (params->nThreads <= 0) {
-        loop_ub = 1;
+        nthreads = 1;
 #ifdef _OPENMP
-        loop_ub = omp_get_max_threads();
+        nthreads = omp_get_max_threads();
 #endif // _OPENMP
+      } else {
+        nthreads = params->nThreads;
       }
-      m2cTryBlkErrCode = 0;
-#pragma omp parallel default(shared) num_threads(loop_ub)
+      m2cTryBlkErrFlag = 0;
+#pragma omp parallel default(shared) num_threads(nthreads)
       try { // try
         if (mesh_xs.size(1) == 3) {
           assemble_body_par(mesh_xs, mesh_conn, stcls, mesh_n2cPtr,
@@ -816,33 +821,36 @@ static void assemble_body(const ::coder::array<double, 2U> &mesh_xs,
                               mesh_parts, wls_, rdTags_, rdCounts_, &b_mesh_xs);
         }
       } catch (const std::runtime_error &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("runtime_error %s\n", m2cExc.what());
       } catch (const std::logic_error &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("logic_error %s\n", m2cExc.what());
       } catch (const std::exception &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("exception %s\n", m2cExc.what());
       } catch (...) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("Unknown error detected from C++ exceptions\n");
+        fflush(stderr);
       } // end try
-      if ((int)m2cTryBlkErrCode != 0) {
+      if ((int)m2cTryBlkErrFlag != 0) {
         throw std::runtime_error("omp4m:runtimeErrorInThread");
       }
     } else {
-      coder::SizeType m2cTryBlkErrCode;
+      boolean_T m2cTryBlkErrFlag;
+      coder::SizeType nthreads;
       //  task
-      loop_ub = params->nThreads;
       if (params->nThreads <= 0) {
-        loop_ub = 1;
+        nthreads = 1;
 #ifdef _OPENMP
-        loop_ub = omp_get_max_threads();
+        nthreads = omp_get_max_threads();
 #endif // _OPENMP
+      } else {
+        nthreads = params->nThreads;
       }
-      m2cTryBlkErrCode = 0;
-#pragma omp parallel default(shared) num_threads(loop_ub)
+      m2cTryBlkErrFlag = 0;
+#pragma omp parallel default(shared) num_threads(nthreads)
       try { // try
         if (mesh_xs.size(1) == 3) {
           assemble_body_task(mesh_xs, mesh_conn, stcls, mesh_n2cPtr,
@@ -861,19 +869,20 @@ static void assemble_body(const ::coder::array<double, 2U> &mesh_xs,
                                mesh_parts, wls_, rdTags_, rdCounts_);
         }
       } catch (const std::runtime_error &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("runtime_error %s\n", m2cExc.what());
       } catch (const std::logic_error &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("logic_error %s\n", m2cExc.what());
       } catch (const std::exception &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("exception %s\n", m2cExc.what());
       } catch (...) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("Unknown error detected from C++ exceptions\n");
+        fflush(stderr);
       } // end try
-      if ((int)m2cTryBlkErrCode != 0) {
+      if ((int)m2cTryBlkErrFlag != 0) {
         throw std::runtime_error("omp4m:runtimeErrorInThread");
       }
     }
@@ -978,9 +987,9 @@ static void assemble_body_par(
     ::coder::array<boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts,
     Omp4mPartContext *partContext)
 {
+  coder::SizeType i;
   coder::SizeType lvl;
   coder::SizeType n;
-  coder::SizeType partid;
   int rdCountsLoc;
   boolean_T exitg1;
   //  parallel kernel
@@ -995,9 +1004,9 @@ static void assemble_body_par(
 #pragma omp single
   { // single
     partContext->atomic_counters.set_size(parts.size(0));
-    partid = parts.size(0);
-    for (coder::SizeType i{0}; i < partid; i++) {
-      partContext->atomic_counters[i] = 1;
+    i = parts.size(0);
+    for (coder::SizeType b_i{0}; b_i < i; b_i++) {
+      partContext->atomic_counters[b_i] = 1;
     }
   } // single
   //  safe and shared across all threads
@@ -1006,21 +1015,15 @@ static void assemble_body_par(
   while ((!exitg1) && (lvl <= parts.size(0) - 1)) {
     //  assemble for this part
     coder::SizeType exitg2;
+    coder::SizeType mypart;
     do {
       exitg2 = 0;
-#pragma omp atomic capture
-      { // atomic capture
-        //  to prevent Coder putting this line before pragma
-        partid = partContext->atomic_counters[lvl];
-        partContext->atomic_counters[lvl] =
-            partContext->atomic_counters[lvl] + 1;
-      } // atomic capture
-      //  to prevent Coder detecting v is for index and automatically subtract
-      if ((lvl + 1 <= parts.size(0)) && (partid <= parts[lvl].nparts)) {
+      mypart = ompAtomicCapture(&partContext->atomic_counters[lvl]);
+      if ((lvl + 1 <= parts.size(0)) && (mypart <= parts[lvl].nparts)) {
         d_assemble_body_kernel(
             xs, conn, stcls, n2cPtr, n2cList, degree, rowPtr, colInd, vals,
-            nnzPr, parts[lvl].part_list, parts[lvl].part_ptr[partid - 1],
-            parts[lvl].part_ptr[partid] - 1, &wls[n], rdTags, &rdCountsLoc);
+            nnzPr, parts[lvl].part_list, parts[lvl].part_ptr[mypart - 1],
+            parts[lvl].part_ptr[mypart] - 1, &wls[n], rdTags, &rdCountsLoc);
         if (rdCountsLoc < 0) {
           exitg2 = 1;
         } else {
@@ -1134,7 +1137,6 @@ static void assemble_body_task_kernel(
     ::coder::array<boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts)
 {
   coder::SizeType n;
-  //  Gets the thread number of the thread, within the team, making this call.
   n = 0;
 #ifdef _OPENMP
   n = omp_get_thread_num();
@@ -1197,16 +1199,18 @@ static void assemble_surf(const ::coder::array<double, 2U> &mesh_xs,
       wls_.set_size(params->nThreads);
       rdCounts_.set_size(params->nThreads);
       if (params->parTask) {
-        coder::SizeType m2cTryBlkErrCode;
-        loop_ub = params->nThreads;
+        boolean_T m2cTryBlkErrFlag;
+        coder::SizeType nthreads;
         if (params->nThreads <= 0) {
-          loop_ub = 1;
+          nthreads = 1;
 #ifdef _OPENMP
-          loop_ub = omp_get_max_threads();
+          nthreads = omp_get_max_threads();
 #endif // _OPENMP
+        } else {
+          nthreads = params->nThreads;
         }
-        m2cTryBlkErrCode = 0;
-#pragma omp parallel default(shared) num_threads(loop_ub)
+        m2cTryBlkErrFlag = 0;
+#pragma omp parallel default(shared) num_threads(nthreads)
         try { // try
           assemble_surf_task(mesh_xs, mesh_conn, stcls, mesh_n2cPtr,
                              mesh_n2cList, params->surfType, params->degree,
@@ -1214,32 +1218,35 @@ static void assemble_surf(const ::coder::array<double, 2U> &mesh_xs,
                              rowPtr, colInd, vals, nnzPr, mesh_parts, wls_,
                              rdTags_, rdCounts_);
         } catch (const std::runtime_error &m2cExc) {
-          m2cTryBlkErrCode = 1;
+          m2cTryBlkErrFlag = 1;
           m2cPrintError("runtime_error %s\n", m2cExc.what());
         } catch (const std::logic_error &m2cExc) {
-          m2cTryBlkErrCode = 1;
+          m2cTryBlkErrFlag = 1;
           m2cPrintError("logic_error %s\n", m2cExc.what());
         } catch (const std::exception &m2cExc) {
-          m2cTryBlkErrCode = 1;
+          m2cTryBlkErrFlag = 1;
           m2cPrintError("exception %s\n", m2cExc.what());
         } catch (...) {
-          m2cTryBlkErrCode = 1;
+          m2cTryBlkErrFlag = 1;
           m2cPrintError("Unknown error detected from C++ exceptions\n");
+          fflush(stderr);
         } // end try
-        if ((int)m2cTryBlkErrCode != 0) {
+        if ((int)m2cTryBlkErrFlag != 0) {
           throw std::runtime_error("omp4m:runtimeErrorInThread");
         }
       } else {
-        coder::SizeType m2cTryBlkErrCode;
-        loop_ub = params->nThreads;
+        boolean_T m2cTryBlkErrFlag;
+        coder::SizeType nthreads;
         if (params->nThreads <= 0) {
-          loop_ub = 1;
+          nthreads = 1;
 #ifdef _OPENMP
-          loop_ub = omp_get_max_threads();
+          nthreads = omp_get_max_threads();
 #endif // _OPENMP
+        } else {
+          nthreads = params->nThreads;
         }
-        m2cTryBlkErrCode = 0;
-#pragma omp parallel default(shared) num_threads(loop_ub)
+        m2cTryBlkErrFlag = 0;
+#pragma omp parallel default(shared) num_threads(nthreads)
         try { // try
           assemble_surf_par(mesh_xs, mesh_conn, stcls, mesh_n2cPtr,
                             mesh_n2cList, params->surfType, params->degree,
@@ -1247,19 +1254,20 @@ static void assemble_surf(const ::coder::array<double, 2U> &mesh_xs,
                             rowPtr, colInd, vals, nnzPr, mesh_parts, wls_,
                             rdTags_, rdCounts_, &b_mesh_xs);
         } catch (const std::runtime_error &m2cExc) {
-          m2cTryBlkErrCode = 1;
+          m2cTryBlkErrFlag = 1;
           m2cPrintError("runtime_error %s\n", m2cExc.what());
         } catch (const std::logic_error &m2cExc) {
-          m2cTryBlkErrCode = 1;
+          m2cTryBlkErrFlag = 1;
           m2cPrintError("logic_error %s\n", m2cExc.what());
         } catch (const std::exception &m2cExc) {
-          m2cTryBlkErrCode = 1;
+          m2cTryBlkErrFlag = 1;
           m2cPrintError("exception %s\n", m2cExc.what());
         } catch (...) {
-          m2cTryBlkErrCode = 1;
+          m2cTryBlkErrFlag = 1;
           m2cPrintError("Unknown error detected from C++ exceptions\n");
+          fflush(stderr);
         } // end try
-        if ((int)m2cTryBlkErrCode != 0) {
+        if ((int)m2cTryBlkErrFlag != 0) {
           throw std::runtime_error("omp4m:runtimeErrorInThread");
         }
       }
@@ -1277,16 +1285,18 @@ static void assemble_surf(const ::coder::array<double, 2U> &mesh_xs,
     wls_.set_size(params->nThreads);
     rdCounts_.set_size(params->nThreads);
     if (params->parTask) {
-      coder::SizeType m2cTryBlkErrCode;
-      loop_ub = params->nThreads;
+      boolean_T m2cTryBlkErrFlag;
+      coder::SizeType nthreads;
       if (params->nThreads <= 0) {
-        loop_ub = 1;
+        nthreads = 1;
 #ifdef _OPENMP
-        loop_ub = omp_get_max_threads();
+        nthreads = omp_get_max_threads();
 #endif // _OPENMP
+      } else {
+        nthreads = params->nThreads;
       }
-      m2cTryBlkErrCode = 0;
-#pragma omp parallel default(shared) num_threads(loop_ub)
+      m2cTryBlkErrFlag = 0;
+#pragma omp parallel default(shared) num_threads(nthreads)
       try { // try
         b_assemble_surf_task(mesh_xs, mesh_conn, stcls, mesh_n2cPtr,
                              mesh_n2cList, params->surfType, params->degree,
@@ -1294,32 +1304,35 @@ static void assemble_surf(const ::coder::array<double, 2U> &mesh_xs,
                              rowPtr, colInd, vals, nnzPr, mesh_parts, wls_,
                              rdTags_, rdCounts_);
       } catch (const std::runtime_error &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("runtime_error %s\n", m2cExc.what());
       } catch (const std::logic_error &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("logic_error %s\n", m2cExc.what());
       } catch (const std::exception &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("exception %s\n", m2cExc.what());
       } catch (...) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("Unknown error detected from C++ exceptions\n");
+        fflush(stderr);
       } // end try
-      if ((int)m2cTryBlkErrCode != 0) {
+      if ((int)m2cTryBlkErrFlag != 0) {
         throw std::runtime_error("omp4m:runtimeErrorInThread");
       }
     } else {
-      coder::SizeType m2cTryBlkErrCode;
-      loop_ub = params->nThreads;
+      boolean_T m2cTryBlkErrFlag;
+      coder::SizeType nthreads;
       if (params->nThreads <= 0) {
-        loop_ub = 1;
+        nthreads = 1;
 #ifdef _OPENMP
-        loop_ub = omp_get_max_threads();
+        nthreads = omp_get_max_threads();
 #endif // _OPENMP
+      } else {
+        nthreads = params->nThreads;
       }
-      m2cTryBlkErrCode = 0;
-#pragma omp parallel default(shared) num_threads(loop_ub)
+      m2cTryBlkErrFlag = 0;
+#pragma omp parallel default(shared) num_threads(nthreads)
       try { // try
         b_assemble_surf_par(mesh_xs, mesh_conn, stcls, mesh_n2cPtr,
                             mesh_n2cList, params->surfType, params->degree,
@@ -1327,19 +1340,20 @@ static void assemble_surf(const ::coder::array<double, 2U> &mesh_xs,
                             rowPtr, colInd, vals, nnzPr, mesh_parts, wls_,
                             rdTags_, rdCounts_, &b_mesh_xs);
       } catch (const std::runtime_error &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("runtime_error %s\n", m2cExc.what());
       } catch (const std::logic_error &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("logic_error %s\n", m2cExc.what());
       } catch (const std::exception &m2cExc) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("exception %s\n", m2cExc.what());
       } catch (...) {
-        m2cTryBlkErrCode = 1;
+        m2cTryBlkErrFlag = 1;
         m2cPrintError("Unknown error detected from C++ exceptions\n");
+        fflush(stderr);
       } // end try
-      if ((int)m2cTryBlkErrCode != 0) {
+      if ((int)m2cTryBlkErrFlag != 0) {
         throw std::runtime_error("omp4m:runtimeErrorInThread");
       }
     }
@@ -1677,9 +1691,9 @@ static void assemble_surf_par(
     ::coder::array<boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts,
     Omp4mPartContext *partContext)
 {
+  coder::SizeType i;
   coder::SizeType lvl;
   coder::SizeType n;
-  coder::SizeType partid;
   int rdCountsLoc;
   boolean_T exitg1;
   //  kernel for parallel
@@ -1694,9 +1708,9 @@ static void assemble_surf_par(
 #pragma omp single
   { // single
     partContext->atomic_counters.set_size(parts.size(0));
-    partid = parts.size(0);
-    for (coder::SizeType i{0}; i < partid; i++) {
-      partContext->atomic_counters[i] = 1;
+    i = parts.size(0);
+    for (coder::SizeType b_i{0}; b_i < i; b_i++) {
+      partContext->atomic_counters[b_i] = 1;
     }
   } // single
   //  safe and shared across threads
@@ -1705,21 +1719,15 @@ static void assemble_surf_par(
   while ((!exitg1) && (lvl <= parts.size(0) - 1)) {
     //  Assemble for this part
     coder::SizeType exitg2;
+    coder::SizeType mypart;
     do {
       exitg2 = 0;
-#pragma omp atomic capture
-      { // atomic capture
-        //  to prevent Coder putting this line before pragma
-        partid = partContext->atomic_counters[lvl];
-        partContext->atomic_counters[lvl] =
-            partContext->atomic_counters[lvl] + 1;
-      } // atomic capture
-      //  to prevent Coder detecting v is for index and automatically subtract
-      if ((lvl + 1 <= parts.size(0)) && (partid <= parts[lvl].nparts)) {
+      mypart = ompAtomicCapture(&partContext->atomic_counters[lvl]);
+      if ((lvl + 1 <= parts.size(0)) && (mypart <= parts[lvl].nparts)) {
         b_assemble_surf_kernel(
             xs, conn, stcls, n2cPtr, n2cList, surfType, degree, nrms, rowPtr,
             colInd, vals, nnzPr, parts[lvl].part_list,
-            parts[lvl].part_ptr[partid - 1], parts[lvl].part_ptr[partid] - 1,
+            parts[lvl].part_ptr[mypart - 1], parts[lvl].part_ptr[mypart] - 1,
             &wls[n], rdTags, &rdCountsLoc);
         if (rdCountsLoc < 0) {
           exitg2 = 1;
@@ -1838,7 +1846,6 @@ static void assemble_surf_task_kernel(
 {
   coder::SizeType n;
   int rdCountsLoc;
-  //  Gets the thread number of the thread, within the team, making this call.
   n = 0;
 #ifdef _OPENMP
   n = omp_get_thread_num();
@@ -1977,9 +1984,9 @@ static void b_assemble_body_par(
     ::coder::array<boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts,
     Omp4mPartContext *partContext)
 {
+  coder::SizeType i;
   coder::SizeType lvl;
   coder::SizeType n;
-  coder::SizeType partid;
   int rdCountsLoc;
   boolean_T exitg1;
   //  parallel kernel
@@ -1994,9 +2001,9 @@ static void b_assemble_body_par(
 #pragma omp single
   { // single
     partContext->atomic_counters.set_size(parts.size(0));
-    partid = parts.size(0);
-    for (coder::SizeType i{0}; i < partid; i++) {
-      partContext->atomic_counters[i] = 1;
+    i = parts.size(0);
+    for (coder::SizeType b_i{0}; b_i < i; b_i++) {
+      partContext->atomic_counters[b_i] = 1;
     }
   } // single
   //  safe and shared across all threads
@@ -2005,21 +2012,15 @@ static void b_assemble_body_par(
   while ((!exitg1) && (lvl <= parts.size(0) - 1)) {
     //  assemble for this part
     coder::SizeType exitg2;
+    coder::SizeType mypart;
     do {
       exitg2 = 0;
-#pragma omp atomic capture
-      { // atomic capture
-        //  to prevent Coder putting this line before pragma
-        partid = partContext->atomic_counters[lvl];
-        partContext->atomic_counters[lvl] =
-            partContext->atomic_counters[lvl] + 1;
-      } // atomic capture
-      //  to prevent Coder detecting v is for index and automatically subtract
-      if ((lvl + 1 <= parts.size(0)) && (partid <= parts[lvl].nparts)) {
+      mypart = ompAtomicCapture(&partContext->atomic_counters[lvl]);
+      if ((lvl + 1 <= parts.size(0)) && (mypart <= parts[lvl].nparts)) {
         e_assemble_body_kernel(
             xs, conn, stcls, n2cPtr, n2cList, degree, rowPtr, colInd, vals,
-            nnzPr, parts[lvl].part_list, parts[lvl].part_ptr[partid - 1],
-            parts[lvl].part_ptr[partid] - 1, &wls[n], rdTags, &rdCountsLoc);
+            nnzPr, parts[lvl].part_list, parts[lvl].part_ptr[mypart - 1],
+            parts[lvl].part_ptr[mypart] - 1, &wls[n], rdTags, &rdCountsLoc);
         if (rdCountsLoc < 0) {
           exitg2 = 1;
         } else {
@@ -2133,7 +2134,6 @@ static void b_assemble_body_task_kernel(
     ::coder::array<boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts)
 {
   coder::SizeType n;
-  //  Gets the thread number of the thread, within the team, making this call.
   n = 0;
 #ifdef _OPENMP
   n = omp_get_thread_num();
@@ -2454,9 +2454,9 @@ static void b_assemble_surf_par(
     ::coder::array<boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts,
     Omp4mPartContext *partContext)
 {
+  coder::SizeType i;
   coder::SizeType lvl;
   coder::SizeType n;
-  coder::SizeType partid;
   int rdCountsLoc;
   boolean_T exitg1;
   //  kernel for parallel
@@ -2471,9 +2471,9 @@ static void b_assemble_surf_par(
 #pragma omp single
   { // single
     partContext->atomic_counters.set_size(parts.size(0));
-    partid = parts.size(0);
-    for (coder::SizeType i{0}; i < partid; i++) {
-      partContext->atomic_counters[i] = 1;
+    i = parts.size(0);
+    for (coder::SizeType b_i{0}; b_i < i; b_i++) {
+      partContext->atomic_counters[b_i] = 1;
     }
   } // single
   //  safe and shared across threads
@@ -2482,21 +2482,15 @@ static void b_assemble_surf_par(
   while ((!exitg1) && (lvl <= parts.size(0) - 1)) {
     //  Assemble for this part
     coder::SizeType exitg2;
+    coder::SizeType mypart;
     do {
       exitg2 = 0;
-#pragma omp atomic capture
-      { // atomic capture
-        //  to prevent Coder putting this line before pragma
-        partid = partContext->atomic_counters[lvl];
-        partContext->atomic_counters[lvl] =
-            partContext->atomic_counters[lvl] + 1;
-      } // atomic capture
-      //  to prevent Coder detecting v is for index and automatically subtract
-      if ((lvl + 1 <= parts.size(0)) && (partid <= parts[lvl].nparts)) {
+      mypart = ompAtomicCapture(&partContext->atomic_counters[lvl]);
+      if ((lvl + 1 <= parts.size(0)) && (mypart <= parts[lvl].nparts)) {
         d_assemble_surf_kernel(
             xs, conn, stcls, n2cPtr, n2cList, surfType, degree, nrms, rowPtr,
             colInd, vals, nnzPr, parts[lvl].part_list,
-            parts[lvl].part_ptr[partid - 1], parts[lvl].part_ptr[partid] - 1,
+            parts[lvl].part_ptr[mypart - 1], parts[lvl].part_ptr[mypart] - 1,
             &wls[n], rdTags, &rdCountsLoc);
         if (rdCountsLoc < 0) {
           exitg2 = 1;
@@ -2615,7 +2609,6 @@ static void b_assemble_surf_task_kernel(
 {
   coder::SizeType n;
   int rdCountsLoc;
-  //  Gets the thread number of the thread, within the team, making this call.
   n = 0;
 #ifdef _OPENMP
   n = omp_get_thread_num();
@@ -2973,9 +2966,9 @@ static void c_assemble_body_par(
     ::coder::array<boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts,
     Omp4mPartContext *partContext)
 {
+  coder::SizeType i;
   coder::SizeType lvl;
   coder::SizeType n;
-  coder::SizeType partid;
   int rdCountsLoc;
   boolean_T exitg1;
   //  parallel kernel
@@ -2990,9 +2983,9 @@ static void c_assemble_body_par(
 #pragma omp single
   { // single
     partContext->atomic_counters.set_size(parts.size(0));
-    partid = parts.size(0);
-    for (coder::SizeType i{0}; i < partid; i++) {
-      partContext->atomic_counters[i] = 1;
+    i = parts.size(0);
+    for (coder::SizeType b_i{0}; b_i < i; b_i++) {
+      partContext->atomic_counters[b_i] = 1;
     }
   } // single
   //  safe and shared across all threads
@@ -3001,21 +2994,15 @@ static void c_assemble_body_par(
   while ((!exitg1) && (lvl <= parts.size(0) - 1)) {
     //  assemble for this part
     coder::SizeType exitg2;
+    coder::SizeType mypart;
     do {
       exitg2 = 0;
-#pragma omp atomic capture
-      { // atomic capture
-        //  to prevent Coder putting this line before pragma
-        partid = partContext->atomic_counters[lvl];
-        partContext->atomic_counters[lvl] =
-            partContext->atomic_counters[lvl] + 1;
-      } // atomic capture
-      //  to prevent Coder detecting v is for index and automatically subtract
-      if ((lvl + 1 <= parts.size(0)) && (partid <= parts[lvl].nparts)) {
+      mypart = ompAtomicCapture(&partContext->atomic_counters[lvl]);
+      if ((lvl + 1 <= parts.size(0)) && (mypart <= parts[lvl].nparts)) {
         f_assemble_body_kernel(
             xs, conn, stcls, n2cPtr, n2cList, degree, rowPtr, colInd, vals,
-            nnzPr, parts[lvl].part_list, parts[lvl].part_ptr[partid - 1],
-            parts[lvl].part_ptr[partid] - 1, &wls[n], rdTags, &rdCountsLoc);
+            nnzPr, parts[lvl].part_list, parts[lvl].part_ptr[mypart - 1],
+            parts[lvl].part_ptr[mypart] - 1, &wls[n], rdTags, &rdCountsLoc);
         if (rdCountsLoc < 0) {
           exitg2 = 1;
         } else {
@@ -3129,7 +3116,6 @@ static void c_assemble_body_task_kernel(
     ::coder::array<boolean_T, 1U> &rdTags, ::coder::array<int, 1U> &rdCounts)
 {
   coder::SizeType n;
-  //  Gets the thread number of the thread, within the team, making this call.
   n = 0;
 #ifdef _OPENMP
   n = omp_get_thread_num();
@@ -3419,34 +3405,36 @@ static void compute_area(const ::coder::array<double, 2U> &xs,
                          ::coder::array<double, 1U> &A,
                          coder::SizeType nThreads)
 {
-  coder::SizeType m2cTryBlkErrCode;
+  boolean_T m2cTryBlkErrFlag;
   coder::SizeType nthreads;
   //  kernel for computing areas
-  nthreads = nThreads;
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
     nthreads = omp_get_max_threads();
 #endif // _OPENMP
+  } else {
+    nthreads = nThreads;
   }
-  m2cTryBlkErrCode = 0;
+  m2cTryBlkErrFlag = 0;
 #pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
     compute_area_kernel(conn.size(0), xs.size(1), xs, conn, A, nThreads);
   } catch (const std::runtime_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("runtime_error %s\n", m2cExc.what());
   } catch (const std::logic_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("logic_error %s\n", m2cExc.what());
   } catch (const std::exception &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("exception %s\n", m2cExc.what());
   } catch (...) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("Unknown error detected from C++ exceptions\n");
+    fflush(stderr);
   } // end try
-  if ((int)m2cTryBlkErrCode != 0) {
+  if ((int)m2cTryBlkErrFlag != 0) {
     throw std::runtime_error("omp4m:runtimeErrorInThread");
   }
 }
@@ -3462,7 +3450,6 @@ static void compute_area_kernel(coder::SizeType m, coder::SizeType dim,
   coder::SizeType nthreads;
   coder::SizeType u1;
   nthreads = nThreads;
-  //  Obtains starting and ending indices of local chunk for current thread
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
@@ -3474,7 +3461,6 @@ static void compute_area_kernel(coder::SizeType m, coder::SizeType dim,
     iend = m;
   } else {
     coder::SizeType threadID;
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -3599,7 +3585,6 @@ compute_beta_kernel(coder::SizeType n, double epsBeta, double hGlobal,
   { // single
     beta.set_size(n, nRhs);
   } // single
-  //  Obtains starting and ending indices of local chunk for current thread
   nthreads = 1;
 #ifdef _OPENMP
   nthreads = omp_get_num_threads();
@@ -3611,7 +3596,6 @@ compute_beta_kernel(coder::SizeType n, double epsBeta, double hGlobal,
     coder::SizeType b_remainder;
     coder::SizeType chunk;
     coder::SizeType threadID;
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -3666,34 +3650,36 @@ static void compute_body_h(const ::coder::array<double, 2U> &xs,
                            ::coder::array<double, 1U> &h,
                            coder::SizeType nThreads)
 {
-  coder::SizeType m2cTryBlkErrCode;
+  boolean_T m2cTryBlkErrFlag;
   coder::SizeType nthreads;
   //  kernel for computing body cell sizes
-  nthreads = nThreads;
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
     nthreads = omp_get_max_threads();
 #endif // _OPENMP
+  } else {
+    nthreads = nThreads;
   }
-  m2cTryBlkErrCode = 0;
+  m2cTryBlkErrFlag = 0;
 #pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
     compute_body_h_kernel(conn.size(0), xs.size(1), xs, conn, h, nThreads);
   } catch (const std::runtime_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("runtime_error %s\n", m2cExc.what());
   } catch (const std::logic_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("logic_error %s\n", m2cExc.what());
   } catch (const std::exception &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("exception %s\n", m2cExc.what());
   } catch (...) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("Unknown error detected from C++ exceptions\n");
+    fflush(stderr);
   } // end try
-  if ((int)m2cTryBlkErrCode != 0) {
+  if ((int)m2cTryBlkErrFlag != 0) {
     throw std::runtime_error("omp4m:runtimeErrorInThread");
   }
 }
@@ -3709,7 +3695,6 @@ static void compute_body_h_kernel(coder::SizeType m, coder::SizeType dim,
   coder::SizeType nthreads;
   coder::SizeType u1;
   nthreads = nThreads;
-  //  Obtains starting and ending indices of local chunk for current thread
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
@@ -3721,7 +3706,6 @@ static void compute_body_h_kernel(coder::SizeType m, coder::SizeType dim,
     iend = m;
   } else {
     coder::SizeType threadID;
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -3916,7 +3900,6 @@ static void compute_nodal_alpha(coder::SizeType n,
     coder::SizeType b_remainder;
     coder::SizeType chunk;
     coder::SizeType threadID;
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -3955,46 +3938,48 @@ static void compute_surf_h(const ::coder::array<double, 2U> &xs,
                            const ::coder::array<int, 2U> &conn,
                            const ::coder::array<int, 1U> &n2nPtr,
                            const ::coder::array<int, 1U> &n2nList,
-                           const ::coder::array<double, 2U> &nrms,
                            coder::SizeType surfType,
                            ::coder::array<double, 1U> &h,
                            coder::SizeType nThreads,
                            ::coder::array<double, 1U> &buf_)
 {
-  coder::SizeType m2cTryBlkErrCode;
+  boolean_T m2cTryBlkErrFlag;
+  coder::SizeType loop_ub;
   coder::SizeType nthreads;
   //  kernel for computing the cell sizes on surfaces in 2D and 3D
-  nthreads = nThreads;
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
     nthreads = omp_get_max_threads();
 #endif // _OPENMP
+  } else {
+    nthreads = nThreads;
   }
-  m2cTryBlkErrCode = 0;
+  m2cTryBlkErrFlag = 0;
 #pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
     buf_.set_size(xs.size(0));
-    nthreads = xs.size(0);
-    for (coder::SizeType i{0}; i < nthreads; i++) {
+    loop_ub = xs.size(0);
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       buf_[i] = 0.0;
     }
     compute_surf_h_kernel(xs.size(0), conn.size(0), xs.size(1), xs, conn,
-                          n2nPtr, n2nList, nrms, surfType, h, buf_, nThreads);
+                          n2nPtr, n2nList, surfType, h, buf_, nThreads);
   } catch (const std::runtime_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("runtime_error %s\n", m2cExc.what());
   } catch (const std::logic_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("logic_error %s\n", m2cExc.what());
   } catch (const std::exception &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("exception %s\n", m2cExc.what());
   } catch (...) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("Unknown error detected from C++ exceptions\n");
+    fflush(stderr);
   } // end try
-  if ((int)m2cTryBlkErrCode != 0) {
+  if ((int)m2cTryBlkErrFlag != 0) {
     throw std::runtime_error("omp4m:runtimeErrorInThread");
   }
 }
@@ -4003,45 +3988,49 @@ static void compute_surf_h(const ::coder::array<double, 2U> &xs,
                            const ::coder::array<int, 2U> &conn,
                            const ::coder::array<int, 1U> &n2nPtr,
                            const ::coder::array<int, 1U> &n2nList,
+                           const ::coder::array<double, 2U> &nrms,
                            coder::SizeType surfType,
                            ::coder::array<double, 1U> &h,
                            coder::SizeType nThreads,
                            ::coder::array<double, 1U> &buf_)
 {
-  coder::SizeType m2cTryBlkErrCode;
+  boolean_T m2cTryBlkErrFlag;
+  coder::SizeType loop_ub;
   coder::SizeType nthreads;
   //  kernel for computing the cell sizes on surfaces in 2D and 3D
-  nthreads = nThreads;
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
     nthreads = omp_get_max_threads();
 #endif // _OPENMP
+  } else {
+    nthreads = nThreads;
   }
-  m2cTryBlkErrCode = 0;
+  m2cTryBlkErrFlag = 0;
 #pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
     buf_.set_size(xs.size(0));
-    nthreads = xs.size(0);
-    for (coder::SizeType i{0}; i < nthreads; i++) {
+    loop_ub = xs.size(0);
+    for (coder::SizeType i{0}; i < loop_ub; i++) {
       buf_[i] = 0.0;
     }
     compute_surf_h_kernel(xs.size(0), conn.size(0), xs.size(1), xs, conn,
-                          n2nPtr, n2nList, surfType, h, buf_, nThreads);
+                          n2nPtr, n2nList, nrms, surfType, h, buf_, nThreads);
   } catch (const std::runtime_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("runtime_error %s\n", m2cExc.what());
   } catch (const std::logic_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("logic_error %s\n", m2cExc.what());
   } catch (const std::exception &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("exception %s\n", m2cExc.what());
   } catch (...) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("Unknown error detected from C++ exceptions\n");
+    fflush(stderr);
   } // end try
-  if ((int)m2cTryBlkErrCode != 0) {
+  if ((int)m2cTryBlkErrFlag != 0) {
     throw std::runtime_error("omp4m:runtimeErrorInThread");
   }
 }
@@ -4068,7 +4057,6 @@ compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim,
   coder::SizeType threadID;
   coder::SizeType u1;
   nthreads = nThreads;
-  //  Obtains starting and ending indices of local chunk for current thread
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
@@ -4079,7 +4067,6 @@ compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim,
     istartN = 1;
     iendN = n;
   } else {
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -4259,7 +4246,6 @@ compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim,
   }
 #pragma omp barrier
   nthreads = nThreads;
-  //  Obtains starting and ending indices of local chunk for current thread
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
@@ -4270,7 +4256,6 @@ compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim,
     istartM = 0;
     iendM = m;
   } else {
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -4325,7 +4310,6 @@ compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim,
   coder::SizeType threadID;
   coder::SizeType u1;
   nthreads = nThreads;
-  //  Obtains starting and ending indices of local chunk for current thread
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
@@ -4336,7 +4320,6 @@ compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim,
     istartN = 1;
     iendN = n;
   } else {
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -4509,7 +4492,6 @@ compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim,
   }
 #pragma omp barrier
   nthreads = nThreads;
-  //  Obtains starting and ending indices of local chunk for current thread
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
@@ -4520,7 +4502,6 @@ compute_surf_h_kernel(coder::SizeType n, coder::SizeType m, coder::SizeType dim,
     istartM = 0;
     iendM = m;
   } else {
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -4559,34 +4540,36 @@ static void compute_volume_tet(const ::coder::array<double, 2U> &xs,
                                ::coder::array<double, 1U> &V,
                                coder::SizeType nThreads)
 {
-  coder::SizeType m2cTryBlkErrCode;
+  boolean_T m2cTryBlkErrFlag;
   coder::SizeType nthreads;
   //  kernel for estimating the volumes for a tet mesh
-  nthreads = nThreads;
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
     nthreads = omp_get_max_threads();
 #endif // _OPENMP
+  } else {
+    nthreads = nThreads;
   }
-  m2cTryBlkErrCode = 0;
+  m2cTryBlkErrFlag = 0;
 #pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
     compute_volume_tet_kernel(conn.size(0), xs, conn, V, nThreads);
   } catch (const std::runtime_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("runtime_error %s\n", m2cExc.what());
   } catch (const std::logic_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("logic_error %s\n", m2cExc.what());
   } catch (const std::exception &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("exception %s\n", m2cExc.what());
   } catch (...) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("Unknown error detected from C++ exceptions\n");
+    fflush(stderr);
   } // end try
-  if ((int)m2cTryBlkErrCode != 0) {
+  if ((int)m2cTryBlkErrFlag != 0) {
     throw std::runtime_error("omp4m:runtimeErrorInThread");
   }
 }
@@ -4602,7 +4585,6 @@ static void compute_volume_tet_kernel(coder::SizeType m,
   coder::SizeType nthreads;
   coder::SizeType u1;
   nthreads = nThreads;
-  //  Obtains starting and ending indices of local chunk for current thread
   if (nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
@@ -4614,7 +4596,6 @@ static void compute_volume_tet_kernel(coder::SizeType m,
     iend = m;
   } else {
     coder::SizeType threadID;
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -4671,6 +4652,7 @@ static void compute_volume_tet_kernel(coder::SizeType m,
   }
 }
 
+//  crsAx_kernel - Kernel function for evaluating A*x in each thread
 static void crsAx_kernel(const ::coder::array<int, 1U> &row_ptr,
                          const ::coder::array<int, 1U> &col_ind,
                          const ::coder::array<double, 1U> &val,
@@ -4682,7 +4664,6 @@ static void crsAx_kernel(const ::coder::array<int, 1U> &row_ptr,
   coder::SizeType istart;
   coder::SizeType nthreads;
   coder::SizeType u1;
-  //  Never inline the function, so that all variables are private
   nthreads = 1;
 #ifdef _OPENMP
   nthreads = omp_get_num_threads();
@@ -4694,7 +4675,6 @@ static void crsAx_kernel(const ::coder::array<int, 1U> &row_ptr,
     coder::SizeType b_remainder;
     coder::SizeType chunk;
     coder::SizeType threadID;
-    //  Gets the thread number of the thread, within the team, making this call.
     threadID = 0;
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
@@ -5715,9 +5695,9 @@ static void gen_vander(const ::coder::array<double, 2U> &us,
 {
   switch (us.size(1)) {
   case 1: {
-    coder::SizeType b_n;
+    coder::SizeType b_ret;
     coder::SizeType i;
-    coder::SizeType n;
+    coder::SizeType ret;
     boolean_T b;
     boolean_T b1;
     m2cAssert(us.size(1) == 1, "");
@@ -5725,36 +5705,36 @@ static void gen_vander(const ::coder::array<double, 2U> &us,
     m2cAssert(npoints <= us.size(0), "Input us is too small.");
     m2cAssert(degree >= 0, "Degree must be nonnegative");
     //  Number of row blocks
-    n = degree + 1;
-    b_n = us.size(0);
-    V.set_size(n, b_n);
+    ret = degree + 1;
+    b_ret = us.size(0);
+    V.set_size(ret, b_ret);
     //  Compute rows corresponding to function values
     if (weights.size(0) == 0) {
       if (degree != 0) {
         b = true;
         b1 = ((us.size(1) <= 0) || (us.size(0) <= 0));
-        n = us.size(1) * us.size(0);
-        b_n = 0;
+        ret = us.size(1) * us.size(0);
+        b_ret = 0;
         for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
-          if (b1 || (iPnt >= n)) {
-            b_n = 0;
+          if (b1 || (iPnt >= ret)) {
+            b_ret = 0;
             b = true;
           } else if (b) {
             b = false;
-            b_n = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
+            b_ret = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
           } else {
             i = us.size(1) * us.size(0) - 1;
-            if (b_n > MAX_int32_T - us.size(1)) {
-              b_n = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
+            if (b_ret > MAX_int32_T - us.size(1)) {
+              b_ret = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
             } else {
-              b_n += us.size(1);
-              if (b_n > i) {
-                b_n -= i;
+              b_ret += us.size(1);
+              if (b_ret > i) {
+                b_ret -= i;
               }
             }
           }
           V[iPnt] = 1.0;
-          V[iPnt + V.size(1)] = us[b_n];
+          V[iPnt + V.size(1)] = us[b_ret];
         }
       } else {
         for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
@@ -5764,42 +5744,42 @@ static void gen_vander(const ::coder::array<double, 2U> &us,
     } else if (degree != 0) {
       b = true;
       b1 = ((us.size(1) <= 0) || (us.size(0) <= 0));
-      n = us.size(1) * us.size(0);
-      b_n = 0;
+      ret = us.size(1) * us.size(0);
+      b_ret = 0;
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
-        if (b1 || (iPnt >= n)) {
-          b_n = 0;
+        if (b1 || (iPnt >= ret)) {
+          b_ret = 0;
           b = true;
         } else if (b) {
           b = false;
-          b_n = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
+          b_ret = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
         } else {
           i = us.size(1) * us.size(0) - 1;
-          if (b_n > MAX_int32_T - us.size(1)) {
-            b_n = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
+          if (b_ret > MAX_int32_T - us.size(1)) {
+            b_ret = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
           } else {
-            b_n += us.size(1);
-            if (b_n > i) {
-              b_n -= i;
+            b_ret += us.size(1);
+            if (b_ret > i) {
+              b_ret -= i;
             }
           }
         }
         V[iPnt] = weights[iPnt];
-        V[iPnt + V.size(1)] = us[b_n] * weights[iPnt];
+        V[iPnt + V.size(1)] = us[b_ret] * weights[iPnt];
       }
     } else {
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
         V[iPnt] = weights[iPnt];
       }
     }
-    n = degree + 1;
-    for (coder::SizeType ii{2}; ii <= n; ii++) {
+    ret = degree + 1;
+    for (coder::SizeType ii{2}; ii <= ret; ii++) {
       b = true;
       b1 = ((us.size(1) <= 0) || (us.size(0) <= 0));
-      b_n = us.size(1) * us.size(0);
+      b_ret = us.size(1) * us.size(0);
       i = 0;
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
-        if (b1 || (iPnt >= b_n)) {
+        if (b1 || (iPnt >= b_ret)) {
           i = 0;
           b = true;
         } else if (b) {
@@ -5838,10 +5818,10 @@ static void gen_vander(const ::coder::array<double, 2U> &us,
 {
   switch (us.size(1)) {
   case 1: {
-    coder::SizeType b_n;
     coder::SizeType b_npoints;
+    coder::SizeType b_ret;
     coder::SizeType i;
-    coder::SizeType n;
+    coder::SizeType ret;
     boolean_T b;
     boolean_T b1;
     b_npoints = npoints - 1;
@@ -5854,49 +5834,49 @@ static void gen_vander(const ::coder::array<double, 2U> &us,
     }
     m2cAssert(degree >= 0, "Degree must be nonnegative");
     //  Number of row blocks
-    n = degree + 1;
-    b_n = us.size(0);
-    V.set_size(n, b_n);
+    ret = degree + 1;
+    b_ret = us.size(0);
+    V.set_size(ret, b_ret);
     //  Compute rows corresponding to function values
     if (degree != 0) {
       b = true;
       b1 = ((us.size(1) <= 0) || (us.size(0) <= 0));
-      n = us.size(1) * us.size(0);
-      b_n = 0;
+      ret = us.size(1) * us.size(0);
+      b_ret = 0;
       for (coder::SizeType iPnt{0}; iPnt <= b_npoints; iPnt++) {
-        if (b1 || (iPnt >= n)) {
-          b_n = 0;
+        if (b1 || (iPnt >= ret)) {
+          b_ret = 0;
           b = true;
         } else if (b) {
           b = false;
-          b_n = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
+          b_ret = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
         } else {
           i = us.size(1) * us.size(0) - 1;
-          if (b_n > MAX_int32_T - us.size(1)) {
-            b_n = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
+          if (b_ret > MAX_int32_T - us.size(1)) {
+            b_ret = iPnt % us.size(0) * us.size(1) + iPnt / us.size(0);
           } else {
-            b_n += us.size(1);
-            if (b_n > i) {
-              b_n -= i;
+            b_ret += us.size(1);
+            if (b_ret > i) {
+              b_ret -= i;
             }
           }
         }
         V[iPnt] = 1.0;
-        V[iPnt + V.size(1)] = us[b_n];
+        V[iPnt + V.size(1)] = us[b_ret];
       }
     } else {
       for (coder::SizeType iPnt{0}; iPnt <= b_npoints; iPnt++) {
         V[iPnt] = 1.0;
       }
     }
-    n = degree + 1;
-    for (coder::SizeType ii{2}; ii <= n; ii++) {
+    ret = degree + 1;
+    for (coder::SizeType ii{2}; ii <= ret; ii++) {
       b = true;
       b1 = ((us.size(1) <= 0) || (us.size(0) <= 0));
-      b_n = us.size(1) * us.size(0);
+      b_ret = us.size(1) * us.size(0);
       i = 0;
       for (coder::SizeType iPnt{0}; iPnt <= b_npoints; iPnt++) {
-        if (b1 || (iPnt >= b_n)) {
+        if (b1 || (iPnt >= b_ret)) {
           i = 0;
           b = true;
         } else if (b) {
@@ -5947,7 +5927,7 @@ static void gen_vander_2d(const ::coder::array<double, 2U> &us,
 {
   coder::SizeType b_degree;
   coder::SizeType c;
-  coder::SizeType n;
+  coder::SizeType ret;
   if (npoints == 0) {
     npoints = us.size(0);
   } else if (npoints > us.size(0)) {
@@ -5959,9 +5939,9 @@ static void gen_vander_2d(const ::coder::array<double, 2U> &us,
   } else {
     b_degree = (1 - degree) * (1 - degree);
   }
-  n = b_degree;
+  ret = b_degree;
   b_degree = us.size(0);
-  V.set_size(n, b_degree);
+  V.set_size(ret, b_degree);
   //  compute 0th order generalized Vandermonde matrix
   if (degree != 0) {
     for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
@@ -5976,11 +5956,11 @@ static void gen_vander_2d(const ::coder::array<double, 2U> &us,
   }
   c = 3;
   if (degree < 0) {
-    n = -degree;
+    ret = -degree;
   } else {
-    n = degree;
+    ret = degree;
   }
-  for (coder::SizeType deg{2}; deg <= n; deg++) {
+  for (coder::SizeType deg{2}; deg <= ret; deg++) {
     for (coder::SizeType j{0}; j < deg; j++) {
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
         V[iPnt + V.size(1) * c] =
@@ -5995,8 +5975,8 @@ static void gen_vander_2d(const ::coder::array<double, 2U> &us,
     c++;
   }
   //  Compute the bi-degree terms if degree<0
-  n = -degree;
-  for (coder::SizeType deg{n}; deg >= 1; deg--) {
+  ret = -degree;
+  for (coder::SizeType deg{ret}; deg >= 1; deg--) {
     for (coder::SizeType k{0}; k < deg; k++) {
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
         V[iPnt + V.size(1) * c] =
@@ -6016,7 +5996,7 @@ static void gen_vander_2d(const ::coder::array<double, 2U> &us,
 {
   coder::SizeType b_degree;
   coder::SizeType c;
-  coder::SizeType n;
+  coder::SizeType ret;
   if (npoints > us.size(0)) {
     m2cErrMsgIdAndTxt("wlslib:BufferTooSmall", "Input us is too small.");
   }
@@ -6026,9 +6006,9 @@ static void gen_vander_2d(const ::coder::array<double, 2U> &us,
   } else {
     b_degree = (1 - degree) * (1 - degree);
   }
-  n = b_degree;
+  ret = b_degree;
   b_degree = us.size(0);
-  V.set_size(n, b_degree);
+  V.set_size(ret, b_degree);
   //  compute 0th order generalized Vandermonde matrix
   if (weights.size(0) == 0) {
     if (degree != 0) {
@@ -6055,11 +6035,11 @@ static void gen_vander_2d(const ::coder::array<double, 2U> &us,
   }
   c = 3;
   if (degree < 0) {
-    n = -degree;
+    ret = -degree;
   } else {
-    n = degree;
+    ret = degree;
   }
-  for (coder::SizeType deg{2}; deg <= n; deg++) {
+  for (coder::SizeType deg{2}; deg <= ret; deg++) {
     for (coder::SizeType j{0}; j < deg; j++) {
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
         V[iPnt + V.size(1) * c] =
@@ -6074,8 +6054,8 @@ static void gen_vander_2d(const ::coder::array<double, 2U> &us,
     c++;
   }
   //  Compute the bi-degree terms if degree<0
-  n = -degree;
-  for (coder::SizeType deg{n}; deg >= 1; deg--) {
+  ret = -degree;
+  for (coder::SizeType deg{ret}; deg >= 1; deg--) {
     for (coder::SizeType k{0}; k < deg; k++) {
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
         V[iPnt + V.size(1) * c] =
@@ -6180,7 +6160,7 @@ static void gen_vander_3d(const ::coder::array<double, 2U> &us,
   coder::SizeType c;
   coder::SizeType d;
   coder::SizeType deg;
-  coder::SizeType n;
+  coder::SizeType ret;
   if (npoints > us.size(0)) {
     m2cErrMsgIdAndTxt("wlslib:BufferTooSmall", "Input us is too small.");
   }
@@ -6191,8 +6171,8 @@ static void gen_vander_3d(const ::coder::array<double, 2U> &us,
     b_degree = (1 - degree) * (1 - degree) * (1 - degree);
   }
   b_degree = b_degree;
-  n = us.size(0);
-  V.set_size(b_degree, n);
+  ret = us.size(0);
+  V.set_size(b_degree, ret);
   //  compute 0th order generalized Vandermonde matrix
   if (weights.size(0) == 0) {
     if (degree != 0) {
@@ -6222,11 +6202,11 @@ static void gen_vander_3d(const ::coder::array<double, 2U> &us,
   c = 4;
   d = 3;
   if (degree < 0) {
-    n = -degree;
+    ret = -degree;
   } else {
-    n = degree;
+    ret = degree;
   }
-  for (deg = 2; deg <= n; deg++) {
+  for (deg = 2; deg <= ret; deg++) {
     //  Within each level, use convention of Pascal triangle with x^deg at peak
     for (coder::SizeType j{0}; j < deg; j++) {
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
@@ -6264,8 +6244,8 @@ static void gen_vander_3d(const ::coder::array<double, 2U> &us,
     // initializing number of elements in layer
     excess = 0;
     // excess based on overlapping of growing Pascal triangles
-    n = 1 - degree;
-    for (coder::SizeType p{n}; p <= maxLayers; p++) {
+    ret = 1 - degree;
+    for (coder::SizeType p{ret}; p <= maxLayers; p++) {
       coder::SizeType counterBottomRow;
       coder::SizeType gap;
       coder::SizeType nTermsInPrevLayer;
@@ -6314,7 +6294,7 @@ static void gen_vander_3d(const ::coder::array<double, 2U> &us,
   coder::SizeType c;
   coder::SizeType d;
   coder::SizeType deg;
-  coder::SizeType n;
+  coder::SizeType ret;
   if (npoints == 0) {
     npoints = us.size(0);
   } else if (npoints > us.size(0)) {
@@ -6327,8 +6307,8 @@ static void gen_vander_3d(const ::coder::array<double, 2U> &us,
     b_degree = (1 - degree) * (1 - degree) * (1 - degree);
   }
   b_degree = b_degree;
-  n = us.size(0);
-  V.set_size(b_degree, n);
+  ret = us.size(0);
+  V.set_size(b_degree, ret);
   //  compute 0th order generalized Vandermonde matrix
   if (degree != 0) {
     for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
@@ -6345,11 +6325,11 @@ static void gen_vander_3d(const ::coder::array<double, 2U> &us,
   c = 4;
   d = 3;
   if (degree < 0) {
-    n = -degree;
+    ret = -degree;
   } else {
-    n = degree;
+    ret = degree;
   }
-  for (deg = 2; deg <= n; deg++) {
+  for (deg = 2; deg <= ret; deg++) {
     //  Within each level, use convention of Pascal triangle with x^deg at peak
     for (coder::SizeType j{0}; j < deg; j++) {
       for (coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
@@ -6387,8 +6367,8 @@ static void gen_vander_3d(const ::coder::array<double, 2U> &us,
     // initializing number of elements in layer
     excess = 0;
     // excess based on overlapping of growing Pascal triangles
-    n = 1 - degree;
-    for (coder::SizeType p{n}; p <= maxLayers; p++) {
+    ret = 1 - degree;
+    for (coder::SizeType p{ret}; p <= maxLayers; p++) {
       coder::SizeType counterBottomRow;
       coder::SizeType gap;
       coder::SizeType nTermsInPrevLayer;
@@ -6901,8 +6881,8 @@ init_osusop(const ::coder::array<int, 2U> &conn,
     //  actual nnz
     nnzPr[e] = j + 1;
     //  with extra reserved space
-    i = rowPtr[e] +
-        static_cast<int>(std::ceil(1.25 * static_cast<double>(j + 1)));
+    i = rowPtr[e] + static_cast<coder::SizeType>(
+                        std::ceil(1.25 * static_cast<double>(j + 1)));
     rowPtr[e + 1] = i;
     if (i - 1 > colInd.size(0)) {
       coder::SizeType exSpace;
@@ -6939,117 +6919,6 @@ init_osusop(const ::coder::array<int, 2U> &conn,
   vals.set_size(loop_ub);
   for (i = 0; i < loop_ub; i++) {
     vals[i] = 0.0;
-  }
-}
-
-static void mark_kernel(coder::SizeType n, double hGlobal, double cGlobal,
-                        double cLocal, double kappa1, double kappa0,
-                        const ::coder::array<double, 2U> &fs,
-                        const ::coder::array<double, 2U> &alphaCell,
-                        const ::coder::array<double, 2U> &beta,
-                        const ::coder::array<double, 2U> &dfGlobal,
-                        const ::coder::array<int, 2U> &mesh_conn,
-                        const ::coder::array<double, 1U> &mesh_cellSizes,
-                        const ::coder::array<int, 1U> &mesh_n2cPtr,
-                        const ::coder::array<int, 1U> &mesh_n2cList,
-                        coder::SizeType nRhs,
-                        ::coder::array<signed char, 2U> &disTags)
-{
-  double thres;
-  coder::SizeType iend;
-  coder::SizeType istart;
-  coder::SizeType nthreads;
-#pragma omp single
-  { // single
-    disTags.set_size(n, nRhs);
-  } // single
-  //  Obtains starting and ending indices of local chunk for current thread
-  nthreads = 1;
-#ifdef _OPENMP
-  nthreads = omp_get_num_threads();
-#endif // _OPENMP
-  if (nthreads == 1) {
-    istart = 1;
-    iend = n;
-  } else {
-    coder::SizeType b_remainder;
-    coder::SizeType chunk;
-    coder::SizeType threadID;
-    coder::SizeType u1;
-    //  Gets the thread number of the thread, within the team, making this call.
-    threadID = 0;
-#ifdef _OPENMP
-    threadID = omp_get_thread_num();
-#endif // _OPENMP
-    chunk = n / nthreads;
-    b_remainder = n - nthreads * chunk;
-    u1 = threadID;
-    if (b_remainder <= threadID) {
-      u1 = b_remainder;
-    }
-    istart = (threadID * chunk + u1) + 1;
-    iend = ((istart + chunk) + (threadID < b_remainder)) - 1;
-  }
-  thres = cGlobal * std::pow(hGlobal, 1.5);
-  //  C++
-  for (coder::SizeType i{istart}; i <= iend; i++) {
-    for (coder::SizeType k{0}; k < nRhs; k++) {
-      double tauGlobal;
-      coder::SizeType j;
-      boolean_T disCell;
-      boolean_T exitg1;
-      disTags[k + disTags.size(1) * (i - 1)] = 0;
-      tauGlobal = thres * dfGlobal[k];
-      disCell = false;
-      j = mesh_n2cPtr[i - 1] - 1;
-      exitg1 = false;
-      while ((!exitg1) && (j + 1 <= mesh_n2cPtr[i] - 1)) {
-        double fMax;
-        double fMin;
-        coder::SizeType eid;
-        coder::SizeType npts;
-        eid = mesh_n2cList[j] - 1;
-        for (npts = mesh_conn.size(1) - 1;
-             mesh_conn[npts + mesh_conn.size(1) * eid] <= 0; npts--) {
-        }
-        fMax = -1.7976931348623157E+308;
-        fMin = 1.7976931348623157E+308;
-        for (coder::SizeType ii{0}; ii <= npts; ii++) {
-          double fValue;
-          fValue = fs[k + fs.size(1) *
-                              (mesh_conn[ii + mesh_conn.size(1) * eid] - 1)];
-          if (fMax < fValue) {
-            fMax = fValue;
-          }
-          if (fMin > fValue) {
-            fMin = fValue;
-          }
-        }
-        //  compute local df and thres
-        if (std::abs(alphaCell[k + alphaCell.size(1) * (mesh_n2cList[j] - 1)]) >
-            std::fmax(tauGlobal,
-                      cLocal * (fMax - fMin) *
-                          std::sqrt(mesh_cellSizes[mesh_n2cList[j] - 1]))) {
-          //  dis cell
-          disCell = true;
-          exitg1 = true;
-        } else {
-          j++;
-        }
-      }
-      if (disCell) {
-        double d;
-        d = beta[k + beta.size(1) * (i - 1)];
-        if (d > kappa1) {
-          disTags[k + disTags.size(1) * (i - 1)] = 2;
-          //  C1
-          if (d > kappa0) {
-            disTags[k + disTags.size(1) * (i - 1)] = 1;
-          }
-          //  C0
-        }
-      }
-    }
   }
 }
 
@@ -7145,6 +7014,115 @@ static void mark_kernel(coder::SizeType n, double hGlobal, double cGlobal,
               disTags[k + disTags.size(1) * i2] = tag;
             }
           }
+        }
+      }
+    }
+  }
+}
+
+static void mark_kernel(coder::SizeType n, double hGlobal, double cGlobal,
+                        double cLocal, double kappa1, double kappa0,
+                        const ::coder::array<double, 2U> &fs,
+                        const ::coder::array<double, 2U> &alphaCell,
+                        const ::coder::array<double, 2U> &beta,
+                        const ::coder::array<double, 2U> &dfGlobal,
+                        const ::coder::array<int, 2U> &mesh_conn,
+                        const ::coder::array<double, 1U> &mesh_cellSizes,
+                        const ::coder::array<int, 1U> &mesh_n2cPtr,
+                        const ::coder::array<int, 1U> &mesh_n2cList,
+                        coder::SizeType nRhs,
+                        ::coder::array<signed char, 2U> &disTags)
+{
+  double thres;
+  coder::SizeType iend;
+  coder::SizeType istart;
+  coder::SizeType nthreads;
+#pragma omp single
+  { // single
+    disTags.set_size(n, nRhs);
+  } // single
+  nthreads = 1;
+#ifdef _OPENMP
+  nthreads = omp_get_num_threads();
+#endif // _OPENMP
+  if (nthreads == 1) {
+    istart = 1;
+    iend = n;
+  } else {
+    coder::SizeType b_remainder;
+    coder::SizeType chunk;
+    coder::SizeType threadID;
+    coder::SizeType u1;
+    threadID = 0;
+#ifdef _OPENMP
+    threadID = omp_get_thread_num();
+#endif // _OPENMP
+    chunk = n / nthreads;
+    b_remainder = n - nthreads * chunk;
+    u1 = threadID;
+    if (b_remainder <= threadID) {
+      u1 = b_remainder;
+    }
+    istart = (threadID * chunk + u1) + 1;
+    iend = ((istart + chunk) + (threadID < b_remainder)) - 1;
+  }
+  thres = cGlobal * std::pow(hGlobal, 1.5);
+  //  C++
+  for (coder::SizeType i{istart}; i <= iend; i++) {
+    for (coder::SizeType k{0}; k < nRhs; k++) {
+      double tauGlobal;
+      coder::SizeType j;
+      boolean_T disCell;
+      boolean_T exitg1;
+      disTags[k + disTags.size(1) * (i - 1)] = 0;
+      tauGlobal = thres * dfGlobal[k];
+      disCell = false;
+      j = mesh_n2cPtr[i - 1] - 1;
+      exitg1 = false;
+      while ((!exitg1) && (j + 1 <= mesh_n2cPtr[i] - 1)) {
+        double fMax;
+        double fMin;
+        coder::SizeType eid;
+        coder::SizeType npts;
+        eid = mesh_n2cList[j] - 1;
+        for (npts = mesh_conn.size(1) - 1;
+             mesh_conn[npts + mesh_conn.size(1) * eid] <= 0; npts--) {
+        }
+        fMax = -1.7976931348623157E+308;
+        fMin = 1.7976931348623157E+308;
+        for (coder::SizeType ii{0}; ii <= npts; ii++) {
+          double fValue;
+          fValue = fs[k + fs.size(1) *
+                              (mesh_conn[ii + mesh_conn.size(1) * eid] - 1)];
+          if (fMax < fValue) {
+            fMax = fValue;
+          }
+          if (fMin > fValue) {
+            fMin = fValue;
+          }
+        }
+        //  compute local df and thres
+        if (std::abs(alphaCell[k + alphaCell.size(1) * (mesh_n2cList[j] - 1)]) >
+            std::fmax(tauGlobal,
+                      cLocal * (fMax - fMin) *
+                          std::sqrt(mesh_cellSizes[mesh_n2cList[j] - 1]))) {
+          //  dis cell
+          disCell = true;
+          exitg1 = true;
+        } else {
+          j++;
+        }
+      }
+      if (disCell) {
+        double d;
+        d = beta[k + beta.size(1) * (i - 1)];
+        if (d > kappa1) {
+          disTags[k + disTags.size(1) * (i - 1)] = 2;
+          //  C1
+          if (d > kappa0) {
+            disTags[k + disTags.size(1) * (i - 1)] = 1;
+          }
+          //  C0
         }
       }
     }
@@ -7323,6 +7301,17 @@ static void omp4mRecurPartMesh(coder::SizeType n,
       }
     }
   }
+}
+
+static coder::SizeType ompAtomicCapture(int *x)
+{
+  coder::SizeType v;
+#pragma omp atomic capture
+  { // atomic capture
+    v = *x;
+    (*x)++;
+  } // atomic capture
+  return v;
 }
 
 // rdi_compute_oscind - Compute oscillation indicators (beta values)
@@ -8468,10 +8457,13 @@ void rdi_assemble_osusop(
     m2cErrMsgIdAndTxt("rdi_assemble_rdiop:badDim",
                       "surface computation only supports 2D or 3D");
   }
-  // Provides a portable wall clock timing routine.
   tStart = 0.0;
 #ifdef _OPENMP
   tStart = omp_get_wtime();
+#else
+  tStart = static_cast<std::chrono::duration<double>>(
+               std::chrono::system_clock::now().time_since_epoch())
+               .count();
 #endif // _OPENMP
   if (rowPtr.size(0) == 0) {
     //  call on no rank-deficient nodes
@@ -8482,19 +8474,25 @@ void rdi_assemble_osusop(
     update_osusop(mesh->xs.size(0), stcls, rdNodes, mesh->n2cPtr, mesh->n2cList,
                   rowPtr, colInd, vals, nnzPr);
   }
-  // Provides a portable wall clock timing routine.
   tEnd = 0.0;
 #ifdef _OPENMP
   tEnd = omp_get_wtime();
+#else
+  tEnd = static_cast<std::chrono::duration<double>>(
+             std::chrono::system_clock::now().time_since_epoch())
+             .count();
 #endif // _OPENMP
   if (params->verbose > 1) {
     m2cPrintf(" Init or updated OSUS operator in %gs...\n", tEnd - tStart);
     fflush(stdout);
   }
-  // Provides a portable wall clock timing routine.
   tStart = 0.0;
 #ifdef _OPENMP
   tStart = omp_get_wtime();
+#else
+  tStart = static_cast<std::chrono::duration<double>>(
+               std::chrono::system_clock::now().time_since_epoch())
+               .count();
 #endif // _OPENMP
   if (isSurf) {
     //  surface assembly
@@ -8507,10 +8505,13 @@ void rdi_assemble_osusop(
                   mesh->parts, stcls, rowPtr, colInd, vals, nnzPr, rdNodes,
                   params);
   }
-  // Provides a portable wall clock timing routine.
   tEnd = 0.0;
 #ifdef _OPENMP
   tEnd = omp_get_wtime();
+#else
+  tEnd = static_cast<std::chrono::duration<double>>(
+             std::chrono::system_clock::now().time_since_epoch())
+             .count();
 #endif // _OPENMP
   if (params->verbose > 1) {
     m2cPrintf(" Assembly OSUS operator finished in %gs...\n", tEnd - tStart);
@@ -8586,27 +8587,36 @@ void rdi_assemble_osusop2(
     m2cErrMsgIdAndTxt("rdi_assemble_rdiop:badDim",
                       "surface computation only supports 2D or 3D");
   }
-  // Provides a portable wall clock timing routine.
   tStart = 0.0;
 #ifdef _OPENMP
   tStart = omp_get_wtime();
+#else
+  tStart = static_cast<std::chrono::duration<double>>(
+               std::chrono::system_clock::now().time_since_epoch())
+               .count();
 #endif // _OPENMP
   //  call on no rank-deficient nodes
   init_osusop(mesh->conn, stcls, maxStclPr, rowPtr, colInd, vals, nnzPr);
   rdNodes.set_size(0);
-  // Provides a portable wall clock timing routine.
   tEnd = 0.0;
 #ifdef _OPENMP
   tEnd = omp_get_wtime();
+#else
+  tEnd = static_cast<std::chrono::duration<double>>(
+             std::chrono::system_clock::now().time_since_epoch())
+             .count();
 #endif // _OPENMP
   if (params->verbose > 1) {
     m2cPrintf(" Init or updated OSUS operator in %gs...\n", tEnd - tStart);
     fflush(stdout);
   }
-  // Provides a portable wall clock timing routine.
   tStart = 0.0;
 #ifdef _OPENMP
   tStart = omp_get_wtime();
+#else
+  tStart = static_cast<std::chrono::duration<double>>(
+               std::chrono::system_clock::now().time_since_epoch())
+               .count();
 #endif // _OPENMP
   if (isSurf) {
     //  surface assembly
@@ -8619,10 +8629,13 @@ void rdi_assemble_osusop2(
                   mesh->parts, stcls, rowPtr, colInd, vals, nnzPr, rdNodes,
                   params);
   }
-  // Provides a portable wall clock timing routine.
   tEnd = 0.0;
 #ifdef _OPENMP
   tEnd = omp_get_wtime();
+#else
+  tEnd = static_cast<std::chrono::duration<double>>(
+             std::chrono::system_clock::now().time_since_epoch())
+             .count();
 #endif // _OPENMP
   if (params->verbose > 1) {
     m2cPrintf(" Assembly OSUS operator finished in %gs...\n", tEnd - tStart);
@@ -9299,16 +9312,17 @@ void rdi_compute_inds2(const ::coder::array<int, 1U> &rowPtr,
                        ::coder::array<double, 2U> &alphaNode,
                        ::coder::array<double, 2U> &beta)
 {
-  coder::SizeType m2cTryBlkErrCode;
+  boolean_T m2cTryBlkErrFlag;
   coder::SizeType nthreads;
-  nthreads = params->nThreads;
   if (params->nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
     nthreads = omp_get_max_threads();
 #endif // _OPENMP
+  } else {
+    nthreads = params->nThreads;
   }
-  m2cTryBlkErrCode = 0;
+  m2cTryBlkErrFlag = 0;
 #pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
     rdi_compute_osusind(rowPtr, colInd, vals, fs, mesh->n2cPtr, mesh->n2cList,
@@ -9318,19 +9332,20 @@ void rdi_compute_inds2(const ::coder::array<int, 1U> &rowPtr,
                        mesh->cellWeights, mesh->n2cPtr, mesh->n2cList,
                        params->dim, params->epsBeta, beta);
   } catch (const std::runtime_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("runtime_error %s\n", m2cExc.what());
   } catch (const std::logic_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("logic_error %s\n", m2cExc.what());
   } catch (const std::exception &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("exception %s\n", m2cExc.what());
   } catch (...) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("Unknown error detected from C++ exceptions\n");
+    fflush(stderr);
   } // end try
-  if ((int)m2cTryBlkErrCode != 0) {
+  if ((int)m2cTryBlkErrFlag != 0) {
     throw std::runtime_error("omp4m:runtimeErrorInThread");
   }
 }
@@ -9384,10 +9399,10 @@ void rdi_compute_oscind2(const ::coder::array<double, 2U> &dfGlobal,
                          const RdiMesh *mesh, const RdiParams *params,
                          ::coder::array<double, 2U> &beta)
 {
-  coder::SizeType m2cTryBlkErrCode;
+  boolean_T m2cTryBlkErrFlag;
   double epsBeta;
   double hGlobal;
-  coder::SizeType last;
+  coder::SizeType nthreads;
   epsBeta = params->epsBeta;
   if (params->epsBeta <= 0.0) {
     epsBeta = 0.0002;
@@ -9395,6 +9410,7 @@ void rdi_compute_oscind2(const ::coder::array<double, 2U> &dfGlobal,
   hGlobal = mesh->hGlobal;
   if (mesh->hGlobal <= 0.0) {
     double ex;
+    coder::SizeType last;
     last = mesh->cellWeights.size(0);
     if (mesh->cellWeights.size(0) <= 2) {
       if (mesh->cellWeights.size(0) == 1) {
@@ -9417,33 +9433,35 @@ void rdi_compute_oscind2(const ::coder::array<double, 2U> &dfGlobal,
     }
     hGlobal = std::pow(ex, 1.0 / static_cast<double>(params->dim));
   }
-  last = params->nThreads;
   if (params->nThreads <= 0) {
-    last = 1;
+    nthreads = 1;
 #ifdef _OPENMP
-    last = omp_get_max_threads();
+    nthreads = omp_get_max_threads();
 #endif // _OPENMP
+  } else {
+    nthreads = params->nThreads;
   }
-  m2cTryBlkErrCode = 0;
-#pragma omp parallel default(shared) num_threads(last)
+  m2cTryBlkErrFlag = 0;
+#pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
     compute_beta_kernel(mesh->xs.size(0), epsBeta, hGlobal, dfGlobal, alphaCell,
                         mesh->cellWeights, mesh->n2cPtr, mesh->n2cList,
                         alphaCell.size(1), beta);
   } catch (const std::runtime_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("runtime_error %s\n", m2cExc.what());
   } catch (const std::logic_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("logic_error %s\n", m2cExc.what());
   } catch (const std::exception &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("exception %s\n", m2cExc.what());
   } catch (...) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("Unknown error detected from C++ exceptions\n");
+    fflush(stderr);
   } // end try
-  if ((int)m2cTryBlkErrCode != 0) {
+  if ((int)m2cTryBlkErrFlag != 0) {
     throw std::runtime_error("omp4m:runtimeErrorInThread");
   }
 }
@@ -9471,16 +9489,17 @@ void rdi_compute_osusind2(const ::coder::array<int, 1U> &rowPtr,
                           ::coder::array<double, 2U> &alphaCell,
                           ::coder::array<double, 2U> &alphaNode)
 {
-  coder::SizeType m2cTryBlkErrCode;
+  boolean_T m2cTryBlkErrFlag;
   coder::SizeType nthreads;
-  nthreads = params->nThreads;
   if (params->nThreads <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
     nthreads = omp_get_max_threads();
 #endif // _OPENMP
+  } else {
+    nthreads = params->nThreads;
   }
-  m2cTryBlkErrCode = 0;
+  m2cTryBlkErrFlag = 0;
 #pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
     //  using advanced OpenMP mode
@@ -9488,19 +9507,20 @@ void rdi_compute_osusind2(const ::coder::array<int, 1U> &rowPtr,
     compute_nodal_alpha(fs.size(0), alphaCell, mesh->n2cPtr, mesh->n2cList,
                         fs.size(1), alphaNode);
   } catch (const std::runtime_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("runtime_error %s\n", m2cExc.what());
   } catch (const std::logic_error &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("logic_error %s\n", m2cExc.what());
   } catch (const std::exception &m2cExc) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("exception %s\n", m2cExc.what());
   } catch (...) {
-    m2cTryBlkErrCode = 1;
+    m2cTryBlkErrFlag = 1;
     m2cPrintError("Unknown error detected from C++ exceptions\n");
+    fflush(stderr);
   } // end try
-  if ((int)m2cTryBlkErrCode != 0) {
+  if ((int)m2cTryBlkErrFlag != 0) {
     throw std::runtime_error("omp4m:runtimeErrorInThread");
   }
 }
@@ -9618,9 +9638,9 @@ void rdi_mark_discontinuities(const ::coder::array<double, 2U> &fs,
   double hGlobal;
   double kappa0;
   double kappa1;
-  coder::SizeType last;
   hGlobal = mesh->hGlobal;
   if (mesh->hGlobal <= 0.0) {
+    coder::SizeType last;
     last = mesh->cellSizes.size(0);
     if (mesh->cellSizes.size(0) <= 2) {
       if (mesh->cellSizes.size(0) == 1) {
@@ -9672,34 +9692,37 @@ void rdi_mark_discontinuities(const ::coder::array<double, 2U> &fs,
                 mesh->n2cPtr, mesh->n2cList, mesh->n2nPtr, mesh->n2nList,
                 fs.size(1), disTags);
   } else {
-    coder::SizeType m2cTryBlkErrCode;
-    last = params->nThreads;
+    boolean_T m2cTryBlkErrFlag;
+    coder::SizeType nthreads;
     if (params->nThreads <= 0) {
-      last = 1;
+      nthreads = 1;
 #ifdef _OPENMP
-      last = omp_get_max_threads();
+      nthreads = omp_get_max_threads();
 #endif // _OPENMP
+    } else {
+      nthreads = params->nThreads;
     }
-    m2cTryBlkErrCode = 0;
-#pragma omp parallel default(shared) num_threads(last)
+    m2cTryBlkErrFlag = 0;
+#pragma omp parallel default(shared) num_threads(nthreads)
     try { // try
       mark_kernel(fs.size(0), hGlobal, cGlobal, cLocal, kappa1, kappa0, fs,
                   alphaCell, beta, dfGlobal, mesh->conn, mesh->cellSizes,
                   mesh->n2cPtr, mesh->n2cList, fs.size(1), disTags);
     } catch (const std::runtime_error &m2cExc) {
-      m2cTryBlkErrCode = 1;
+      m2cTryBlkErrFlag = 1;
       m2cPrintError("runtime_error %s\n", m2cExc.what());
     } catch (const std::logic_error &m2cExc) {
-      m2cTryBlkErrCode = 1;
+      m2cTryBlkErrFlag = 1;
       m2cPrintError("logic_error %s\n", m2cExc.what());
     } catch (const std::exception &m2cExc) {
-      m2cTryBlkErrCode = 1;
+      m2cTryBlkErrFlag = 1;
       m2cPrintError("exception %s\n", m2cExc.what());
     } catch (...) {
-      m2cTryBlkErrCode = 1;
+      m2cTryBlkErrFlag = 1;
       m2cPrintError("Unknown error detected from C++ exceptions\n");
+      fflush(stderr);
     } // end try
-    if ((int)m2cTryBlkErrCode != 0) {
+    if ((int)m2cTryBlkErrFlag != 0) {
       throw std::runtime_error("omp4m:runtimeErrorInThread");
     }
   }

@@ -1,10 +1,10 @@
 // Copyright 2022 The NumGeom Group, Stony Brook University
 // Main developers:
-//     rdilib: Qiao Chen
+//     rdilib: Qiao Chen, Xiangmin Jiao
 //     momp2cpp: Xiangmin Jiao, Qiao Chen
 //     wlslib: Xiangmin Jiao, Qiao Chen, Jacob Jones
-//     ahmesh: Qiao Chen, Xiangmin Jiao, Vladimir Dedov
-//     sfelib: Qiao Chen, Xiangmin Jiao
+//     sfelib: Qiao Chen, Xiangmin Jiao, Jacob Jones
+//     ahmesh: Qiao Chen, Xiangmin Jiao, Jacob Jones, Vladimir Dedov
 //
 // rdi_compute_stencils.cpp
 //
@@ -17,6 +17,7 @@
 #include "m2c_lib.h"
 #include "rdi_params.hpp"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #ifdef _OPENMP
@@ -255,7 +256,7 @@ static void append_one_ring(coder::SizeType vid,
                     sibhfs[(iv9[ii + 3 * (lvid - 1)] + sibhfs.size(1) * rid) -
                            1]) >>
                 3;
-            if ((static_cast<int>(c) != 0) && (!etags[c - 1])) {
+            if ((c != 0) && (!etags[c - 1])) {
               if (size_stack >= 1024) {
                 m2cPrintf("Overflow in stack in append_one_ring.m \n");
                 fflush(stdout);
@@ -349,7 +350,7 @@ b_append_one_ring(coder::SizeType vid, const ::coder::array<int, 2U> &tets,
                     sibhfs[(iv9[ii + 3 * (lvid - 1)] + sibhfs.size(1) * rid) -
                            1]) >>
                 3;
-            if ((static_cast<int>(c) != 0) && (!etags[c - 1])) {
+            if ((c != 0) && (!etags[c - 1])) {
               if (size_stack >= 128) {
                 m2cPrintf("Overflow in stack in append_one_ring.m \n");
                 fflush(stdout);
@@ -1387,35 +1388,35 @@ static void determine_incident_halffaces(coder::SizeType nv,
           if (v2hf[elems[i] - 1] == 0) {
             if (!isborder[v]) {
               //  Encode <cid,lfid> pair into a hfid.
-              v2hf[v] = ((ii << 3) + iv3[3 * jj]) - 1;
+              v2hf[v] = ((ii << 3) + iv4[3 * jj]) - 1;
             } else {
-              loop_ub = offset_o + iv3[3 * jj];
+              loop_ub = offset_o + iv4[3 * jj];
               if (sibhfs[loop_ub % sibhfs.size(0) + loop_ub / sibhfs.size(0)] ==
                   0) {
                 //  Encode <cid,lfid> pair into a hfid.
-                v2hf[v] = ((ii << 3) + iv3[3 * jj]) - 1;
+                v2hf[v] = ((ii << 3) + iv4[3 * jj]) - 1;
               }
             }
             if (!isborder[v]) {
               //  Encode <cid,lfid> pair into a hfid.
-              v2hf[v] = ((ii << 3) + iv3[3 * jj + 1]) - 1;
+              v2hf[v] = ((ii << 3) + iv4[3 * jj + 1]) - 1;
             } else {
-              loop_ub = offset_o + iv3[3 * jj + 1];
+              loop_ub = offset_o + iv4[3 * jj + 1];
               if (sibhfs[loop_ub % sibhfs.size(0) + loop_ub / sibhfs.size(0)] ==
                   0) {
                 //  Encode <cid,lfid> pair into a hfid.
-                v2hf[v] = ((ii << 3) + iv3[3 * jj + 1]) - 1;
+                v2hf[v] = ((ii << 3) + iv4[3 * jj + 1]) - 1;
               }
             }
             if (!isborder[v]) {
               //  Encode <cid,lfid> pair into a hfid.
-              v2hf[v] = ((ii << 3) + iv3[3 * jj + 2]) - 1;
+              v2hf[v] = ((ii << 3) + iv4[3 * jj + 2]) - 1;
             } else {
-              loop_ub = offset_o + iv3[3 * jj + 2];
+              loop_ub = offset_o + iv4[3 * jj + 2];
               if (sibhfs[loop_ub % sibhfs.size(0) + loop_ub / sibhfs.size(0)] ==
                   0) {
                 //  Encode <cid,lfid> pair into a hfid.
-                v2hf[v] = ((ii << 3) + iv3[3 * jj + 2]) - 1;
+                v2hf[v] = ((ii << 3) + iv4[3 * jj + 2]) - 1;
               }
             }
           }
@@ -1508,7 +1509,7 @@ static void determine_incident_halffaces(coder::SizeType nv,
       ncvpE = 3;
       v2f_size_idx_1 = 3;
       for (i = 0; i < 12; i++) {
-        v2f_data[i] = iv3[i];
+        v2f_data[i] = iv4[i];
       }
     }
     b_sibhfs.set_size(sibhfs.size(0), sibhfs.size(1));
@@ -1680,7 +1681,7 @@ static void determine_sibling_halfedges(coder::SizeType nv,
             sibhes_tmp = v2he_fid[b_index - 1];
             unnamed_idx_0_tmp = v2he_leid[b_index - 1];
             sibhes[prev_heid_leid + sibhes.size(1) * prev_heid_fid] =
-                (static_cast<int>(sibhes_tmp << 4) + unnamed_idx_0_tmp) - 1;
+                ((sibhes_tmp << 4) + unnamed_idx_0_tmp) - 1;
             prev_heid_fid = sibhes_tmp - 1;
             prev_heid_leid = unnamed_idx_0_tmp - 1;
           }
@@ -1695,7 +1696,7 @@ static void determine_sibling_halfedges(coder::SizeType nv,
               //  Encode <fid,leid> pair into a heid.
               sibhes_tmp = v2he_leid[b_index - 1];
               sibhes[prev_heid_leid + sibhes.size(1) * prev_heid_fid] =
-                  (static_cast<int>(unnamed_idx_0_tmp << 4) + sibhes_tmp) - 1;
+                  ((unnamed_idx_0_tmp << 4) + sibhes_tmp) - 1;
               prev_heid_fid = unnamed_idx_0_tmp - 1;
               prev_heid_leid = sibhes_tmp - 1;
             }
@@ -2586,7 +2587,7 @@ determine_sibling_halffaces_mixed(coder::SizeType nv,
                   k = is_index_o[static_cast<coder::SizeType>((v2hf[b_index]) >>
                                                               3) -
                                  1] +
-                      static_cast<int>(v2hf[b_index] & 7U);
+                      (v2hf[b_index] & 7U);
                   exitg10 = 1;
                 } else {
                   b_index++;
@@ -2618,8 +2619,7 @@ determine_sibling_halffaces_mixed(coder::SizeType nv,
                 if (b_index + 1 <= i) {
                   if ((v2oe_v1[b_index] == b_vs_elem[3]) &&
                       (v2oe_v2[b_index] == b_vs_elem[1]) &&
-                      (static_cast<int>(
-                           static_cast<unsigned int>(v2hf[b_index]) >> 3) !=
+                      (static_cast<coder::SizeType>((v2hf[b_index]) >> 3) !=
                        ii + 1)) {
                     sibhfs.set_size(0);
                     exitg11 = 1;
@@ -2690,7 +2690,7 @@ determine_sibling_halffaces_mixed(coder::SizeType nv,
                   k = is_index_o[static_cast<coder::SizeType>((v2hf[b_index]) >>
                                                               3) -
                                  1] +
-                      static_cast<int>(v2hf[b_index] & 7U);
+                      (v2hf[b_index] & 7U);
                   exitg7 = 1;
                 } else {
                   b_index++;
@@ -2727,8 +2727,7 @@ determine_sibling_halffaces_mixed(coder::SizeType nv,
                                       (nvpf - 1) / nvpf * nvpf) +
                                      (jj << 2)] -
                                  1]) &&
-                      (static_cast<int>(
-                           static_cast<unsigned int>(v2hf[b_index]) >> 3) !=
+                      (static_cast<coder::SizeType>((v2hf[b_index]) >> 3) !=
                        ii + 1)) {
                     sibhfs.set_size(0);
                     exitg8 = 1;
@@ -2799,7 +2798,7 @@ determine_sibling_halffaces_mixed(coder::SizeType nv,
                   k = is_index_o[static_cast<coder::SizeType>((v2hf[b_index]) >>
                                                               3) -
                                  1] +
-                      static_cast<int>(v2hf[b_index] & 7U);
+                      (v2hf[b_index] & 7U);
                   exitg4 = 1;
                 } else {
                   b_index++;
@@ -2837,8 +2836,7 @@ determine_sibling_halffaces_mixed(coder::SizeType nv,
                                       (nvpf - 1) / nvpf * nvpf) +
                                      (jj << 2)] -
                                  1]) &&
-                      (static_cast<int>(
-                           static_cast<unsigned int>(v2hf[b_index]) >> 3) !=
+                      (static_cast<coder::SizeType>((v2hf[b_index]) >> 3) !=
                        ii + 1)) {
                     sibhfs.set_size(0);
                     exitg5 = 1;
@@ -2905,7 +2903,7 @@ determine_sibling_halffaces_mixed(coder::SizeType nv,
                   k = is_index_o[static_cast<coder::SizeType>((v2hf[b_index]) >>
                                                               3) -
                                  1] +
-                      static_cast<int>(v2hf[b_index] & 7U);
+                      (v2hf[b_index] & 7U);
                   exitg1 = 1;
                 } else {
                   b_index++;
@@ -2938,8 +2936,7 @@ determine_sibling_halffaces_mixed(coder::SizeType nv,
                 if (b_index + 1 <= i1) {
                   if ((v2oe_v1[b_index] == e_vs_elem[iv4[3 * jj + 1] - 1]) &&
                       (v2oe_v2[b_index] == e_vs_elem[iv4[3 * jj + 2] - 1]) &&
-                      (static_cast<int>(
-                           static_cast<unsigned int>(v2hf[b_index]) >> 3) !=
+                      (static_cast<coder::SizeType>((v2hf[b_index]) >> 3) !=
                        ii + 1)) {
                     sibhfs.set_size(0);
                     exitg2 = 1;
@@ -3040,7 +3037,7 @@ determine_sibling_halffaces_pyramid(coder::SizeType nv,
   v2oe_v2.set_size(is_index[nv]);
   for (ii = 0; ii <= nelems; ii++) {
     for (jj = 0; jj < 5; jj++) {
-      nvpf = jj + 1 < 4;
+      nvpf = jj + 1 == 1;
       jj_idx_0 = nvpf + 3;
       std::copy(&iv5[jj * 4], &iv5[jj * 4 + jj_idx_0], &tmp_data[0]);
       iindx = 0;
@@ -3493,7 +3490,7 @@ static coder::SizeType elem_one_ring(coder::SizeType vid,
           c = static_cast<coder::SizeType>(
                   sibhfs[(iv9[ii + 3 * lvid] + sibhfs.size(1) * rid) - 1]) >>
               3;
-          if ((static_cast<int>(c) != 0) && (!etags[c - 1])) {
+          if ((c != 0) && (!etags[c - 1])) {
             if (size_stack >= 128) {
               m2cPrintf("Overflow in stack in append_one_ring.m \n");
               fflush(stdout);
@@ -3528,10 +3525,10 @@ static void obtain_nring_curv(coder::SizeType vid, double ring,
   unsigned int c;
   // OBTAIN_NRING_CURV Collect n-ring vertices and edges.
   c = (v2hv[vid - 1]) >> 1;
-  b_c = v2hv[vid - 1] & 1U;
+  b_c = (v2hv[vid - 1] & 1U);
   *nverts = 0;
   *nedges = 0;
-  if (static_cast<int>(c) != 0) {
+  if (c != 0) {
     int hvbuf[13];
     coder::SizeType opp;
     //  Collect one-ring vertices and edges
@@ -3543,7 +3540,7 @@ static void obtain_nring_curv(coder::SizeType vid, double ring,
     opp = sibhvs[b_c + 2 * (c - 1)];
     if (opp != 0) {
       c = opp >> 1;
-      b_c = opp & 1U;
+      b_c = (opp & 1U);
       ngbvs[1] = edgs[(edgs.size(1) * (c - 1) - b_c) + 1];
       *nverts = 2;
       hvbuf[1] = sibhvs[(2 * (c - 1) - b_c) + 1];
@@ -3580,13 +3577,13 @@ static void obtain_nring_curv(coder::SizeType vid, double ring,
         for (coder::SizeType ii{i}; ii <= nverts_last; ii++) {
           c = (hvbuf[ii - 1]) >> 1;
           //  If the edge has already been inserted, then the vertex must be
-          if ((static_cast<int>(c) != 0) && (!etags[c - 1])) {
+          if ((c != 0) && (!etags[c - 1])) {
             coder::SizeType v;
             //  Insert edge into list
             (*nedges)++;
             ebuf[*nedges - 1] = c;
             etags[c - 1] = true;
-            b_c = hvbuf[ii - 1] & 1U;
+            b_c = (hvbuf[ii - 1] & 1U);
             v = edgs[(edgs.size(1) * (c - 1) - b_c) + 1];
             if (!vtags[v - 1]) {
               (*nverts)++;
@@ -3639,12 +3636,12 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
   c = (v2he[vid - 1]) >> 4;
   fid = static_cast<coder::SizeType>(static_cast<unsigned int>(v2he[vid - 1]) >>
                                      4);
-  c_tmp = v2he[vid - 1] & 15U;
+  c_tmp = (v2he[vid - 1] & 15U);
   lid = c_tmp;
   *nverts = 0;
   *nfaces = 0;
   overflow = false;
-  if (static_cast<int>(c) != 0) {
+  if (c != 0) {
     int hebuf[1024];
     coder::SizeType exitg1;
     coder::SizeType fid_in;
@@ -3662,9 +3659,7 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
       } else {
         b = false;
       }
-      ngbvs[0] = elems[(nxt[c_tmp + (b << 2)] +
-                        elems.size(1) * (static_cast<int>(c) - 1)) -
-                       1];
+      ngbvs[0] = elems[(nxt[c_tmp + (b << 2)] + elems.size(1) * (c - 1)) - 1];
       *nverts = 1;
       hebuf[0] = 0;
     }
@@ -3688,11 +3683,11 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
         overflow = true;
       }
       opp = sibhes[lid_prv + sibhes.size(1) * (fid - 1)];
-      fid = opp >> 4;
-      if (static_cast<int>(opp >> 4) == fid_in) {
+      fid = (opp >> 4);
+      if ((opp >> 4) == fid_in) {
         exitg1 = 1;
       } else {
-        lid = opp & 15U;
+        lid = (opp & 15U);
       }
     } while (exitg1 == 0);
     //  Finished cycle
@@ -3780,7 +3775,7 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
                       b = false;
                     }
                     v = elems[(prv[(oppe & 15U) + (b << 2)] +
-                               elems.size(1) * (static_cast<int>(c) - 1)) -
+                               elems.size(1) * (c - 1)) -
                               1] -
                         1;
                     if (overflow || ((!vtags[v]) && (*nverts >= 1024)) ||
@@ -3834,10 +3829,9 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
             boolean_T allow_early_term;
             boolean_T isfirst;
             c = (v2he[ngbvs[ii - 1] - 1]) >> 4;
-            fid = static_cast<coder::SizeType>(
-                      static_cast<unsigned int>(v2he[ngbvs[ii - 1] - 1]) >> 4) -
+            fid = static_cast<coder::SizeType>((v2he[ngbvs[ii - 1] - 1]) >> 4) -
                   1;
-            lid = v2he[ngbvs[ii - 1] - 1] & 15U;
+            lid = (v2he[ngbvs[ii - 1] - 1] & 15U);
             if ((elems.size(1) == 4) &&
                 (elems[elems.size(1) * (c - 1) + 3] != 0)) {
               b = true;
@@ -3847,14 +3841,13 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
             nedges = b;
             //  Allow early termination of the loop if an incident halfedge
             c_tmp = hebuf[ii - 1];
-            if ((c_tmp != 0) &&
-                (sibhes[(v2he[ngbvs[ii - 1] - 1] & 15U) +
-                        sibhes.size(1) * (static_cast<int>(c) - 1)] != 0)) {
+            if ((c_tmp != 0) && (sibhes[(v2he[ngbvs[ii - 1] - 1] & 15U) +
+                                        sibhes.size(1) * (c - 1)] != 0)) {
               allow_early_term = true;
               fid = static_cast<coder::SizeType>(
                         static_cast<unsigned int>(hebuf[ii - 1]) >> 4) -
                     1;
-              lid = c_tmp & 15U;
+              lid = (c_tmp & 15U);
               if ((elems.size(1) == 4) &&
                   (elems[elems.size(1) * (static_cast<coder::SizeType>(
                                               (hebuf[ii - 1]) >> 4) -
@@ -3887,7 +3880,8 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
               vtags[v] = true;
               //  Save starting position for next vertex
               hebuf[*nverts - 1] =
-                  (static_cast<int>(static_cast<unsigned int>(fid + 1) << 4) +
+                  (static_cast<coder::SizeType>(
+                       static_cast<unsigned int>(fid + 1) << 4) +
                    c_tmp) -
                   1;
             }
@@ -3942,11 +3936,11 @@ static void obtain_nring_quad(coder::SizeType vid, double ring,
               if (guard2) {
                 opp = sibhes[lid_prv + sibhes.size(1) * fid];
                 fid = (opp >> 4) - 1;
-                if (static_cast<int>(opp >> 4) == fid_in + 1) {
+                if ((opp >> 4) == fid_in + 1) {
                   //  Finished cycle
                   exitg2 = 1;
                 } else {
-                  lid = opp & 15U;
+                  lid = (opp & 15U);
                 }
               }
             } while (exitg2 == 0);
@@ -4378,6 +4372,10 @@ void rdi_compute_stencils(coder::SizeType n,
   tStart = 0.0;
 #ifdef _OPENMP
   tStart = omp_get_wtime();
+#else
+  tStart = static_cast<std::chrono::duration<double>>(
+               std::chrono::system_clock::now().time_since_epoch())
+               .count();
 #endif // _OPENMP
   //  topological dimension
   maxStcl = params->maxStclSize;
@@ -4422,10 +4420,13 @@ void rdi_compute_stencils(coder::SizeType n,
     }
     compute_stcl_kernel_tet(n, conn, params->ring, stcls, nrange);
   }
-  // Provides a portable wall clock timing routine.
   tEnd = 0.0;
 #ifdef _OPENMP
   tEnd = omp_get_wtime();
+#else
+  tEnd = static_cast<std::chrono::duration<double>>(
+             std::chrono::system_clock::now().time_since_epoch())
+             .count();
 #endif // _OPENMP
   if (params->verbose > 1) {
     m2cPrintf(" Stencil computation finished in %gs...\n", tEnd - tStart);
@@ -4445,6 +4446,10 @@ void rdi_compute_stencils(coder::SizeType n,
   tStart = 0.0;
 #ifdef _OPENMP
   tStart = omp_get_wtime();
+#else
+  tStart = static_cast<std::chrono::duration<double>>(
+               std::chrono::system_clock::now().time_since_epoch())
+               .count();
 #endif // _OPENMP
   //  topological dimension
   maxStcl = params->maxStclSize;
@@ -4477,10 +4482,13 @@ void rdi_compute_stencils(coder::SizeType n,
     }
     compute_stcl_kernel_tet(n, conn, params->ring, stcls);
   }
-  // Provides a portable wall clock timing routine.
   tEnd = 0.0;
 #ifdef _OPENMP
   tEnd = omp_get_wtime();
+#else
+  tEnd = static_cast<std::chrono::duration<double>>(
+             std::chrono::system_clock::now().time_since_epoch())
+             .count();
 #endif // _OPENMP
   if (params->verbose > 1) {
     m2cPrintf(" Stencil computation finished in %gs...\n", tEnd - tStart);
