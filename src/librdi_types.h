@@ -22,7 +22,6 @@ typedef int32_T SizeType;
 #endif // CODER_ARRAY_SIZE_TYPE_DEFINED
 
 #include "coder_array.h"
-#include "coder_bounded_array.h"
 #define MAX_THREADS omp_get_max_threads()
 
 // Type Definitions
