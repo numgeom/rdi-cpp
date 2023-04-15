@@ -1,4 +1,4 @@
-// Copyright 2022 The NumGeom Group, Stony Brook University
+// Copyright 2023 The NumGeom Group, Stony Brook University
 //
 // librdi.cpp
 //
@@ -7,8 +7,9 @@
 
 // Include files
 #include "librdi.h"
-#include "coder_array.h"
+#include "m2c_lib.h"
 #include "librdi_types.h"
+#include "coder_array.h"
 #include "m2c_lib.h"
 #ifdef OMP4M_HAS_METIS
 #include "metis.h"
@@ -105,18 +106,21 @@ static const int16_T iv[250]{
 
 // Function Declarations
 namespace rdi_kernel {
-static inline ::coder::SizeType append_wlsmesh_kring(WlsMesh *mesh);
+static inline
+::coder::SizeType append_wlsmesh_kring(WlsMesh *mesh);
 
-static inline void
+static inline
+void
 assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
               const ::coder::array<ConnData, 1U> &mesh_elemtables,
               const ::coder::array<uint64_T, 1U> &mesh_teids,
               const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
               const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-              const ::coder::array<Stencils, 1U> &mesh_stencils,
-              ::coder::SizeType stclid, boolean_T interp0);
+              const ::coder::array<Stencils, 1U> &mesh_stencils, ::coder::SizeType stclid,
+              boolean_T interp0);
 
-static inline void
+static inline
+void
 assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                     const ::coder::array<int32_T, 1U> &col_ind,
                     const ::coder::array<real_T, 2U> &mesh_coords,
@@ -127,12 +131,12 @@ assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                     const ::coder::array<int64_T, 1U> &n2e_row_ptr,
                     const ::coder::array<int32_T, 1U> &n2e_col_ind,
                     ::coder::SizeType degree, boolean_T interp0,
-                    const ::coder::array<int32_T, 1U> &nrange,
-                    ::coder::SizeType istart, ::coder::SizeType iend,
-                    ::coder::array<real_T, 1U> &val,
+                    const ::coder::array<int32_T, 1U> &nrange, ::coder::SizeType istart,
+                    ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
                     ::coder::array<boolean_T, 1U> &rdtags, boolean_T *fullrank);
 
-static inline void assemble_body_task(
+static inline
+void assemble_body_task(
     RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
     const ::coder::array<ConnData, 1U> &mesh_elemtables,
     const ::coder::array<uint64_T, 1U> &mesh_teids,
@@ -142,17 +146,19 @@ static inline void assemble_body_task(
     const ::coder::array<int64_T, 1U> &stcl_row_ptr,
     const ::coder::array<int32_T, 1U> &stcl_col_ind, boolean_T interp0);
 
-static inline void
+static inline
+void
 assemble_surf(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
               const ::coder::array<ConnData, 1U> &mesh_elemtables,
               const ::coder::array<uint64_T, 1U> &mesh_teids,
               const ::coder::array<NormalsData, 1U> &mesh_nrmstables,
               const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
               const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-              const ::coder::array<Stencils, 1U> &mesh_stencils,
-              ::coder::SizeType stclid, boolean_T interp0);
+              const ::coder::array<Stencils, 1U> &mesh_stencils, ::coder::SizeType stclid,
+              boolean_T interp0);
 
-static inline void
+static inline
+void
 assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                     const ::coder::array<int32_T, 1U> &col_ind,
                     const ::coder::array<real_T, 2U> &mesh_coords,
@@ -162,14 +168,14 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                     const ::coder::array<int32_T, 1U> &stcl_col_ind,
                     const ::coder::array<int64_T, 1U> &n2e_row_ptr,
                     const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                    const ::coder::array<real_T, 2U> &nrms,
-                    ::coder::SizeType degree, boolean_T interp0,
-                    const ::coder::array<int32_T, 1U> &nrange,
-                    ::coder::SizeType istart, ::coder::SizeType iend,
-                    ::coder::array<real_T, 1U> &val,
+                    const ::coder::array<real_T, 2U> &nrms, ::coder::SizeType degree,
+                    boolean_T interp0,
+                    const ::coder::array<int32_T, 1U> &nrange, ::coder::SizeType istart,
+                    ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
                     ::coder::array<boolean_T, 1U> &rdtags, boolean_T *fullrank);
 
-static inline void
+static inline
+void
 assemble_surf_task(RdiObject *rdi,
                    const ::coder::array<real_T, 2U> &mesh_coords,
                    const ::coder::array<ConnData, 1U> &mesh_elemtables,
@@ -181,9 +187,11 @@ assemble_surf_task(RdiObject *rdi,
                    const ::coder::array<int32_T, 1U> &stcl_col_ind,
                    const ::coder::array<real_T, 2U> &nrms, boolean_T interp0);
 
-static inline ::coder::SizeType b_append_wlsmesh_kring(WlsMesh *mesh);
+static inline
+::coder::SizeType b_append_wlsmesh_kring(WlsMesh *mesh);
 
-static inline void
+static inline
+void
 b_assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 const ::coder::array<uint64_T, 1U> &mesh_teids,
@@ -191,25 +199,24 @@ b_assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
                 const ::coder::array<Stencils, 1U> &mesh_stencils,
                 const ::coder::array<Omp4mPart, 1U> &mesh_nodeparts,
-                ::coder::SizeType stclid, boolean_T interp0,
-                ::coder::SizeType varargin_2);
+                ::coder::SizeType stclid, boolean_T interp0, ::coder::SizeType varargin_2);
 
-static inline boolean_T
-b_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
-                      const ::coder::array<int32_T, 1U> &col_ind,
-                      const ::coder::array<real_T, 2U> &mesh_coords,
-                      const ::coder::array<ConnData, 1U> &mesh_elemtables,
-                      const ::coder::array<uint64_T, 1U> &mesh_teids,
-                      const ::coder::array<int64_T, 1U> &stcl_row_ptr,
-                      const ::coder::array<int32_T, 1U> &stcl_col_ind,
-                      const ::coder::array<int64_T, 1U> &n2e_row_ptr,
-                      const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                      ::coder::SizeType degree, boolean_T interp0,
-                      const ::coder::array<int32_T, 1U> &nrange,
-                      ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
-                      ::coder::array<boolean_T, 1U> &rdtags);
+static inline
+boolean_T b_assemble_body_range(
+    const ::coder::array<int64_T, 1U> &row_ptr,
+    const ::coder::array<int32_T, 1U> &col_ind,
+    const ::coder::array<real_T, 2U> &mesh_coords,
+    const ::coder::array<ConnData, 1U> &mesh_elemtables,
+    const ::coder::array<uint64_T, 1U> &mesh_teids,
+    const ::coder::array<int64_T, 1U> &stcl_row_ptr,
+    const ::coder::array<int32_T, 1U> &stcl_col_ind,
+    const ::coder::array<int64_T, 1U> &n2e_row_ptr,
+    const ::coder::array<int32_T, 1U> &n2e_col_ind, ::coder::SizeType degree,
+    boolean_T interp0, const ::coder::array<int32_T, 1U> &nrange, ::coder::SizeType iend,
+    ::coder::array<real_T, 1U> &val, ::coder::array<boolean_T, 1U> &rdtags);
 
-static inline void
+static inline
+void
 b_assemble_surf(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 const ::coder::array<uint64_T, 1U> &mesh_teids,
@@ -218,70 +225,82 @@ b_assemble_surf(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
                 const ::coder::array<Stencils, 1U> &mesh_stencils,
                 const ::coder::array<Omp4mPart, 1U> &mesh_nodeparts,
-                ::coder::SizeType stclid, boolean_T interp0,
-                ::coder::SizeType varargin_2);
+                ::coder::SizeType stclid, boolean_T interp0, ::coder::SizeType varargin_2);
 
-static inline boolean_T
-b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
-                      const ::coder::array<int32_T, 1U> &col_ind,
-                      const ::coder::array<real_T, 2U> &mesh_coords,
-                      const ::coder::array<ConnData, 1U> &mesh_elemtables,
-                      const ::coder::array<uint64_T, 1U> &mesh_teids,
-                      const ::coder::array<int64_T, 1U> &stcl_row_ptr,
-                      const ::coder::array<int32_T, 1U> &stcl_col_ind,
-                      const ::coder::array<int64_T, 1U> &n2e_row_ptr,
-                      const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                      const ::coder::array<real_T, 2U> &nrms,
-                      ::coder::SizeType degree, boolean_T interp0,
-                      const ::coder::array<int32_T, 1U> &nrange,
-                      ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
-                      ::coder::array<boolean_T, 1U> &rdtags);
+static inline
+boolean_T b_assemble_surf_range(
+    const ::coder::array<int64_T, 1U> &row_ptr,
+    const ::coder::array<int32_T, 1U> &col_ind,
+    const ::coder::array<real_T, 2U> &mesh_coords,
+    const ::coder::array<ConnData, 1U> &mesh_elemtables,
+    const ::coder::array<uint64_T, 1U> &mesh_teids,
+    const ::coder::array<int64_T, 1U> &stcl_row_ptr,
+    const ::coder::array<int32_T, 1U> &stcl_col_ind,
+    const ::coder::array<int64_T, 1U> &n2e_row_ptr,
+    const ::coder::array<int32_T, 1U> &n2e_col_ind,
+    const ::coder::array<real_T, 2U> &nrms, ::coder::SizeType degree, boolean_T interp0,
+    const ::coder::array<int32_T, 1U> &nrange, ::coder::SizeType iend,
+    ::coder::array<real_T, 1U> &val, ::coder::array<boolean_T, 1U> &rdtags);
 
-static inline void b_compute_stencils_1d(WlsMesh *mesh,
-                                         ::coder::SizeType stclidx,
-                                         const real_T krings[4]);
+static inline
+void b_compute_lref(const ::coder::array<real_T, 2U> &mesh_coords,
+                           real_T *lref, real_T *buf1, real_T *buf2);
 
-static inline void b_compute_stencils_2d(WlsMesh *mesh,
-                                         ::coder::SizeType stclidx,
-                                         const real_T krings[4]);
+static inline
+void b_compute_stencils_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                  const real_T krings[4]);
 
-static inline void b_compute_stencils_kernel_1d(WlsMesh *mesh,
-                                                ::coder::SizeType stclidx,
-                                                real_T ring,
-                                                const int32_T bounds[2]);
+static inline
+void b_compute_stencils_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                  const real_T krings[4]);
 
-static inline void b_compute_stencils_kernel_2d(WlsMesh *mesh,
-                                                ::coder::SizeType stclidx,
-                                                real_T ring,
-                                                const int32_T bounds[2]);
+static inline
+void b_compute_stencils_3d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                  const real_T krings[4]);
 
-static inline void b_wlsmesh_compute_1ring(WlsMesh *mesh);
+static inline
+void b_compute_stencils_kernel_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                         real_T ring, const int32_T bounds[2]);
 
-static inline void b_wlsmesh_compute_meshprop(WlsMesh *mesh,
-                                              ::coder::SizeType nrmidx);
+static inline
+void b_compute_stencils_kernel_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                         real_T ring, const int32_T bounds[2]);
 
-static inline void b_wlsmesh_compute_stencils(WlsMesh *mesh,
-                                              ::coder::SizeType stclidx,
-                                              real_T krings);
+static inline
+void b_compute_stencils_kernel_3d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                         real_T ring, const int32_T bounds[2]);
 
-static inline void bar_quadrules(::coder::SizeType degree,
-                                 ::coder::array<real_T, 2U> &cs,
-                                 ::coder::array<real_T, 1U> &ws);
+static inline
+void b_wlsmesh_compute_1ring(WlsMesh *mesh);
 
-static inline void build_part(::coder::SizeType nParts,
-                              const ::coder::array<int32_T, 1U> &nparts,
-                              const ::coder::array<int32_T, 1U> &cparts,
-                              const ::coder::array<int32_T, 1U> &eptr,
-                              const ::coder::array<int32_T, 1U> &eind,
-                              ::coder::array<boolean_T, 1U> &ctags,
-                              ::coder::array<int32_T, 1U> &iwork,
-                              ::coder::array<int32_T, 1U> &partptr,
-                              ::coder::array<int32_T, 1U> &partlist,
-                              ::coder::array<int32_T, 1U> &sharedents);
+static inline
+void b_wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx);
 
-static inline ::coder::SizeType c_append_wlsmesh_kring(WlsMesh *mesh);
+static inline
+void b_wlsmesh_compute_stencils(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                       real_T krings);
 
-static inline void
+static inline
+void bar_quadrules(::coder::SizeType degree, ::coder::array<real_T, 2U> &cs,
+                          ::coder::array<real_T, 1U> &ws);
+
+static inline
+void build_part(::coder::SizeType nParts,
+                       const ::coder::array<int32_T, 1U> &nparts,
+                       const ::coder::array<int32_T, 1U> &cparts,
+                       const ::coder::array<int32_T, 1U> &eptr,
+                       const ::coder::array<int32_T, 1U> &eind,
+                       ::coder::array<boolean_T, 1U> &ctags,
+                       ::coder::array<int32_T, 1U> &iwork,
+                       ::coder::array<int32_T, 1U> &partptr,
+                       ::coder::array<int32_T, 1U> &partlist,
+                       ::coder::array<int32_T, 1U> &sharedents);
+
+static inline
+::coder::SizeType c_append_wlsmesh_kring(WlsMesh *mesh);
+
+static inline
+void
 c_assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 const ::coder::array<uint64_T, 1U> &mesh_teids,
@@ -291,7 +310,8 @@ c_assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<Omp4mPart, 1U> &mesh_nodeparts,
                 ::coder::SizeType stclid, boolean_T interp0);
 
-static inline boolean_T
+static inline
+boolean_T
 c_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                       const ::coder::array<int32_T, 1U> &col_ind,
                       const ::coder::array<real_T, 2U> &mesh_coords,
@@ -301,11 +321,12 @@ c_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                       const ::coder::array<int32_T, 1U> &stcl_col_ind,
                       const ::coder::array<int64_T, 1U> &n2e_row_ptr,
                       const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                      ::coder::SizeType degree, boolean_T interp0,
-                      ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
+                      ::coder::SizeType degree, boolean_T interp0, ::coder::SizeType iend,
+                      ::coder::array<real_T, 1U> &val,
                       ::coder::array<boolean_T, 1U> &rdtags);
 
-static inline void
+static inline
+void
 c_assemble_surf(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 const ::coder::array<uint64_T, 1U> &mesh_teids,
@@ -316,7 +337,8 @@ c_assemble_surf(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<Omp4mPart, 1U> &mesh_nodeparts,
                 ::coder::SizeType stclid, boolean_T interp0);
 
-static inline boolean_T
+static inline
+boolean_T
 c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                       const ::coder::array<int32_T, 1U> &col_ind,
                       const ::coder::array<real_T, 2U> &mesh_coords,
@@ -326,213 +348,246 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                       const ::coder::array<int32_T, 1U> &stcl_col_ind,
                       const ::coder::array<int64_T, 1U> &n2e_row_ptr,
                       const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                      const ::coder::array<real_T, 2U> &nrms,
-                      ::coder::SizeType degree, boolean_T interp0,
-                      ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
+                      const ::coder::array<real_T, 2U> &nrms, ::coder::SizeType degree,
+                      boolean_T interp0, ::coder::SizeType iend,
+                      ::coder::array<real_T, 1U> &val,
                       ::coder::array<boolean_T, 1U> &rdtags);
 
-static inline void call_metis_mesh(int32_T n, ::coder::array<int32_T, 1U> &eptr,
-                                   ::coder::array<int32_T, 1U> &eind,
-                                   int32_T nParts,
-                                   ::coder::array<int32_T, 1U> &nparts,
-                                   ::coder::array<int32_T, 1U> &cparts);
+static inline
+void call_metis_mesh(int32_T n, ::coder::array<int32_T, 1U> &eptr,
+                            ::coder::array<int32_T, 1U> &eind, int32_T nParts,
+                            ::coder::array<int32_T, 1U> &nparts,
+                            ::coder::array<int32_T, 1U> &cparts);
 
 namespace coder {
-static inline real_T sum(const ::coder::array<real_T, 1U> &x);
+static inline
+real_T sum(const ::coder::array<real_T, 1U> &x);
 
 }
-static inline void
+static inline
+void
 compute_beta_kernel(const ::coder::array<real_T, 2U> &mesh_coords,
                     const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
                     const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
                     const ::coder::array<real_T, 1U> &mesh_elemmeas,
                     real_T mesh_globalh, const ::coder::array<real_T, 2U> &df,
                     const ::coder::array<real_T, 2U> &alpha, real_T epsbeta,
-                    ::coder::array<real_T, 2U> &beta);
+                    real_T lref, ::coder::array<real_T, 2U> &beta);
 
-static inline ::coder::SizeType compute_connected_components(
+static inline
+::coder::SizeType compute_connected_components(
     ::coder::array<boolean_T, 1U> &visited, ::coder::array<int32_T, 1U> &iwork,
     const ::coder::array<int64_T, 1U> &G_row_ptr,
     const ::coder::array<int32_T, 1U> &G_col_ind, ::coder::SizeType G_ncols);
 
-static inline void compute_fconn_graph(
-    ::coder::array<boolean_T, 1U> &visited, ::coder::array<int32_T, 1U> &iwork,
-    const ::coder::array<ConnData, 1U> &mesh_elemtables,
-    const ::coder::array<uint64_T, 1U> &mesh_teids,
-    const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
-    const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-    ::coder::SizeType nid, const ::coder::array<int8_T, 2U> &distags,
-    ::coder::SizeType col, ::coder::array<int64_T, 1U> &G_row_ptr,
-    ::coder::array<int32_T, 1U> &G_col_ind, int32_T *G_ncols);
+static inline
+void
+compute_fconn_graph(::coder::array<boolean_T, 1U> &visited,
+                    ::coder::array<int32_T, 1U> &iwork,
+                    const ::coder::array<ConnData, 1U> &mesh_elemtables,
+                    const ::coder::array<uint64_T, 1U> &mesh_teids,
+                    const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
+                    const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
+                    ::coder::SizeType nid, const ::coder::array<int8_T, 2U> &distags,
+                    ::coder::SizeType col, ::coder::array<int64_T, 1U> &G_row_ptr,
+                    ::coder::array<int32_T, 1U> &G_col_ind, int32_T *G_ncols);
 
-static inline void
+static inline
+void compute_lref(const ::coder::array<real_T, 2U> &mesh_coords,
+                         real_T *lref, real_T *buf1, real_T *buf2);
+
+static inline
+void
 compute_measure_kernel(const ::coder::array<real_T, 2U> &mesh_coords,
                        const ::coder::array<ConnData, 1U> &mesh_elemtables,
                        const ::coder::array<uint64_T, 1U> &mesh_teids,
                        ::coder::array<real_T, 1U> &m);
 
-static inline void compute_meshsizes_kernel(
+static inline
+void compute_meshsizes_kernel(
+    const ::coder::array<real_T, 2U> &mesh_coords,
+    const ::coder::array<ConnData, 1U> &mesh_elemtables,
+    const ::coder::array<uint64_T, 1U> &mesh_teids,
+    const ::coder::array<int64_T, 1U> &mesh_node2nodes_row_ptr,
+    const ::coder::array<int32_T, 1U> &mesh_node2nodes_col_ind,
+    ::coder::array<real_T, 1U> &elemh, ::coder::array<real_T, 1U> &nodeh);
+
+static inline
+void compute_meshsizes_kernel(
     const ::coder::array<real_T, 2U> &mesh_coords,
     const ::coder::array<ConnData, 1U> &mesh_elemtables,
     const ::coder::array<uint64_T, 1U> &mesh_teids,
     const ::coder::array<int64_T, 1U> &mesh_node2nodes_row_ptr,
     const ::coder::array<int32_T, 1U> &mesh_node2nodes_col_ind,
     const ::coder::array<real_T, 2U> &nrms, ::coder::array<real_T, 1U> &elemh,
-    ::coder::array<real_T, 1U> &nodeh, real_T *globalh);
+    ::coder::array<real_T, 1U> &nodeh);
 
-static inline void compute_meshsizes_kernel(
-    const ::coder::array<real_T, 2U> &mesh_coords,
-    const ::coder::array<ConnData, 1U> &mesh_elemtables,
-    const ::coder::array<uint64_T, 1U> &mesh_teids,
-    const ::coder::array<int64_T, 1U> &mesh_node2nodes_row_ptr,
-    const ::coder::array<int32_T, 1U> &mesh_node2nodes_col_ind,
-    ::coder::array<real_T, 1U> &elemh, ::coder::array<real_T, 1U> &nodeh,
-    real_T *globalh);
-
-static inline void
+static inline
+void
 compute_nodal_alpha(const ::coder::array<real_T, 2U> &alphacell,
                     const ::coder::array<real_T, 2U> &mesh_coords,
                     const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
                     const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
                     ::coder::array<real_T, 2U> &alphanode);
 
-static inline void compute_stencils_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
-                                       const real_T krings[4]);
+static inline
+void compute_stencils_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                const real_T krings[4]);
 
-static inline void compute_stencils_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
-                                       const real_T krings[4]);
+static inline
+void compute_stencils_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                const real_T krings[4]);
 
-static inline void compute_stencils_kernel_1d(WlsMesh *mesh,
-                                              ::coder::SizeType stclidx,
-                                              real_T ring,
-                                              const int32_T bounds[2]);
+static inline
+void compute_stencils_3d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                const real_T krings[4]);
 
-static inline void compute_stencils_kernel_2d(WlsMesh *mesh,
-                                              ::coder::SizeType stclidx,
-                                              real_T ring,
-                                              const int32_T bounds[2]);
+static inline
+void compute_stencils_kernel_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                       real_T ring, const int32_T bounds[2]);
 
-static inline void crsAx_kernel(const ::coder::array<int64_T, 1U> &row_ptr,
-                                const ::coder::array<int32_T, 1U> &col_ind,
-                                const ::coder::array<real_T, 1U> &val,
-                                const ::coder::array<real_T, 2U> &x,
-                                ::coder::array<real_T, 2U> &b);
+static inline
+void compute_stencils_kernel_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                       real_T ring, const int32_T bounds[2]);
 
-static inline void crsCompress(CrsMatrix *A,
-                               const ::coder::array<int32_T, 1U> &nnzs);
+static inline
+void compute_stencils_kernel_3d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                       real_T ring, const int32_T bounds[2]);
 
-static inline void crsProdMatVec(const ::coder::array<int64_T, 1U> &A_row_ptr,
-                                 const ::coder::array<int32_T, 1U> &A_col_ind,
-                                 const ::coder::array<real_T, 1U> &A_val,
-                                 const ::coder::array<real_T, 2U> &x,
-                                 ::coder::array<real_T, 2U> &b);
+static inline
+void crsAx_worker(const ::coder::array<int64_T, 1U> &row_ptr,
+                         const ::coder::array<int32_T, 1U> &col_ind,
+                         const ::coder::array<real_T, 1U> &val,
+                         const ::coder::array<real_T, 2U> &x,
+                         ::coder::array<real_T, 2U> &b);
 
-static inline void crs_compress(::coder::array<int64_T, 1U> &row_ptr,
-                                ::coder::array<int32_T, 1U> &col_ind,
-                                const ::coder::array<int32_T, 1U> &nnzs);
+static inline
+void crsCompress(CrsMatrixD *A, const ::coder::array<int32_T, 1U> &nnzs);
 
-static inline void crs_prod_mat_vec(const ::coder::array<int64_T, 1U> &A_rowptr,
-                                    const ::coder::array<int32_T, 1U> &A_colind,
-                                    const ::coder::array<real_T, 1U> &A_val,
-                                    const ::coder::array<real_T, 2U> &x,
-                                    ::coder::array<real_T, 2U> &b);
+static inline
+void crsProdMatVec(const ::coder::array<int64_T, 1U> &A_row_ptr,
+                          const ::coder::array<int32_T, 1U> &A_col_ind,
+                          const ::coder::array<real_T, 1U> &A_val,
+                          const ::coder::array<real_T, 2U> &x,
+                          ::coder::array<real_T, 2U> &b);
 
-static inline void determine_rdnodes(boolean_T fullrank,
-                                     ::coder::array<boolean_T, 1U> &rdtags,
-                                     ::coder::array<int32_T, 1U> &rdnodes);
+static inline
+void crs_compress(::coder::array<int64_T, 1U> &row_ptr,
+                         ::coder::array<int32_T, 1U> &col_ind,
+                         const ::coder::array<int32_T, 1U> &nnzs);
 
-static inline void extract_sub(
-    ::coder::SizeType n, const ::coder::array<int32_T, 1U> &crange,
-    const ::coder::array<int32_T, 1U> &eptr,
-    const ::coder::array<int32_T, 1U> &eind, ::coder::array<int32_T, 1U> &iwork,
-    ::coder::array<boolean_T, 1U> &ntags, ::coder::array<int32_T, 1U> &eptrloc,
-    ::coder::array<int32_T, 1U> &eindloc, int32_T *nnodes);
+static inline
+void crs_prod_mat_vec(const ::coder::array<int64_T, 1U> &A_rowptr,
+                             const ::coder::array<int32_T, 1U> &A_colind,
+                             const ::coder::array<real_T, 1U> &A_val,
+                             const ::coder::array<real_T, 2U> &x,
+                             ::coder::array<real_T, 2U> &b);
 
-static inline real_T find_kth_shortest_dist(::coder::array<real_T, 1U> &arr,
-                                            ::coder::SizeType k,
-                                            ::coder::SizeType l,
-                                            ::coder::SizeType r);
+static inline
+void determine_rdnodes(boolean_T fullrank,
+                              ::coder::array<boolean_T, 1U> &rdtags,
+                              ::coder::array<int32_T, 1U> &rdnodes);
 
-static inline void gen_vander(const ::coder::array<real_T, 2U> &us,
-                              ::coder::SizeType npoints,
-                              ::coder::SizeType degree,
-                              ::coder::array<real_T, 2U> &V);
+static inline
+void extract_sub(::coder::SizeType n, const ::coder::array<int32_T, 1U> &crange,
+                        const ::coder::array<int32_T, 1U> &eptr,
+                        const ::coder::array<int32_T, 1U> &eind,
+                        ::coder::array<int32_T, 1U> &iwork,
+                        ::coder::array<boolean_T, 1U> &ntags,
+                        ::coder::array<int32_T, 1U> &eptrloc,
+                        ::coder::array<int32_T, 1U> &eindloc, int32_T *nnodes);
 
-static inline void gen_vander(const ::coder::array<real_T, 2U> &us,
-                              ::coder::SizeType npoints,
-                              ::coder::SizeType degree,
-                              const ::coder::array<real_T, 1U> &weights,
-                              ::coder::array<real_T, 2U> &V);
+static inline
+real_T find_kth_shortest_dist(::coder::array<real_T, 1U> &arr, ::coder::SizeType k,
+                                     ::coder::SizeType l, ::coder::SizeType r);
 
-static inline void gen_vander_2d(const ::coder::array<real_T, 2U> &us,
-                                 ::coder::SizeType npoints,
-                                 ::coder::SizeType degree,
-                                 ::coder::array<real_T, 2U> &V);
+static inline
+void gen_vander(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                       ::coder::SizeType degree, ::coder::array<real_T, 2U> &V);
 
-static inline void gen_vander_2d(const ::coder::array<real_T, 2U> &us,
-                                 ::coder::SizeType npoints,
-                                 ::coder::SizeType degree,
-                                 const ::coder::array<real_T, 1U> &weights,
-                                 ::coder::array<real_T, 2U> &V);
+static inline
+void gen_vander(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                       ::coder::SizeType degree,
+                       const ::coder::array<real_T, 1U> &weights,
+                       ::coder::array<real_T, 2U> &V);
 
-static inline void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
-                                 ::coder::SizeType npoints,
-                                 ::coder::SizeType degree,
-                                 ::coder::array<real_T, 2U> &V);
+static inline
+void gen_vander_2d(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                          ::coder::SizeType degree, ::coder::array<real_T, 2U> &V);
 
-static inline void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
-                                 ::coder::SizeType npoints,
-                                 ::coder::SizeType degree,
-                                 const ::coder::array<real_T, 1U> &weights,
-                                 ::coder::array<real_T, 2U> &V);
+static inline
+void gen_vander_2d(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                          ::coder::SizeType degree,
+                          const ::coder::array<real_T, 1U> &weights,
+                          ::coder::array<real_T, 2U> &V);
 
-static inline void hexa_125(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[125], real_T sdvals[375]);
+static inline
+void gen_vander_3d(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                          ::coder::SizeType degree,
+                          const ::coder::array<real_T, 1U> &weights,
+                          ::coder::array<real_T, 2U> &V);
 
-static inline void hexa_216(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[216], real_T sdvals[648]);
+static inline
+void gen_vander_3d(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                          ::coder::SizeType degree, ::coder::array<real_T, 2U> &V);
 
-static inline void hexa_343(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[343], real_T sdvals[1029]);
+static inline
+void hexa_125(real_T xi, real_T eta, real_T zeta, real_T sfvals[125],
+                     real_T sdvals[375]);
 
-static inline void hexa_64(real_T xi, real_T eta, real_T zeta,
-                           real_T sfvals[64], real_T sdvals[192]);
+static inline
+void hexa_216(real_T xi, real_T eta, real_T zeta, real_T sfvals[216],
+                     real_T sdvals[648]);
 
-static inline void hexa_gl_125(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[125], real_T sdvals[375]);
+static inline
+void hexa_343(real_T xi, real_T eta, real_T zeta, real_T sfvals[343],
+                     real_T sdvals[1029]);
 
-static inline void hexa_gl_216(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[216], real_T sdvals[648]);
+static inline
+void hexa_64(real_T xi, real_T eta, real_T zeta, real_T sfvals[64],
+                    real_T sdvals[192]);
 
-static inline void hexa_gl_343(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[343], real_T sdvals[1029]);
+static inline
+void hexa_gl_125(real_T xi, real_T eta, real_T zeta, real_T sfvals[125],
+                        real_T sdvals[375]);
 
-static inline void hexa_gl_64(real_T xi, real_T eta, real_T zeta,
-                              real_T sfvals[64], real_T sdvals[192]);
+static inline
+void hexa_gl_216(real_T xi, real_T eta, real_T zeta, real_T sfvals[216],
+                        real_T sdvals[648]);
 
-static inline void
-init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
-            const ::coder::array<ConnData, 1U> &mesh_elemtables,
-            const ::coder::array<uint64_T, 1U> &mesh_teids,
-            const ::coder::array<Stencils, 1U> &mesh_stencils,
-            ::coder::SizeType stclid, ::coder::array<int64_T, 1U> &A_row_ptr,
-            ::coder::array<int32_T, 1U> &A_col_ind,
-            ::coder::array<real_T, 1U> &A_val, int32_T *A_ncols,
-            ::coder::array<int32_T, 1U> &nnzs);
+static inline
+void hexa_gl_343(real_T xi, real_T eta, real_T zeta, real_T sfvals[343],
+                        real_T sdvals[1029]);
 
-static inline void insert_mem_crs(::coder::SizeType i,
-                                  ::coder::array<int64_T, 1U> &row_ptr,
-                                  ::coder::array<int32_T, 1U> &col_ind,
-                                  ::coder::array<real_T, 1U> &val);
+static inline
+void hexa_gl_64(real_T xi, real_T eta, real_T zeta, real_T sfvals[64],
+                       real_T sdvals[192]);
 
-static inline int64_T m2cFind(const ::coder::array<int32_T, 1U> &keys,
-                              ::coder::SizeType key, int64_T b_first,
-                              int64_T last);
+static inline
+void init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
+                        const ::coder::array<ConnData, 1U> &mesh_elemtables,
+                        const ::coder::array<uint64_T, 1U> &mesh_teids,
+                        const ::coder::array<Stencils, 1U> &mesh_stencils,
+                        ::coder::SizeType stclid, ::coder::array<int64_T, 1U> &A_row_ptr,
+                        ::coder::array<int32_T, 1U> &A_col_ind,
+                        ::coder::array<real_T, 1U> &A_val, int32_T *A_ncols,
+                        ::coder::array<int32_T, 1U> &nnzs);
 
-static inline void m2cSort(::coder::array<int32_T, 1U> &keys,
-                           ::coder::SizeType b_first, ::coder::SizeType last);
+static inline
+void insert_mem_crs(::coder::SizeType i, ::coder::array<int64_T, 1U> &row_ptr,
+                           ::coder::array<int32_T, 1U> &col_ind,
+                           ::coder::array<real_T, 1U> &val);
 
-static inline void mark_discontinuities_kernel(
+static inline
+int64_T m2cFind(const ::coder::array<int32_T, 1U> &keys, ::coder::SizeType key,
+                       int64_T b_first, int64_T last);
+
+static inline
+void m2cSort(::coder::array<int32_T, 1U> &keys, ::coder::SizeType b_first,
+                    ::coder::SizeType last);
+
+static inline
+void mark_discontinuities_kernel(
     const ::coder::array<real_T, 2U> &mesh_coords,
     const ::coder::array<ConnData, 1U> &mesh_elemtables,
     const ::coder::array<uint64_T, 1U> &mesh_teids,
@@ -542,112 +597,149 @@ static inline void mark_discontinuities_kernel(
     const ::coder::array<real_T, 2U> &fs, const ::coder::array<real_T, 2U> &df,
     const ::coder::array<real_T, 2U> &alpha,
     const ::coder::array<real_T, 2U> &beta, real_T cglobal, real_T clocal,
-    real_T kappa1, real_T kappa0, ::coder::array<int8_T, 2U> &distags);
+    real_T kappa1, real_T kappa0, real_T lref,
+    ::coder::array<int8_T, 2U> &distags);
 
-static inline uint8_T obtain_facets(::coder::SizeType etype);
+static inline
+uint8_T obtain_facets(::coder::SizeType etype);
 
-static inline void obtain_facets(::coder::SizeType etype, int8_T facetid,
-                                 uint8_T *ret, int16_T lids_data[],
-                                 ::coder::SizeType *lids_size);
+static inline
+void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
+                          int16_T lids_data[], ::coder::SizeType *lids_size);
 
-static inline void
-obtain_nring_1d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
-                const ::coder::array<uint64_T, 1U> &mesh_teids,
-                const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
-                const ::coder::array<uint64_T, 1U> &mesh_v2hfid,
-                ::coder::SizeType vid, real_T ring, ::coder::SizeType maxnpnts,
-                ::coder::array<boolean_T, 1U> &vtags,
-                ::coder::array<boolean_T, 1U> &ftags,
-                ::coder::array<int32_T, 1U> &ngbvs, int32_T *nverts,
-                ::coder::array<int32_T, 1U> &ngbfs, int32_T *nfaces,
-                ::coder::array<uint64_T, 1U> &hebuf, boolean_T *reflected,
-                boolean_T *overflow);
+static inline
+void obtain_nring_1d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
+                            const ::coder::array<uint64_T, 1U> &mesh_teids,
+                            const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
+                            const ::coder::array<uint64_T, 1U> &mesh_v2hfid,
+                            ::coder::SizeType vid, real_T ring, ::coder::SizeType maxnpnts,
+                            ::coder::array<boolean_T, 1U> &vtags,
+                            ::coder::array<boolean_T, 1U> &ftags,
+                            ::coder::array<int32_T, 1U> &ngbvs, int32_T *nverts,
+                            ::coder::array<int32_T, 1U> &ngbfs, int32_T *nfaces,
+                            ::coder::array<uint64_T, 1U> &hebuf,
+                            boolean_T *reflected, boolean_T *overflow);
 
-static inline void
-obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
-                const ::coder::array<uint64_T, 1U> &mesh_teids,
-                const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
-                const ::coder::array<uint64_T, 1U> &mesh_v2hfid,
-                ::coder::SizeType vid, real_T ring, ::coder::SizeType maxnpnts,
-                ::coder::array<boolean_T, 1U> &vtags,
-                ::coder::array<boolean_T, 1U> &ftags,
-                const ::coder::array<int32_T, 1U> &bridges,
-                ::coder::array<int32_T, 1U> &ngbvs, int32_T *nverts,
-                ::coder::array<int32_T, 1U> &ngbfs, int32_T *nfaces,
-                ::coder::array<uint64_T, 1U> &hebuf, boolean_T *reflected,
-                boolean_T *overflow);
+static inline
+void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
+                            const ::coder::array<uint64_T, 1U> &mesh_teids,
+                            const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
+                            const ::coder::array<uint64_T, 1U> &mesh_v2hfid,
+                            ::coder::SizeType vid, real_T ring, ::coder::SizeType maxnpnts,
+                            ::coder::array<boolean_T, 1U> &vtags,
+                            ::coder::array<boolean_T, 1U> &ftags,
+                            const ::coder::array<int32_T, 1U> &bridges,
+                            ::coder::array<int32_T, 1U> &ngbvs, int32_T *nverts,
+                            ::coder::array<int32_T, 1U> &ngbfs, int32_T *nfaces,
+                            ::coder::array<uint64_T, 1U> &hebuf,
+                            boolean_T *reflected, boolean_T *overflow);
 
-static inline void omp4mRecurPartMesh(::coder::SizeType n,
-                                      const ::coder::array<int32_T, 2U> &cells,
-                                      ::coder::SizeType dim,
-                                      ::coder::SizeType nLevels,
-                                      ::coder::SizeType nParts,
-                                      ::coder::array<Omp4mPart, 1U> &parts);
+static inline
+void obtain_nring_3d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
+                            const ::coder::array<uint64_T, 1U> &mesh_teids,
+                            const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
+                            const ::coder::array<uint64_T, 1U> &mesh_v2hfid,
+                            ::coder::SizeType vid, real_T ring, ::coder::SizeType maxnpnts,
+                            ::coder::array<boolean_T, 1U> &vtags,
+                            ::coder::array<boolean_T, 1U> &etags,
+                            ::coder::array<boolean_T, 1U> &buffertags,
+                            const ::coder::array<int32_T, 1U> &bridges,
+                            ::coder::array<int32_T, 1U> &ngbvs, int32_T *nverts,
+                            ::coder::array<int32_T, 1U> &ngbes, int32_T *nelems,
+                            ::coder::array<uint64_T, 1U> &hebuf,
+                            boolean_T *reflected, boolean_T *overflow);
 
-static inline void prism_126(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[126], real_T sdvals[378]);
+static inline
+void omp4mRecurPartMesh(::coder::SizeType n,
+                               const ::coder::array<int32_T, 2U> &cells,
+                               ::coder::SizeType dim, ::coder::SizeType nLevels, ::coder::SizeType nParts,
+                               ::coder::array<Omp4mPart, 1U> &parts);
 
-static inline void prism_196(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[196], real_T sdvals[588]);
+static inline
+void prism_126(real_T xi, real_T eta, real_T zeta, real_T sfvals[126],
+                      real_T sdvals[378]);
 
-static inline void prism_40(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[40], real_T sdvals[120]);
+static inline
+void prism_196(real_T xi, real_T eta, real_T zeta, real_T sfvals[196],
+                      real_T sdvals[588]);
 
-static inline void prism_75(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[75], real_T sdvals[225]);
+static inline
+void prism_40(real_T xi, real_T eta, real_T zeta, real_T sfvals[40],
+                     real_T sdvals[120]);
 
-static inline void prism_gl_126(real_T xi, real_T eta, real_T zeta,
-                                real_T sfvals[126], real_T sdvals[378]);
+static inline
+void prism_75(real_T xi, real_T eta, real_T zeta, real_T sfvals[75],
+                     real_T sdvals[225]);
 
-static inline void prism_gl_40(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[40], real_T sdvals[120]);
+static inline
+void prism_gl_126(real_T xi, real_T eta, real_T zeta, real_T sfvals[126],
+                         real_T sdvals[378]);
 
-static inline void prism_gl_75(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[75], real_T sdvals[225]);
+static inline
+void prism_gl_40(real_T xi, real_T eta, real_T zeta, real_T sfvals[40],
+                        real_T sdvals[120]);
 
-static inline void pyra_30(real_T xi, real_T eta, real_T zeta,
-                           real_T sfvals[30], real_T sdvals[90]);
+static inline
+void prism_gl_75(real_T xi, real_T eta, real_T zeta, real_T sfvals[75],
+                        real_T sdvals[225]);
 
-static inline void pyra_55(real_T xi, real_T eta, real_T zeta,
-                           real_T sfvals[55], real_T sdvals[165]);
+static inline
+void pyra_30(real_T xi, real_T eta, real_T zeta, real_T sfvals[30],
+                    real_T sdvals[90]);
 
-static inline void pyra_gl_30(real_T xi, real_T eta, real_T zeta,
-                              real_T sfvals[30], real_T sdvals[90]);
+static inline
+void pyra_55(real_T xi, real_T eta, real_T zeta, real_T sfvals[55],
+                    real_T sdvals[165]);
 
-static inline void pyra_gl_55(real_T xi, real_T eta, real_T zeta,
-                              real_T sfvals[55], real_T sdvals[165]);
+static inline
+void pyra_gl_30(real_T xi, real_T eta, real_T zeta, real_T sfvals[30],
+                       real_T sdvals[90]);
 
-static inline void pyra_quadrules(::coder::SizeType degree,
-                                  ::coder::array<real_T, 2U> &cs,
-                                  ::coder::array<real_T, 1U> &ws);
+static inline
+void pyra_gl_55(real_T xi, real_T eta, real_T zeta, real_T sfvals[55],
+                       real_T sdvals[165]);
 
-static inline void quad_25(real_T xi, real_T eta, real_T sfvals[25],
-                           real_T sdvals[50]);
+static inline
+void pyra_quadrules(::coder::SizeType degree, ::coder::array<real_T, 2U> &cs,
+                           ::coder::array<real_T, 1U> &ws);
 
-static inline void quad_36(real_T xi, real_T eta, real_T sfvals[36],
-                           real_T sdvals[72]);
+static inline
+void quad_25(real_T xi, real_T eta, real_T sfvals[25],
+                    real_T sdvals[50]);
 
-static inline void quad_49(real_T xi, real_T eta, real_T sfvals[49],
-                           real_T sdvals[98]);
+static inline
+void quad_36(real_T xi, real_T eta, real_T sfvals[36],
+                    real_T sdvals[72]);
 
-static inline void quad_gl_25(real_T xi, real_T eta, real_T sfvals[25],
-                              real_T sdvals[50]);
+static inline
+void quad_49(real_T xi, real_T eta, real_T sfvals[49],
+                    real_T sdvals[98]);
 
-static inline void quad_gl_36(real_T xi, real_T eta, real_T sfvals[36],
-                              real_T sdvals[72]);
+static inline
+void quad_gl_25(real_T xi, real_T eta, real_T sfvals[25],
+                       real_T sdvals[50]);
 
-static inline void quad_gl_49(real_T xi, real_T eta, real_T sfvals[49],
-                              real_T sdvals[98]);
+static inline
+void quad_gl_36(real_T xi, real_T eta, real_T sfvals[36],
+                       real_T sdvals[72]);
 
-static inline void rdi_compute_oscind(
-    real_T rdi_epsbeta, const ::coder::array<real_T, 2U> &mesh_coords,
-    const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
-    const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-    const ::coder::array<real_T, 1U> &mesh_elemmeas, real_T mesh_globalh,
-    const ::coder::array<real_T, 2U> &df,
-    const ::coder::array<real_T, 2U> &alpha, ::coder::array<real_T, 2U> &beta);
+static inline
+void quad_gl_49(real_T xi, real_T eta, real_T sfvals[49],
+                       real_T sdvals[98]);
 
-static inline void rdi_compute_osusind(
+static inline
+void
+rdi_compute_oscind(real_T rdi_lref, real_T rdi_epsbeta,
+                   const ::coder::array<real_T, 2U> &mesh_coords,
+                   const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
+                   const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
+                   const ::coder::array<real_T, 1U> &mesh_elemmeas,
+                   real_T mesh_globalh, const ::coder::array<real_T, 2U> &df,
+                   const ::coder::array<real_T, 2U> &alpha,
+                   ::coder::array<real_T, 2U> &beta);
+
+static inline
+void rdi_compute_osusind(
     const ::coder::array<int64_T, 1U> &rdi_A_row_ptr,
     const ::coder::array<int32_T, 1U> &rdi_A_col_ind,
     const ::coder::array<real_T, 1U> &rdi_A_val, boolean_T rdi_fullrank,
@@ -657,7 +749,8 @@ static inline void rdi_compute_osusind(
     const ::coder::array<real_T, 2U> &fs, ::coder::array<real_T, 2U> &alphacell,
     ::coder::array<real_T, 2U> &alphanode);
 
-static inline void
+static inline
+void
 rdi_contract_markers(::coder::array<int8_T, 2U> &distags,
                      const ::coder::array<real_T, 2U> &mesh_coords,
                      const ::coder::array<ConnData, 1U> &mesh_elemtables,
@@ -668,15 +761,17 @@ rdi_contract_markers(::coder::array<int8_T, 2U> &distags,
                      const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
                      ::coder::SizeType nlayers);
 
-static inline void
+static inline
+void
 rdi_expand_markers(::coder::array<int8_T, 2U> &distags,
                    const ::coder::array<int64_T, 1U> &mesh_node2nodes_row_ptr,
                    const ::coder::array<int32_T, 1U> &mesh_node2nodes_col_ind,
                    ::coder::SizeType nlayers);
 
-static inline void rdi_mark_discontinuities(
-    real_T rdi_cglobal, real_T rdi_clocal, real_T rdi_kappa0, real_T rdi_kappa1,
-    const ::coder::array<real_T, 2U> &mesh_coords,
+static inline
+void rdi_mark_discontinuities(
+    real_T rdi_lref, real_T rdi_cglobal, real_T rdi_clocal, real_T rdi_kappa0,
+    real_T rdi_kappa1, const ::coder::array<real_T, 2U> &mesh_coords,
     const ::coder::array<ConnData, 1U> &mesh_elemtables,
     const ::coder::array<uint64_T, 1U> &mesh_teids,
     const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
@@ -687,241 +782,276 @@ static inline void rdi_mark_discontinuities(
     const ::coder::array<real_T, 2U> &beta,
     ::coder::array<int8_T, 2U> &distags);
 
-static inline void rdi_update_osusop(RdiObject *rdi, WlsMesh *mesh,
-                                     boolean_T interp0);
+static inline
+void rdi_update_osusop(RdiObject *rdi, WlsMesh *mesh, boolean_T interp0);
 
-static inline void rrqr_factor(const ::coder::array<real_T, 2U> &A,
-                               real_T thres, ::coder::SizeType rowoffset,
-                               ::coder::SizeType coloffset, ::coder::SizeType m,
-                               ::coder::SizeType n,
-                               ::coder::array<real_T, 2U> &QR,
-                               ::coder::array<int32_T, 1U> &p, int32_T *rank,
-                               ::coder::array<real_T, 1U> &work);
+static inline
+void rrqr_factor(const ::coder::array<real_T, 2U> &A, real_T thres,
+                        ::coder::SizeType rowoffset, ::coder::SizeType coloffset, ::coder::SizeType m,
+                        ::coder::SizeType n, ::coder::array<real_T, 2U> &QR,
+                        ::coder::array<int32_T, 1U> &p, int32_T *rank,
+                        ::coder::array<real_T, 1U> &work);
 
-static inline void rrqr_qmulti(const ::coder::array<real_T, 2U> &QR,
-                               ::coder::SizeType m, ::coder::SizeType n,
-                               ::coder::SizeType rank,
-                               ::coder::array<real_T, 2U> &bs,
-                               ::coder::SizeType nrhs,
-                               ::coder::array<real_T, 1U> &work);
+static inline
+void rrqr_qmulti(const ::coder::array<real_T, 2U> &QR, ::coder::SizeType m,
+                        ::coder::SizeType n, ::coder::SizeType rank, ::coder::array<real_T, 2U> &bs,
+                        ::coder::SizeType nrhs, ::coder::array<real_T, 1U> &work);
 
-static inline void rrqr_rtsolve(const ::coder::array<real_T, 2U> &QR,
-                                ::coder::SizeType n, ::coder::SizeType rank,
-                                ::coder::array<real_T, 2U> &bs,
-                                ::coder::SizeType nrhs);
+static inline
+void rrqr_rtsolve(const ::coder::array<real_T, 2U> &QR, ::coder::SizeType n,
+                         ::coder::SizeType rank, ::coder::array<real_T, 2U> &bs,
+                         ::coder::SizeType nrhs);
 
-static inline void sfe1_tabulate_shapefuncs(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe1_tabulate_shapefuncs(::coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_equi_quad(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe2_tabulate_equi_quad(::coder::SizeType etype,
+                                    const ::coder::array<real_T, 2U> &cs,
+                                    ::coder::array<real_T, 2U> &sfvals,
+                                    ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_equi_tri(::coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe2_tabulate_equi_tri(::coder::SizeType etype,
+                                   const ::coder::array<real_T, 2U> &cs,
+                                   ::coder::array<real_T, 2U> &sfvals,
+                                   ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_fek_tri(::coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe2_tabulate_fek_tri(::coder::SizeType etype,
+                                  const ::coder::array<real_T, 2U> &cs,
+                                  ::coder::array<real_T, 2U> &sfvals,
+                                  ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_gl_quad(::coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe2_tabulate_gl_quad(::coder::SizeType etype,
+                                  const ::coder::array<real_T, 2U> &cs,
+                                  ::coder::array<real_T, 2U> &sfvals,
+                                  ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_gl_tri(::coder::SizeType etype,
-                                        const ::coder::array<real_T, 2U> &cs,
-                                        ::coder::array<real_T, 2U> &sfvals,
-                                        ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe2_tabulate_gl_tri(::coder::SizeType etype,
+                                 const ::coder::array<real_T, 2U> &cs,
+                                 ::coder::array<real_T, 2U> &sfvals,
+                                 ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_shapefuncs(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe2_tabulate_shapefuncs(::coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_equi_hexa(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_equi_hexa(::coder::SizeType etype,
+                                    const ::coder::array<real_T, 2U> &cs,
+                                    ::coder::array<real_T, 2U> &sfvals,
+                                    ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_equi_prism(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_equi_prism(::coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_equi_pyra(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_equi_pyra(::coder::SizeType etype,
+                                    const ::coder::array<real_T, 2U> &cs,
+                                    ::coder::array<real_T, 2U> &sfvals,
+                                    ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_equi_tet(::coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_equi_tet(::coder::SizeType etype,
+                                   const ::coder::array<real_T, 2U> &cs,
+                                   ::coder::array<real_T, 2U> &sfvals,
+                                   ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_gl_hexa(::coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_gl_hexa(::coder::SizeType etype,
+                                  const ::coder::array<real_T, 2U> &cs,
+                                  ::coder::array<real_T, 2U> &sfvals,
+                                  ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_gl_prism(::coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_gl_prism(::coder::SizeType etype,
+                                   const ::coder::array<real_T, 2U> &cs,
+                                   ::coder::array<real_T, 2U> &sfvals,
+                                   ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_gl_pyra(::coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_gl_pyra(::coder::SizeType etype,
+                                  const ::coder::array<real_T, 2U> &cs,
+                                  ::coder::array<real_T, 2U> &sfvals,
+                                  ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_gl_tet(::coder::SizeType etype,
-                                        const ::coder::array<real_T, 2U> &cs,
-                                        ::coder::array<real_T, 2U> &sfvals,
-                                        ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_gl_tet(::coder::SizeType etype,
+                                 const ::coder::array<real_T, 2U> &cs,
+                                 ::coder::array<real_T, 2U> &sfvals,
+                                 ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_shapefuncs(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
+static inline
+void sfe3_tabulate_shapefuncs(::coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe_init(SfeObject *sfe, ::coder::SizeType etypes,
-                            const ::coder::array<real_T, 2U> &xs);
+static inline
+void sfe_init(SfeObject *sfe, const ::coder::array<real_T, 2U> &xs);
 
-static inline void sfe_init(SfeObject *sfe,
-                            const ::coder::array<real_T, 2U> &xs);
+static inline
+void sfe_init(SfeObject *sfe, ::coder::SizeType etypes,
+                     const ::coder::array<real_T, 2U> &xs);
 
-static inline void
+static inline
+void
 sfemesh_determine_bndnodes(const ::coder::array<real_T, 2U> &mesh_coords,
                            const ::coder::array<ConnData, 1U> &mesh_elemtables,
                            const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
                            ::coder::array<boolean_T, 1U> &bndtags);
 
-static inline void tabulate_quadratures(::coder::SizeType etype,
-                                        ::coder::SizeType qd,
-                                        ::coder::array<real_T, 2U> &cs,
-                                        ::coder::array<real_T, 1U> &ws);
-
-static inline void tabulate_shapefuncs(::coder::SizeType etype,
-                                       const ::coder::array<real_T, 2U> &cs,
-                                       ::coder::array<real_T, 2U> &sfvals,
-                                       ::coder::array<real_T, 3U> &sdvals);
-
-static inline void tet_20(real_T xi, real_T eta, real_T zeta, real_T sfvals[20],
-                          real_T sdvals[60]);
-
-static inline void tet_35(real_T xi, real_T eta, real_T zeta, real_T sfvals[35],
-                          real_T sdvals[105]);
-
-static inline void tet_56(real_T xi, real_T eta, real_T zeta, real_T sfvals[56],
-                          real_T sdvals[168]);
-
-static inline void tet_84(real_T xi, real_T eta, real_T zeta, real_T sfvals[84],
-                          real_T sdvals[252]);
-
-static inline void tet_gl_20(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[20], real_T sdvals[60]);
-
-static inline void tet_gl_35(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[35], real_T sdvals[105]);
-
-static inline void tri_21(real_T xi, real_T eta, real_T sfvals[21],
-                          real_T sdvals[42]);
-
-static inline void tri_28(real_T xi, real_T eta, real_T sfvals[28],
-                          real_T sdvals[56]);
-
-static inline void tri_fek_15(real_T xi, real_T eta, real_T sfvals[15],
-                              real_T sdvals[30]);
-
-static inline void tri_fek_21(real_T xi, real_T eta, real_T sfvals[21],
-                              real_T sdvals[42]);
-
-static inline void tri_fek_28(real_T xi, real_T eta, real_T sfvals[28],
-                              real_T sdvals[56]);
-
-static inline void tri_gl_21(real_T xi, real_T eta, real_T sfvals[21],
-                             real_T sdvals[42]);
-
-static inline void tri_quadrules(::coder::SizeType degree,
+static inline
+void tabulate_quadratures(::coder::SizeType etype, ::coder::SizeType qd,
                                  ::coder::array<real_T, 2U> &cs,
                                  ::coder::array<real_T, 1U> &ws);
 
-static inline void
-update_osusop(CrsMatrix *A, ::coder::array<int32_T, 1U> &nnzs,
+static inline
+void tabulate_shapefuncs(::coder::SizeType etype,
+                                const ::coder::array<real_T, 2U> &cs,
+                                ::coder::array<real_T, 2U> &sfvals,
+                                ::coder::array<real_T, 3U> &sdvals);
+
+static inline
+void tet_20(real_T xi, real_T eta, real_T zeta, real_T sfvals[20],
+                   real_T sdvals[60]);
+
+static inline
+void tet_35(real_T xi, real_T eta, real_T zeta, real_T sfvals[35],
+                   real_T sdvals[105]);
+
+static inline
+void tet_56(real_T xi, real_T eta, real_T zeta, real_T sfvals[56],
+                   real_T sdvals[168]);
+
+static inline
+void tet_84(real_T xi, real_T eta, real_T zeta, real_T sfvals[84],
+                   real_T sdvals[252]);
+
+static inline
+void tet_gl_20(real_T xi, real_T eta, real_T zeta, real_T sfvals[20],
+                      real_T sdvals[60]);
+
+static inline
+void tet_gl_35(real_T xi, real_T eta, real_T zeta, real_T sfvals[35],
+                      real_T sdvals[105]);
+
+static inline
+void tri_21(real_T xi, real_T eta, real_T sfvals[21], real_T sdvals[42]);
+
+static inline
+void tri_28(real_T xi, real_T eta, real_T sfvals[28], real_T sdvals[56]);
+
+static inline
+void tri_fek_15(real_T xi, real_T eta, real_T sfvals[15],
+                       real_T sdvals[30]);
+
+static inline
+void tri_fek_21(real_T xi, real_T eta, real_T sfvals[21],
+                       real_T sdvals[42]);
+
+static inline
+void tri_fek_28(real_T xi, real_T eta, real_T sfvals[28],
+                       real_T sdvals[56]);
+
+static inline
+void tri_gl_21(real_T xi, real_T eta, real_T sfvals[21],
+                      real_T sdvals[42]);
+
+static inline
+void tri_quadrules(::coder::SizeType degree, ::coder::array<real_T, 2U> &cs,
+                          ::coder::array<real_T, 1U> &ws);
+
+static inline
+void
+update_osusop(CrsMatrixD *A, ::coder::array<int32_T, 1U> &nnzs,
               const ::coder::array<real_T, 2U> &mesh_coords,
               const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
               const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
               const ::coder::array<Stencils, 1U> &mesh_stencils,
               ::coder::SizeType stclid);
 
-static inline void
-wls_buhmann_weights(const ::coder::array<real_T, 2U> &us,
-                    ::coder::SizeType npoints, ::coder::SizeType degree,
-                    const ::coder::array<real_T, 1U> &params_sh,
-                    const ::coder::array<real_T, 2U> &params_pw,
-                    ::coder::array<real_T, 1U> &ws);
+static inline
+void wls_buhmann_weights(const ::coder::array<real_T, 2U> &us,
+                                ::coder::SizeType npoints, ::coder::SizeType degree,
+                                const ::coder::array<real_T, 1U> &params_sh,
+                                const ::coder::array<real_T, 2U> &params_pw,
+                                ::coder::array<real_T, 1U> &ws);
 
-static inline void
-wls_eno_weights(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
-                ::coder::SizeType degree,
-                const ::coder::array<real_T, 2U> &us_unscaled,
-                const ::coder::array<real_T, 1U> &params_sh,
-                const ::coder::array<real_T, 2U> &params_pw,
-                ::coder::array<real_T, 1U> &ws);
+static inline
+void wls_eno_weights(const ::coder::array<real_T, 2U> &us,
+                            ::coder::SizeType npoints, ::coder::SizeType degree,
+                            const ::coder::array<real_T, 2U> &us_unscaled,
+                            const ::coder::array<real_T, 1U> &params_sh,
+                            const ::coder::array<real_T, 2U> &params_pw,
+                            ::coder::array<real_T, 1U> &ws);
 
-static inline void wls_func(WlsObject *wls,
-                            const ::coder::array<real_T, 2U> &eval_pnts,
-                            ::coder::array<real_T, 2U> &varargout_1);
+static inline
+void wls_func(WlsObject *wls,
+                     const ::coder::array<real_T, 2U> &eval_pnts,
+                     ::coder::array<real_T, 2U> &varargout_1);
 
-static inline void
-wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
-         const ::coder::array<char_T, 2U> &weight_name,
-         const ::coder::array<real_T, 1U> &weight_params_shared,
-         const ::coder::array<real_T, 2U> &weight_params_pointwise,
-         const ::coder::array<boolean_T, 1U> &weight_omit_rows,
-         ::coder::SizeType degree, ::coder::SizeType interp0,
-         ::coder::SizeType nstpnts);
+static inline
+void wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
+                     const ::coder::array<char_T, 2U> &weight_name,
+                     const ::coder::array<real_T, 1U> &weight_params_shared,
+                     const ::coder::array<real_T, 2U> &weight_params_pointwise,
+                     const ::coder::array<boolean_T, 1U> &weight_omit_rows,
+                     ::coder::SizeType degree, ::coder::SizeType interp0, ::coder::SizeType nstpnts);
 
-static inline void
-wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
-                    ::coder::SizeType npoints, ::coder::SizeType degree,
-                    const ::coder::array<real_T, 1U> &params_sh,
-                    const ::coder::array<real_T, 2U> &params_pw,
-                    ::coder::array<real_T, 1U> &ws);
+static inline
+void wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
+                                ::coder::SizeType npoints, ::coder::SizeType degree,
+                                const ::coder::array<real_T, 1U> &params_sh,
+                                const ::coder::array<real_T, 2U> &params_pw,
+                                ::coder::array<real_T, 1U> &ws);
 
-static inline void wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
-                                       ::coder::SizeType npoints, real_T degree,
-                                       ::coder::array<real_T, 1U> &ws);
+static inline
+void wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
+                                ::coder::SizeType npoints, real_T degree,
+                                ::coder::array<real_T, 1U> &ws);
 
-static inline void wls_kernel(WlsObject *wls,
-                              const ::coder::array<real_T, 2U> &eval_pnts,
-                              ::coder::array<real_T, 2U> &vdops);
+static inline
+void wls_kernel(WlsObject *wls,
+                       const ::coder::array<real_T, 2U> &eval_pnts,
+                       ::coder::array<real_T, 2U> &vdops);
 
-static inline void wls_resize(WlsObject *wls, ::coder::SizeType dim,
-                              ::coder::SizeType nstpnts,
-                              ::coder::SizeType degree);
+static inline
+void wls_resize(WlsObject *wls, ::coder::SizeType dim, ::coder::SizeType nstpnts,
+                       ::coder::SizeType degree);
 
-static inline void wls_solve_sys(WlsObject *wls,
-                                 ::coder::array<real_T, 2U> &vdops);
+static inline
+void wls_solve_sys(WlsObject *wls, ::coder::array<real_T, 2U> &vdops);
 
-static inline void wls_update_rhs(WlsObject *wls);
+static inline
+void wls_update_rhs(WlsObject *wls);
 
-static inline void wlsmesh_compute_1ring(WlsMesh *mesh);
+static inline
+void wlsmesh_compute_1ring(WlsMesh *mesh);
 
-static inline void wlsmesh_compute_meshprop(WlsMesh *mesh,
-                                            ::coder::SizeType nrmidx);
+static inline
+void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx);
 
-static inline void wlsmesh_compute_nodeparts(WlsMesh *mesh,
-                                             ::coder::SizeType nparts);
+static inline
+void wlsmesh_compute_nodeparts(WlsMesh *mesh, ::coder::SizeType nparts);
 
-static inline void wlsmesh_compute_stencils(WlsMesh *mesh,
-                                            ::coder::SizeType stclidx,
-                                            real_T krings);
+static inline
+void wlsmesh_compute_stencils(WlsMesh *mesh, ::coder::SizeType stclidx);
 
-static inline void wlsmesh_compute_stencils(WlsMesh *mesh,
-                                            ::coder::SizeType stclidx);
+static inline
+void wlsmesh_compute_stencils(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                     real_T krings);
 
 } // namespace rdi_kernel
 
@@ -952,14 +1082,15 @@ static ::coder::SizeType append_wlsmesh_kring(WlsMesh *mesh)
 }
 
 // assemble_body - Interior body assembly for OSUS operator
-static inline void
+static inline
+void
 assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
               const ::coder::array<ConnData, 1U> &mesh_elemtables,
               const ::coder::array<uint64_T, 1U> &mesh_teids,
               const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
               const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-              const ::coder::array<Stencils, 1U> &mesh_stencils,
-              ::coder::SizeType stclid, boolean_T interp0)
+              const ::coder::array<Stencils, 1U> &mesh_stencils, ::coder::SizeType stclid,
+              boolean_T interp0)
 {
   if ((stclid != rdi->stclid) && (stclid != rdi->extstclid)) {
     m2cErrMsgIdAndTxt("assemble_body:badStencilID", "bad stencil ID (index) %d",
@@ -997,9 +1128,8 @@ assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                     const ::coder::array<int64_T, 1U> &n2e_row_ptr,
                     const ::coder::array<int32_T, 1U> &n2e_col_ind,
                     ::coder::SizeType degree, boolean_T interp0,
-                    const ::coder::array<int32_T, 1U> &nrange,
-                    ::coder::SizeType istart, ::coder::SizeType iend,
-                    ::coder::array<real_T, 1U> &val,
+                    const ::coder::array<int32_T, 1U> &nrange, ::coder::SizeType istart,
+                    ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
                     ::coder::array<boolean_T, 1U> &rdtags, boolean_T *fullrank)
 {
   static const char_T name[7]{'B', 'u', 'h', 'm', 'a', 'n', 'n'};
@@ -1070,8 +1200,7 @@ assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
       xs_[i] = 0.0;
     }
     for (c_i = 2L; c_i - 1L <= n; c_i++) {
-      k = stcl_col_ind[static_cast<::coder::SizeType>(
-                           (stcl_row_ptr[nid] + c_i) - 2L) -
+      k = stcl_col_ind[static_cast<::coder::SizeType>((stcl_row_ptr[nid] + c_i) - 2L) -
                        1];
       nodes_[c_i - 1] = k;
       for (::coder::SizeType j{0}; j < dim; j++) {
@@ -1082,13 +1211,12 @@ assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
     }
     //  Compute wls
     wls_init(&wls_, xs_, wgts__name, wgts__params_shared,
-             wgts__params_pointwise, wgts__omit_rows, degree, interp0,
-             xs_.size(0));
+             wgts__params_pointwise, wgts__omit_rows, degree,
+             interp0, xs_.size(0));
     if (wls_.rank < 0) {
       //  LAPACK error
       m2cErrMsgIdAndTxt("assemble_body_range:badLapack",
-                        "LAPACK error code %d for node %d", wls_.rank,
-                        (int)nid + 1);
+                        "LAPACK error code %d for node %d", wls_.rank, (int)nid + 1);
     }
     if (!wls_.fullrank) {
       //  Not full rank
@@ -1111,8 +1239,7 @@ assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
         ::coder::SizeType eid;
         ::coder::SizeType leid;
         ::coder::SizeType npe;
-        eid = n2e_col_ind[static_cast<::coder::SizeType>(
-                              (n2e_row_ptr[nid] + b_j) - 1L) -
+        eid = n2e_col_ind[static_cast<::coder::SizeType>((n2e_row_ptr[nid] + b_j) - 1L) -
                           1] -
               1;
         eids_[b_j - 1] = eid + 1;
@@ -1129,31 +1256,38 @@ assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                  1]
                     .conn.size(1);
         Ns_[b_j - 1] =
-            1.0 / static_cast<real_T>(mesh_elemtables[c - 1].conn.size(1));
+            1.0 /
+            static_cast<real_T>(
+                mesh_elemtables[c - 1].conn.size(1));
         //  Compute localized center
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] = mesh_coords
               [k + mesh_coords.size(1) *
                        (mesh_elemtables[c - 1]
-                            .conn[mesh_elemtables[c - 1].conn.size(1) * leid] -
+                            .conn[mesh_elemtables[c - 1]
+                                      .conn.size(1) *
+                                  leid] -
                         1)];
         }
         for (::coder::SizeType d_i{2}; d_i <= npe; d_i++) {
           for (k = 0; k <= b_dim; k++) {
             xs_[k + xs_.size(1) * (b_j - 1)] =
                 xs_[k + xs_.size(1) * (b_j - 1)] +
-                mesh_coords[k + mesh_coords.size(1) *
-                                    (mesh_elemtables[c - 1]
-                                         .conn[(d_i + mesh_elemtables[c - 1]
-                                                              .conn.size(1) *
-                                                          leid) -
-                                               1] -
-                                     1)];
+                mesh_coords
+                    [k + mesh_coords.size(1) *
+                             (mesh_elemtables[c - 1].conn
+                                  [(d_i +
+                                    mesh_elemtables[c - 1]
+                                            .conn.size(1) *
+                                        leid) -
+                                   1] -
+                              1)];
           }
         }
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] =
-              xs_[k + xs_.size(1) * (b_j - 1)] * Ns_[b_j - 1] -
+              xs_[k + xs_.size(1) * (b_j - 1)] *
+                  Ns_[b_j - 1] -
               mesh_coords[k + mesh_coords.size(1) * nid];
         }
       }
@@ -1197,7 +1331,9 @@ assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
               }
             }
           }
-          val[b_k - 1] = val[b_k - 1] + coeffs_[j + coeffs_.size(1) * d_i];
+          val[b_k - 1] =
+              val[b_k - 1] +
+              coeffs_[j + coeffs_.size(1) * d_i];
         }
       }
     }
@@ -1264,8 +1400,8 @@ assemble_surf(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
               const ::coder::array<NormalsData, 1U> &mesh_nrmstables,
               const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
               const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-              const ::coder::array<Stencils, 1U> &mesh_stencils,
-              ::coder::SizeType stclid, boolean_T interp0)
+              const ::coder::array<Stencils, 1U> &mesh_stencils, ::coder::SizeType stclid,
+              boolean_T interp0)
 {
   ::coder::SizeType nrmid;
   if ((stclid != rdi->stclid) && (stclid != rdi->extstclid)) {
@@ -1304,11 +1440,10 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                     const ::coder::array<int32_T, 1U> &stcl_col_ind,
                     const ::coder::array<int64_T, 1U> &n2e_row_ptr,
                     const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                    const ::coder::array<real_T, 2U> &nrms,
-                    ::coder::SizeType degree, boolean_T interp0,
-                    const ::coder::array<int32_T, 1U> &nrange,
-                    ::coder::SizeType istart, ::coder::SizeType iend,
-                    ::coder::array<real_T, 1U> &val,
+                    const ::coder::array<real_T, 2U> &nrms, ::coder::SizeType degree,
+                    boolean_T interp0,
+                    const ::coder::array<int32_T, 1U> &nrange, ::coder::SizeType istart,
+                    ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
                     ::coder::array<boolean_T, 1U> &rdtags, boolean_T *fullrank)
 {
   static const char_T name[7]{'B', 'u', 'h', 'm', 'a', 'n', 'n'};
@@ -1324,11 +1459,9 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
   ::coder::array<boolean_T, 1U> wgts__omit_rows;
   WlsObject wls_;
   real_T t_data[6];
-  ::coder::SizeType b_i;
   ::coder::SizeType dim;
   ::coder::SizeType loop_ub;
   ::coder::SizeType sigma_tmp;
-  ::coder::SizeType t_size_idx_1;
   wls_.degree = degree;
   wls_.nstpnts = 0;
   wls_.order = 0;
@@ -1362,8 +1495,6 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
   if (istart <= iend) {
     dim = mesh_coords.size(1);
     loop_ub = mesh_coords.size(1);
-    t_size_idx_1 = nrms.size(1) - 1;
-    b_i = nrms.size(1);
   }
   for (::coder::SizeType i{istart}; i <= iend; i++) {
     int64_T n;
@@ -1372,6 +1503,7 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     ::coder::SizeType k;
     ::coder::SizeType nid;
     ::coder::SizeType npoints;
+    ::coder::SizeType t_size_idx_1;
     if (nrange.size(0) == 0) {
       nid = i - 1;
     } else {
@@ -1385,20 +1517,20 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     for (sigma_tmp = 0; sigma_tmp < loop_ub; sigma_tmp++) {
       xs_[sigma_tmp] = 0.0;
     }
-    for (int64_T c_i{2L}; c_i - 1L <= n; c_i++) {
-      k = stcl_col_ind[static_cast<::coder::SizeType>(
-                           (stcl_row_ptr[nid] + c_i) - 2L) -
+    for (int64_T b_i{2L}; b_i - 1L <= n; b_i++) {
+      k = stcl_col_ind[static_cast<::coder::SizeType>((stcl_row_ptr[nid] + b_i) - 2L) -
                        1];
-      nodes_[c_i - 1] = k;
+      nodes_[b_i - 1] = k;
       for (::coder::SizeType j{0}; j < dim; j++) {
-        xs_[j + xs_.size(1) * (c_i - 1)] =
+        xs_[j + xs_.size(1) * (b_i - 1)] =
             mesh_coords[j + mesh_coords.size(1) * (k - 1)] -
             mesh_coords[j + mesh_coords.size(1) * nid];
       }
     }
     npoints = xs_.size(0);
     //  Get normal direction
-    if (b_i == 2) {
+    t_size_idx_1 = nrms.size(1) - 1;
+    if (nrms.size(1) == 2) {
       t_data[0] = -nrms[nrms.size(1) * nid + 1];
       t_data[t_size_idx_1] = nrms[nrms.size(1) * nid];
     } else {
@@ -1471,13 +1603,12 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     }
     //  Compute wls
     wls_init(&wls_, us_, wgts__name, wgts__params_shared,
-             wgts__params_pointwise, wgts__omit_rows, degree, interp0,
-             xs_.size(0));
+             wgts__params_pointwise, wgts__omit_rows, degree,
+             interp0, xs_.size(0));
     if (wls_.rank < 0) {
       //  LAPACK error
       m2cErrMsgIdAndTxt("assemble_surf_range:badLapack",
-                        "LAPACK error code %d for node %d", wls_.rank,
-                        (int)nid + 1);
+                        "LAPACK error code %d for node %d", wls_.rank, (int)nid + 1);
     }
     if (!wls_.fullrank) {
       //  Not full rank
@@ -1499,8 +1630,7 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
         ::coder::SizeType eid;
         ::coder::SizeType leid;
         ::coder::SizeType npe;
-        eid = n2e_col_ind[static_cast<::coder::SizeType>(
-                              (n2e_row_ptr[nid] + b_j) - 1L) -
+        eid = n2e_col_ind[static_cast<::coder::SizeType>((n2e_row_ptr[nid] + b_j) - 1L) -
                           1] -
               1;
         eids_[b_j - 1] = eid + 1;
@@ -1517,31 +1647,38 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                  1]
                     .conn.size(1);
         Ns_[b_j - 1] =
-            1.0 / static_cast<real_T>(mesh_elemtables[c - 1].conn.size(1));
+            1.0 /
+            static_cast<real_T>(
+                mesh_elemtables[c - 1].conn.size(1));
         //  Compute localized center
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] = mesh_coords
               [k + mesh_coords.size(1) *
                        (mesh_elemtables[c - 1]
-                            .conn[mesh_elemtables[c - 1].conn.size(1) * leid] -
+                            .conn[mesh_elemtables[c - 1]
+                                      .conn.size(1) *
+                                  leid] -
                         1)];
         }
-        for (::coder::SizeType d_i{2}; d_i <= npe; d_i++) {
+        for (::coder::SizeType c_i{2}; c_i <= npe; c_i++) {
           for (k = 0; k <= b_dim; k++) {
             xs_[k + xs_.size(1) * (b_j - 1)] =
                 xs_[k + xs_.size(1) * (b_j - 1)] +
-                mesh_coords[k + mesh_coords.size(1) *
-                                    (mesh_elemtables[c - 1]
-                                         .conn[(d_i + mesh_elemtables[c - 1]
-                                                              .conn.size(1) *
-                                                          leid) -
-                                               1] -
-                                     1)];
+                mesh_coords
+                    [k + mesh_coords.size(1) *
+                             (mesh_elemtables[c - 1].conn
+                                  [(c_i +
+                                    mesh_elemtables[c - 1]
+                                            .conn.size(1) *
+                                        leid) -
+                                   1] -
+                              1)];
           }
         }
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] =
-              xs_[k + xs_.size(1) * (b_j - 1)] * Ns_[b_j - 1] -
+              xs_[k + xs_.size(1) * (b_j - 1)] *
+                  Ns_[b_j - 1] -
               mesh_coords[k + mesh_coords.size(1) * nid];
         }
       }
@@ -1586,15 +1723,17 @@ assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
       for (::coder::SizeType j{0}; j < b_n; j++) {
         ::coder::SizeType r;
         r = eids_[j];
-        for (::coder::SizeType d_i{0}; d_i < b_m; d_i++) {
+        for (::coder::SizeType c_i{0}; c_i < b_m; c_i++) {
           int64_T b_k;
           b_k = 0L;
           if (r < row_ptr.size(0)) {
             //  Perform linear search
             b_k =
-                m2cFind(col_ind, nodes_[d_i], row_ptr[r - 1], row_ptr[r] - 1L);
+                m2cFind(col_ind, nodes_[c_i], row_ptr[r - 1], row_ptr[r] - 1L);
           }
-          val[b_k - 1] = val[b_k - 1] + coeffs_[j + coeffs_.size(1) * d_i];
+          val[b_k - 1] =
+              val[b_k - 1] +
+              coeffs_[j + coeffs_.size(1) * c_i];
         }
       }
     }
@@ -1680,7 +1819,8 @@ static ::coder::SizeType b_append_wlsmesh_kring(WlsMesh *mesh)
   return stclidx;
 }
 
-static inline void
+static inline
+void
 b_assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 const ::coder::array<uint64_T, 1U> &mesh_teids,
@@ -1688,8 +1828,7 @@ b_assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
                 const ::coder::array<Stencils, 1U> &mesh_stencils,
                 const ::coder::array<Omp4mPart, 1U> &mesh_nodeparts,
-                ::coder::SizeType stclid, boolean_T interp0,
-                ::coder::SizeType varargin_2)
+                ::coder::SizeType stclid, boolean_T interp0, ::coder::SizeType varargin_2)
 {
   if ((stclid != rdi->stclid) && (stclid != rdi->extstclid)) {
     m2cErrMsgIdAndTxt("assemble_body:badStencilID", "bad stencil ID (index) %d",
@@ -1753,20 +1892,18 @@ b_assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
   }
 }
 
-static boolean_T
-b_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
-                      const ::coder::array<int32_T, 1U> &col_ind,
-                      const ::coder::array<real_T, 2U> &mesh_coords,
-                      const ::coder::array<ConnData, 1U> &mesh_elemtables,
-                      const ::coder::array<uint64_T, 1U> &mesh_teids,
-                      const ::coder::array<int64_T, 1U> &stcl_row_ptr,
-                      const ::coder::array<int32_T, 1U> &stcl_col_ind,
-                      const ::coder::array<int64_T, 1U> &n2e_row_ptr,
-                      const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                      ::coder::SizeType degree, boolean_T interp0,
-                      const ::coder::array<int32_T, 1U> &nrange,
-                      ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
-                      ::coder::array<boolean_T, 1U> &rdtags)
+static boolean_T b_assemble_body_range(
+    const ::coder::array<int64_T, 1U> &row_ptr,
+    const ::coder::array<int32_T, 1U> &col_ind,
+    const ::coder::array<real_T, 2U> &mesh_coords,
+    const ::coder::array<ConnData, 1U> &mesh_elemtables,
+    const ::coder::array<uint64_T, 1U> &mesh_teids,
+    const ::coder::array<int64_T, 1U> &stcl_row_ptr,
+    const ::coder::array<int32_T, 1U> &stcl_col_ind,
+    const ::coder::array<int64_T, 1U> &n2e_row_ptr,
+    const ::coder::array<int32_T, 1U> &n2e_col_ind, ::coder::SizeType degree,
+    boolean_T interp0, const ::coder::array<int32_T, 1U> &nrange, ::coder::SizeType iend,
+    ::coder::array<real_T, 1U> &val, ::coder::array<boolean_T, 1U> &rdtags)
 {
   static const char_T name[7]{'B', 'u', 'h', 'm', 'a', 'n', 'n'};
   ::coder::array<real_T, 2U> coeffs_;
@@ -1850,13 +1987,12 @@ b_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
     }
     //  Compute wls
     wls_init(&wls_, xs_, wgts__name, wgts__params_shared,
-             wgts__params_pointwise, wgts__omit_rows, degree, interp0,
-             xs_.size(0));
+             wgts__params_pointwise, wgts__omit_rows, degree,
+             interp0, xs_.size(0));
     if (wls_.rank < 0) {
       //  LAPACK error
       m2cErrMsgIdAndTxt("assemble_body_range:badLapack",
-                        "LAPACK error code %d for node %d", wls_.rank,
-                        (int)nid);
+                        "LAPACK error code %d for node %d", wls_.rank, (int)nid);
     }
     if (!wls_.fullrank) {
       //  Not full rank
@@ -1880,9 +2016,7 @@ b_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
         ::coder::SizeType eid;
         ::coder::SizeType leid;
         ::coder::SizeType npe;
-        eid = n2e_col_ind[static_cast<::coder::SizeType>((n_tmp + b_j) - 1L) -
-                          1] -
-              1;
+        eid = n2e_col_ind[static_cast<::coder::SizeType>((n_tmp + b_j) - 1L) - 1] - 1;
         eids_[b_j - 1] = eid + 1;
         c = mesh_teids[eid] & 255UL;
         leid = (mesh_teids[eid] >> 8) - 1;
@@ -1897,31 +2031,38 @@ b_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                    1]
                       .conn.size(1);
         Ns_[b_j - 1] =
-            1.0 / static_cast<real_T>(mesh_elemtables[c - 1].conn.size(1));
+            1.0 /
+            static_cast<real_T>(
+                mesh_elemtables[c - 1].conn.size(1));
         //  Compute localized center
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] = mesh_coords
               [k + mesh_coords.size(1) *
                        (mesh_elemtables[c - 1]
-                            .conn[mesh_elemtables[c - 1].conn.size(1) * leid] -
+                            .conn[mesh_elemtables[c - 1]
+                                      .conn.size(1) *
+                                  leid] -
                         1)];
         }
         for (::coder::SizeType d_i{2}; d_i <= npe; d_i++) {
           for (k = 0; k <= b_dim; k++) {
             xs_[k + xs_.size(1) * (b_j - 1)] =
                 xs_[k + xs_.size(1) * (b_j - 1)] +
-                mesh_coords[k + mesh_coords.size(1) *
-                                    (mesh_elemtables[c - 1]
-                                         .conn[(d_i + mesh_elemtables[c - 1]
-                                                              .conn.size(1) *
-                                                          leid) -
-                                               1] -
-                                     1)];
+                mesh_coords
+                    [k + mesh_coords.size(1) *
+                             (mesh_elemtables[c - 1].conn
+                                  [(d_i +
+                                    mesh_elemtables[c - 1]
+                                            .conn.size(1) *
+                                        leid) -
+                                   1] -
+                              1)];
           }
         }
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] =
-              xs_[k + xs_.size(1) * (b_j - 1)] * Ns_[b_j - 1] -
+              xs_[k + xs_.size(1) * (b_j - 1)] *
+                  Ns_[b_j - 1] -
               mesh_coords[k + mesh_coords.size(1) * (nid - 1)];
         }
       }
@@ -1965,7 +2106,9 @@ b_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
               }
             }
           }
-          val[b_k - 1] = val[b_k - 1] + coeffs_[j + coeffs_.size(1) * d_i];
+          val[b_k - 1] =
+              val[b_k - 1] +
+              coeffs_[j + coeffs_.size(1) * d_i];
         }
       }
     }
@@ -1982,8 +2125,7 @@ b_assemble_surf(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
                 const ::coder::array<Stencils, 1U> &mesh_stencils,
                 const ::coder::array<Omp4mPart, 1U> &mesh_nodeparts,
-                ::coder::SizeType stclid, boolean_T interp0,
-                ::coder::SizeType varargin_2)
+                ::coder::SizeType stclid, boolean_T interp0, ::coder::SizeType varargin_2)
 {
   ::coder::SizeType nrmid;
   if ((stclid != rdi->stclid) && (stclid != rdi->extstclid)) {
@@ -2051,21 +2193,19 @@ b_assemble_surf(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
   }
 }
 
-static boolean_T
-b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
-                      const ::coder::array<int32_T, 1U> &col_ind,
-                      const ::coder::array<real_T, 2U> &mesh_coords,
-                      const ::coder::array<ConnData, 1U> &mesh_elemtables,
-                      const ::coder::array<uint64_T, 1U> &mesh_teids,
-                      const ::coder::array<int64_T, 1U> &stcl_row_ptr,
-                      const ::coder::array<int32_T, 1U> &stcl_col_ind,
-                      const ::coder::array<int64_T, 1U> &n2e_row_ptr,
-                      const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                      const ::coder::array<real_T, 2U> &nrms,
-                      ::coder::SizeType degree, boolean_T interp0,
-                      const ::coder::array<int32_T, 1U> &nrange,
-                      ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
-                      ::coder::array<boolean_T, 1U> &rdtags)
+static boolean_T b_assemble_surf_range(
+    const ::coder::array<int64_T, 1U> &row_ptr,
+    const ::coder::array<int32_T, 1U> &col_ind,
+    const ::coder::array<real_T, 2U> &mesh_coords,
+    const ::coder::array<ConnData, 1U> &mesh_elemtables,
+    const ::coder::array<uint64_T, 1U> &mesh_teids,
+    const ::coder::array<int64_T, 1U> &stcl_row_ptr,
+    const ::coder::array<int32_T, 1U> &stcl_col_ind,
+    const ::coder::array<int64_T, 1U> &n2e_row_ptr,
+    const ::coder::array<int32_T, 1U> &n2e_col_ind,
+    const ::coder::array<real_T, 2U> &nrms, ::coder::SizeType degree, boolean_T interp0,
+    const ::coder::array<int32_T, 1U> &nrange, ::coder::SizeType iend,
+    ::coder::array<real_T, 1U> &val, ::coder::array<boolean_T, 1U> &rdtags)
 {
   static const char_T name[7]{'B', 'u', 'h', 'm', 'a', 'n', 'n'};
   ::coder::array<real_T, 2U> coeffs_;
@@ -2080,11 +2220,9 @@ b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
   ::coder::array<boolean_T, 1U> wgts__omit_rows;
   WlsObject wls_;
   real_T t_data[6];
-  ::coder::SizeType b_i;
   ::coder::SizeType dim;
   ::coder::SizeType loop_ub;
   ::coder::SizeType sigma_tmp;
-  ::coder::SizeType t_size_idx_1;
   boolean_T fullrank;
   fullrank = true;
   wls_.degree = degree;
@@ -2120,8 +2258,6 @@ b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
   if (iend >= 1) {
     dim = mesh_coords.size(1);
     loop_ub = mesh_coords.size(1);
-    t_size_idx_1 = nrms.size(1) - 1;
-    b_i = nrms.size(1);
   }
   for (::coder::SizeType i{1}; i <= iend; i++) {
     int64_T n;
@@ -2131,6 +2267,7 @@ b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     ::coder::SizeType k;
     ::coder::SizeType nid;
     ::coder::SizeType npoints;
+    ::coder::SizeType t_size_idx_1;
     if (nrange.size(0) == 0) {
       nid = i - 1;
     } else {
@@ -2145,18 +2282,19 @@ b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     for (sigma_tmp = 0; sigma_tmp < loop_ub; sigma_tmp++) {
       xs_[sigma_tmp] = 0.0;
     }
-    for (int64_T c_i{2L}; c_i - 1L <= n; c_i++) {
-      k = stcl_col_ind[static_cast<::coder::SizeType>((n_tmp + c_i) - 2L) - 1];
-      nodes_[c_i - 1] = k;
+    for (int64_T b_i{2L}; b_i - 1L <= n; b_i++) {
+      k = stcl_col_ind[static_cast<::coder::SizeType>((n_tmp + b_i) - 2L) - 1];
+      nodes_[b_i - 1] = k;
       for (::coder::SizeType j{0}; j < dim; j++) {
-        xs_[j + xs_.size(1) * (c_i - 1)] =
+        xs_[j + xs_.size(1) * (b_i - 1)] =
             mesh_coords[j + mesh_coords.size(1) * (k - 1)] -
             mesh_coords[j + mesh_coords.size(1) * nid];
       }
     }
     npoints = xs_.size(0);
     //  Get normal direction
-    if (b_i == 2) {
+    t_size_idx_1 = nrms.size(1) - 1;
+    if (nrms.size(1) == 2) {
       t_data[0] = -nrms[nrms.size(1) * nid + 1];
       t_data[t_size_idx_1] = nrms[nrms.size(1) * nid];
     } else {
@@ -2229,13 +2367,12 @@ b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     }
     //  Compute wls
     wls_init(&wls_, us_, wgts__name, wgts__params_shared,
-             wgts__params_pointwise, wgts__omit_rows, degree, interp0,
-             xs_.size(0));
+             wgts__params_pointwise, wgts__omit_rows, degree,
+             interp0, xs_.size(0));
     if (wls_.rank < 0) {
       //  LAPACK error
       m2cErrMsgIdAndTxt("assemble_surf_range:badLapack",
-                        "LAPACK error code %d for node %d", wls_.rank,
-                        (int)nid + 1);
+                        "LAPACK error code %d for node %d", wls_.rank, (int)nid + 1);
     }
     if (!wls_.fullrank) {
       //  Not full rank
@@ -2257,8 +2394,7 @@ b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
         ::coder::SizeType eid;
         ::coder::SizeType leid;
         ::coder::SizeType npe;
-        eid = n2e_col_ind[static_cast<::coder::SizeType>(
-                              (n2e_row_ptr[nid] + b_j) - 1L) -
+        eid = n2e_col_ind[static_cast<::coder::SizeType>((n2e_row_ptr[nid] + b_j) - 1L) -
                           1] -
               1;
         eids_[b_j - 1] = eid + 1;
@@ -2275,31 +2411,38 @@ b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                  1]
                     .conn.size(1);
         Ns_[b_j - 1] =
-            1.0 / static_cast<real_T>(mesh_elemtables[c - 1].conn.size(1));
+            1.0 /
+            static_cast<real_T>(
+                mesh_elemtables[c - 1].conn.size(1));
         //  Compute localized center
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] = mesh_coords
               [k + mesh_coords.size(1) *
                        (mesh_elemtables[c - 1]
-                            .conn[mesh_elemtables[c - 1].conn.size(1) * leid] -
+                            .conn[mesh_elemtables[c - 1]
+                                      .conn.size(1) *
+                                  leid] -
                         1)];
         }
-        for (::coder::SizeType d_i{2}; d_i <= npe; d_i++) {
+        for (::coder::SizeType c_i{2}; c_i <= npe; c_i++) {
           for (k = 0; k <= b_dim; k++) {
             xs_[k + xs_.size(1) * (b_j - 1)] =
                 xs_[k + xs_.size(1) * (b_j - 1)] +
-                mesh_coords[k + mesh_coords.size(1) *
-                                    (mesh_elemtables[c - 1]
-                                         .conn[(d_i + mesh_elemtables[c - 1]
-                                                              .conn.size(1) *
-                                                          leid) -
-                                               1] -
-                                     1)];
+                mesh_coords
+                    [k + mesh_coords.size(1) *
+                             (mesh_elemtables[c - 1].conn
+                                  [(c_i +
+                                    mesh_elemtables[c - 1]
+                                            .conn.size(1) *
+                                        leid) -
+                                   1] -
+                              1)];
           }
         }
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] =
-              xs_[k + xs_.size(1) * (b_j - 1)] * Ns_[b_j - 1] -
+              xs_[k + xs_.size(1) * (b_j - 1)] *
+                  Ns_[b_j - 1] -
               mesh_coords[k + mesh_coords.size(1) * nid];
         }
       }
@@ -2344,20 +2487,90 @@ b_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
       for (::coder::SizeType j{0}; j < b_n; j++) {
         ::coder::SizeType r;
         r = eids_[j];
-        for (::coder::SizeType d_i{0}; d_i < b_m; d_i++) {
+        for (::coder::SizeType c_i{0}; c_i < b_m; c_i++) {
           int64_T b_k;
           b_k = 0L;
           if (r < row_ptr.size(0)) {
             //  Perform linear search
             b_k =
-                m2cFind(col_ind, nodes_[d_i], row_ptr[r - 1], row_ptr[r] - 1L);
+                m2cFind(col_ind, nodes_[c_i], row_ptr[r - 1], row_ptr[r] - 1L);
           }
-          val[b_k - 1] = val[b_k - 1] + coeffs_[j + coeffs_.size(1) * d_i];
+          val[b_k - 1] =
+              val[b_k - 1] +
+              coeffs_[j + coeffs_.size(1) * c_i];
         }
       }
     }
   }
   return fullrank;
+}
+
+static void b_compute_lref(const ::coder::array<real_T, 2U> &mesh_coords,
+                           real_T *lref, real_T *buf1, real_T *buf2)
+{
+  ::coder::SizeType iend;
+  ::coder::SizeType istart;
+  ::coder::SizeType nthreads;
+  ::coder::SizeType u1;
+  //  compute reference length
+  nthreads = 1;
+#ifdef _OPENMP
+  nthreads = omp_get_num_threads();
+#endif // _OPENMP
+  if (nthreads == 1) {
+    istart = 0;
+    iend = mesh_coords.size(0);
+  } else {
+    ::coder::SizeType b_remainder;
+    ::coder::SizeType chunk;
+    ::coder::SizeType threadID;
+    threadID = 0;
+#ifdef _OPENMP
+    threadID = omp_get_thread_num();
+#endif // _OPENMP
+    chunk = mesh_coords.size(0) / nthreads;
+    b_remainder = mesh_coords.size(0) - nthreads * chunk;
+    u1 = threadID;
+    if (b_remainder <= threadID) {
+      u1 = b_remainder;
+    }
+    istart = threadID * chunk + u1;
+    iend = (istart + chunk) + (threadID < b_remainder);
+  }
+  u1 = mesh_coords.size(1);
+  *lref = 0.0;
+  *buf1 = -1.7976931348623157E+308;
+  *buf2 = 1.7976931348623157E+308;
+  for (::coder::SizeType d{0}; d < u1; d++) {
+    real_T lmax;
+    real_T lmin;
+    real_T lref_tmp;
+#pragma omp barrier
+    lmax = -1.7976931348623157E+308;
+    lmin = 1.7976931348623157E+308;
+    for (::coder::SizeType i{istart + 1}; i <= iend; i++) {
+      lref_tmp = mesh_coords[d + mesh_coords.size(1) * (i - 1)];
+      lmax = std::fmax(lmax, lref_tmp);
+      lmin = std::fmin(lmin, lref_tmp);
+    }
+#pragma omp critical
+    { // critical
+      *buf1 = std::fmax(*buf1, lmax);
+      *buf2 = std::fmin(*buf2, lmin);
+    } // critical
+#pragma omp barrier
+#pragma omp single
+    { // single
+      lref_tmp = *buf1 - *buf2;
+      *lref += lref_tmp * lref_tmp;
+    } // single
+    *buf1 = -1.7976931348623157E+308;
+    *buf2 = 1.7976931348623157E+308;
+  }
+#pragma omp single nowait
+  { // single
+    *lref = std::sqrt(*lref);
+  } // single
 }
 
 static void b_compute_stencils_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
@@ -2391,9 +2604,25 @@ static void b_compute_stencils_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
   b_compute_stencils_kernel_2d(mesh, stclidx, krings[0], bounds);
 }
 
-static void b_compute_stencils_kernel_1d(WlsMesh *mesh,
-                                         ::coder::SizeType stclidx, real_T ring,
-                                         const int32_T bounds[2])
+static void b_compute_stencils_3d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                  const real_T krings[4])
+{
+  int32_T bounds[2];
+  bounds[0] = 0;
+  //  Whether to filter stencils by tangent plane
+  bounds[1] = static_cast<::coder::SizeType>(
+      std::round(20.0 * (krings[0] + 0.33333333333333331) *
+                 (krings[0] + 0.66666666666666663) * (krings[0] + 1.0)));
+  //  Ensure that max is no smaller than corresponding min
+  if (bounds[1] <= 0) {
+    bounds[1] = 0;
+  }
+  //  Parallel
+  b_compute_stencils_kernel_3d(mesh, stclidx, krings[0], bounds);
+}
+
+static void b_compute_stencils_kernel_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                         real_T ring, const int32_T bounds[2])
 {
   ::coder::array<uint64_T, 1U> hebuf_;
   ::coder::array<int32_T, 1U> ngbfs_;
@@ -2477,10 +2706,10 @@ static void b_compute_stencils_kernel_1d(WlsMesh *mesh,
   } // single
 #pragma omp single
   { // single
-    mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size(
-        (mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
-    mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size(
-        (mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
+    mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size((
+        mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
+    mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size((
+        mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
     mesh->iwork1.set_size(n);
     mesh->iwork2.set_size(n);
   } // single
@@ -2521,12 +2750,14 @@ static void b_compute_stencils_kernel_1d(WlsMesh *mesh,
     mesh->stencils[stclidx - 1].reflected[i - 1] = reflected;
     mesh->iwork1[i - 1] = nverts;
     for (int64_T j{1L}; j <= nverts; j++) {
-      mesh->stencils[stclidx - 1].ngbverts.col_ind[(vstart + j) - 1] =
+      mesh->stencils[stclidx - 1]
+          .ngbverts.col_ind[(vstart + j) - 1] =
           ngbvs_[j - 1];
     }
     mesh->iwork2[i - 1] = nfaces;
     for (int64_T j{1L}; j <= nfaces; j++) {
-      mesh->stencils[stclidx - 1].ngbelems.col_ind[(estart + j) - 1] =
+      mesh->stencils[stclidx - 1]
+          .ngbelems.col_ind[(estart + j) - 1] =
           ngbfs_[j - 1];
     }
   }
@@ -2543,9 +2774,8 @@ static void b_compute_stencils_kernel_1d(WlsMesh *mesh,
   } // single
 }
 
-static void b_compute_stencils_kernel_2d(WlsMesh *mesh,
-                                         ::coder::SizeType stclidx, real_T ring,
-                                         const int32_T bounds[2])
+static void b_compute_stencils_kernel_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                         real_T ring, const int32_T bounds[2])
 {
   ::coder::array<uint64_T, 1U> hebuf_;
   ::coder::array<int32_T, 1U> ngbfs_;
@@ -2564,7 +2794,6 @@ static void b_compute_stencils_kernel_2d(WlsMesh *mesh,
   boolean_T hadoverflow;
   boolean_T overflow;
   boolean_T reflected;
-  //  Determine total number of vertices
   if (mesh->stencils[stclidx - 1].vidmap.size(0) == 0) {
     n = mesh->coords.size(0);
   } else {
@@ -2630,10 +2859,10 @@ static void b_compute_stencils_kernel_2d(WlsMesh *mesh,
   } // single
 #pragma omp single
   { // single
-    mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size(
-        (mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
-    mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size(
-        (mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
+    mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size((
+        mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
+    mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size((
+        mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
     mesh->iwork1.set_size(n);
     mesh->iwork2.set_size(n);
   } // single
@@ -2679,12 +2908,14 @@ static void b_compute_stencils_kernel_2d(WlsMesh *mesh,
     mesh->stencils[stclidx - 1].reflected[i - 1] = reflected;
     mesh->iwork1[i - 1] = nverts;
     for (int64_T j{1L}; j <= nverts; j++) {
-      mesh->stencils[stclidx - 1].ngbverts.col_ind[(vstart + j) - 1] =
+      mesh->stencils[stclidx - 1]
+          .ngbverts.col_ind[(vstart + j) - 1] =
           ngbvs_[j - 1];
     }
     mesh->iwork2[i - 1] = nfaces;
     for (int64_T j{1L}; j <= nfaces; j++) {
-      mesh->stencils[stclidx - 1].ngbelems.col_ind[(estart + j) - 1] =
+      mesh->stencils[stclidx - 1]
+          .ngbelems.col_ind[(estart + j) - 1] =
           ngbfs_[j - 1];
     }
   }
@@ -2701,7 +2932,173 @@ static void b_compute_stencils_kernel_2d(WlsMesh *mesh,
   } // single
 }
 
-static inline void b_wlsmesh_compute_1ring(WlsMesh *mesh)
+static void b_compute_stencils_kernel_3d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                         real_T ring, const int32_T bounds[2])
+{
+  ::coder::array<uint64_T, 1U> hebuf_;
+  ::coder::array<int32_T, 1U> ngbfs_;
+  ::coder::array<int32_T, 1U> ngbvs_;
+  ::coder::array<boolean_T, 1U> b_mesh;
+  ::coder::array<boolean_T, 1U> buffertags_;
+  ::coder::array<boolean_T, 1U> ftags_;
+  ::coder::array<boolean_T, 1U> vtags_;
+  ::coder::SizeType iend;
+  ::coder::SizeType istart;
+  ::coder::SizeType n;
+  int32_T nfaces;
+  ::coder::SizeType nthreads;
+  int32_T nverts;
+  ::coder::SizeType u0;
+  ::coder::SizeType u1;
+  boolean_T hadoverflow;
+  boolean_T overflow;
+  boolean_T reflected;
+  if (mesh->stencils[stclidx - 1].vidmap.size(0) == 0) {
+    n = mesh->coords.size(0);
+  } else {
+    n = mesh->stencils[stclidx - 1].vidmap.size(0);
+  }
+  //  Determine partitioning
+  nthreads = 1;
+#ifdef _OPENMP
+  nthreads = omp_get_num_threads();
+#endif // _OPENMP
+  if (nthreads == 1) {
+    istart = 1;
+    iend = n;
+  } else {
+    ::coder::SizeType b_remainder;
+    ::coder::SizeType chunk;
+    ::coder::SizeType threadID;
+    threadID = 0;
+#ifdef _OPENMP
+    threadID = omp_get_thread_num();
+#endif // _OPENMP
+    chunk = n / nthreads;
+    b_remainder = n - nthreads * chunk;
+    u1 = threadID;
+    if (b_remainder <= threadID) {
+      u1 = b_remainder;
+    }
+    istart = (threadID * chunk + u1) + 1;
+    iend = ((istart + chunk) + (threadID < b_remainder)) - 1;
+  }
+#pragma omp single
+  { // single
+    mesh->stencils[stclidx - 1].reflected.set_size(n);
+    mesh->stencils[stclidx - 1].ngbverts.row_ptr.set_size(n + 1);
+    mesh->stencils[stclidx - 1].ngbverts.row_ptr[0] = 1L;
+    mesh->stencils[stclidx - 1].ngbverts.ncols = mesh->coords.size(0);
+    mesh->stencils[stclidx - 1].ngbelems.row_ptr.set_size(n + 1);
+    mesh->stencils[stclidx - 1].ngbelems.row_ptr[0] = 1L;
+    mesh->stencils[stclidx - 1].ngbelems.ncols = mesh->teids.size(0);
+  } // single
+  //  Assemble rowptrs
+  for (::coder::SizeType i{istart}; i <= iend; i++) {
+    //  Get vertex ID
+    mesh->stencils[stclidx - 1].ngbverts.row_ptr[i] = bounds[1];
+    mesh->stencils[stclidx - 1].ngbelems.row_ptr[i] = bounds[1] << 1;
+  }
+#pragma omp barrier
+#pragma omp single nowait
+  { // single
+    for (::coder::SizeType i{0}; i < n; i++) {
+      mesh->stencils[stclidx - 1].ngbverts.row_ptr[i + 1] =
+          mesh->stencils[stclidx - 1].ngbverts.row_ptr[i + 1] +
+          mesh->stencils[stclidx - 1].ngbverts.row_ptr[i];
+    }
+  } // single
+#pragma omp single
+  { // single
+    for (::coder::SizeType i{0}; i < n; i++) {
+      mesh->stencils[stclidx - 1].ngbelems.row_ptr[i + 1] =
+          mesh->stencils[stclidx - 1].ngbelems.row_ptr[i + 1] +
+          mesh->stencils[stclidx - 1].ngbelems.row_ptr[i];
+    }
+  } // single
+#pragma omp single
+  { // single
+    mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size((
+        mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
+    mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size((
+        mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
+    mesh->iwork1.set_size(n);
+    mesh->iwork2.set_size(n);
+  } // single
+  //  Local buffers
+  vtags_.set_size(mesh->coords.size(0));
+  u0 = mesh->coords.size(0);
+  for (u1 = 0; u1 < u0; u1++) {
+    vtags_[u1] = false;
+  }
+  ftags_.set_size(mesh->teids.size(0));
+  u0 = mesh->teids.size(0);
+  for (u1 = 0; u1 < u0; u1++) {
+    ftags_[u1] = false;
+  }
+  buffertags_.set_size(mesh->teids.size(0));
+  u0 = mesh->teids.size(0);
+  for (u1 = 0; u1 < u0; u1++) {
+    buffertags_[u1] = false;
+  }
+  // Local buffers with patterns "\w_mesh" are legitimate
+  //  Boundary nodes
+  sfemesh_determine_bndnodes(mesh->coords, mesh->elemtables, mesh->sibhfs,
+                             b_mesh);
+  //  Construct global to local normal mapping
+  hadoverflow = false;
+  //  Loop begins
+  for (::coder::SizeType i{istart}; i <= iend; i++) {
+    int64_T estart;
+    int64_T vstart;
+    ::coder::SizeType vid;
+    vstart = mesh->stencils[stclidx - 1].ngbverts.row_ptr[i - 1] - 1L;
+    estart = mesh->stencils[stclidx - 1].ngbelems.row_ptr[i - 1] - 1L;
+    //  Prevent Coder from creating copies of rowptrs
+    //  Get vertex ID
+    if (mesh->stencils[stclidx - 1].vidmap.size(0) == 0) {
+      vid = i;
+    } else {
+      vid = mesh->stencils[stclidx - 1].vidmap[i - 1];
+    }
+    obtain_nring_3d(mesh->elemtables, mesh->teids, mesh->sibhfs, mesh->v2hfid,
+                    vid, ring, bounds[1], vtags_, ftags_, buffertags_,
+                    mesh->bridges, ngbvs_, &nverts, ngbfs_, &nfaces, hebuf_,
+                    &reflected, &overflow);
+    if ((!hadoverflow) && overflow) {
+      m2cWarnMsgIdAndTxt("obtain_nring_3d:overflow",
+                         "Buffers are too small to contain neighborhood");
+      hadoverflow = true;
+    }
+    mesh->stencils[stclidx - 1].reflected[i - 1] = reflected;
+    mesh->iwork1[i - 1] = nverts;
+    for (int64_T j{1L}; j <= nverts; j++) {
+      mesh->stencils[stclidx - 1]
+          .ngbverts.col_ind[(vstart + j) - 1] =
+          ngbvs_[j - 1];
+    }
+    mesh->iwork2[i - 1] = nfaces;
+    for (int64_T j{1L}; j <= nfaces; j++) {
+      mesh->stencils[stclidx - 1]
+          .ngbelems.col_ind[(estart + j) - 1] =
+          ngbfs_[j - 1];
+    }
+  }
+#pragma omp barrier
+#pragma omp single nowait
+  { // single
+    crs_compress(mesh->stencils[stclidx - 1].ngbverts.row_ptr,
+                 mesh->stencils[stclidx - 1].ngbverts.col_ind, mesh->iwork1);
+  } // single
+#pragma omp single
+  { // single
+    crs_compress(mesh->stencils[stclidx - 1].ngbelems.row_ptr,
+                 mesh->stencils[stclidx - 1].ngbelems.col_ind, mesh->iwork2);
+  } // single
+}
+
+static inline
+void b_wlsmesh_compute_1ring(WlsMesh *mesh)
 {
 #pragma omp single
   { // single
@@ -2717,8 +3114,8 @@ static inline void b_wlsmesh_compute_1ring(WlsMesh *mesh)
   } // single
 }
 
-static inline void b_wlsmesh_compute_meshprop(WlsMesh *mesh,
-                                              ::coder::SizeType nrmidx)
+static inline
+void b_wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
 {
   if (mesh->teids.size(0) == 0) {
     m2cErrMsgIdAndTxt("wlsmesh_compute_meshprop:missingSetup",
@@ -2734,15 +3131,61 @@ static inline void b_wlsmesh_compute_meshprop(WlsMesh *mesh,
                          mesh->elemmeas);
   //  Sizes
   if (mesh->coords.size(1) == mesh->topo_ndims + 1) {
+    ::coder::SizeType last;
     //  Surface
     compute_meshsizes_kernel(mesh->coords, mesh->elemtables, mesh->teids,
                              mesh->node2nodes.row_ptr, mesh->node2nodes.col_ind,
                              mesh->nrmstables[nrmidx - 1].normals, mesh->elemh,
-                             mesh->nodeh, &mesh->globalh);
+                             mesh->nodeh);
+    //  Compute global h
+    last = mesh->elemh.size(0);
+    if (mesh->elemh.size(0) <= 2) {
+      if (mesh->elemh.size(0) == 1) {
+        mesh->globalh = mesh->elemh[0];
+      } else if (mesh->elemh[0] < mesh->elemh[mesh->elemh.size(0) - 1]) {
+        mesh->globalh = mesh->elemh[mesh->elemh.size(0) - 1];
+      } else {
+        mesh->globalh = mesh->elemh[0];
+      }
+    } else {
+      real_T ex;
+      ex = mesh->elemh[0];
+      for (::coder::SizeType k{2}; k <= last; k++) {
+        real_T d;
+        d = mesh->elemh[k - 1];
+        if (ex < d) {
+          ex = d;
+        }
+      }
+      mesh->globalh = ex;
+    }
   } else {
+    ::coder::SizeType last;
     compute_meshsizes_kernel(mesh->coords, mesh->elemtables, mesh->teids,
                              mesh->node2nodes.row_ptr, mesh->node2nodes.col_ind,
-                             mesh->elemh, mesh->nodeh, &mesh->globalh);
+                             mesh->elemh, mesh->nodeh);
+    //  Compute global h
+    last = mesh->elemh.size(0);
+    if (mesh->elemh.size(0) <= 2) {
+      if (mesh->elemh.size(0) == 1) {
+        mesh->globalh = mesh->elemh[0];
+      } else if (mesh->elemh[0] < mesh->elemh[mesh->elemh.size(0) - 1]) {
+        mesh->globalh = mesh->elemh[mesh->elemh.size(0) - 1];
+      } else {
+        mesh->globalh = mesh->elemh[0];
+      }
+    } else {
+      real_T ex;
+      ex = mesh->elemh[0];
+      for (::coder::SizeType k{2}; k <= last; k++) {
+        real_T d;
+        d = mesh->elemh[k - 1];
+        if (ex < d) {
+          ex = d;
+        }
+      }
+      mesh->globalh = ex;
+    }
   }
 }
 
@@ -2768,13 +3211,12 @@ static void b_wlsmesh_compute_stencils(WlsMesh *mesh, ::coder::SizeType stclidx,
   } else if (mesh->topo_ndims == 2) {
     b_compute_stencils_2d(mesh, stclidx, mykrings);
   } else {
-    m2cAssert(false, "Not impl");
+    b_compute_stencils_3d(mesh, stclidx, mykrings);
   }
 }
 
 //  bar_quadrules - Obtain quadrature points and weights of a bar element.
-static void bar_quadrules(::coder::SizeType degree,
-                          ::coder::array<real_T, 2U> &cs,
+static void bar_quadrules(::coder::SizeType degree, ::coder::array<real_T, 2U> &cs,
                           ::coder::array<real_T, 1U> &ws)
 {
   if (degree <= 1) {
@@ -2962,7 +3404,8 @@ static ::coder::SizeType c_append_wlsmesh_kring(WlsMesh *mesh)
   return stclidx;
 }
 
-static inline void
+static inline
+void
 c_assemble_body(RdiObject *rdi, const ::coder::array<real_T, 2U> &mesh_coords,
                 const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 const ::coder::array<uint64_T, 1U> &mesh_teids,
@@ -3020,8 +3463,8 @@ c_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                       const ::coder::array<int32_T, 1U> &stcl_col_ind,
                       const ::coder::array<int64_T, 1U> &n2e_row_ptr,
                       const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                      ::coder::SizeType degree, boolean_T interp0,
-                      ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
+                      ::coder::SizeType degree, boolean_T interp0, ::coder::SizeType iend,
+                      ::coder::array<real_T, 1U> &val,
                       ::coder::array<boolean_T, 1U> &rdtags)
 {
   static const char_T name[7]{'B', 'u', 'h', 'm', 'a', 'n', 'n'};
@@ -3100,13 +3543,12 @@ c_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
     }
     //  Compute wls
     wls_init(&wls_, xs_, wgts__name, wgts__params_shared,
-             wgts__params_pointwise, wgts__omit_rows, degree, interp0,
-             xs_.size(0));
+             wgts__params_pointwise, wgts__omit_rows, degree,
+             interp0, xs_.size(0));
     if (wls_.rank < 0) {
       //  LAPACK error
       m2cErrMsgIdAndTxt("assemble_body_range:badLapack",
-                        "LAPACK error code %d for node %d", wls_.rank,
-                        (int)b_i);
+                        "LAPACK error code %d for node %d", wls_.rank, (int)b_i);
     }
     if (!wls_.fullrank) {
       //  Not full rank
@@ -3130,9 +3572,7 @@ c_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
         ::coder::SizeType eid;
         ::coder::SizeType leid;
         ::coder::SizeType npe;
-        eid = n2e_col_ind[static_cast<::coder::SizeType>((n_tmp + b_j) - 1L) -
-                          1] -
-              1;
+        eid = n2e_col_ind[static_cast<::coder::SizeType>((n_tmp + b_j) - 1L) - 1] - 1;
         eids_[b_j - 1] = eid + 1;
         c = mesh_teids[eid] & 255UL;
         leid = (mesh_teids[eid] >> 8) - 1;
@@ -3147,31 +3587,38 @@ c_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
                    1]
                       .conn.size(1);
         Ns_[b_j - 1] =
-            1.0 / static_cast<real_T>(mesh_elemtables[c - 1].conn.size(1));
+            1.0 /
+            static_cast<real_T>(
+                mesh_elemtables[c - 1].conn.size(1));
         //  Compute localized center
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] = mesh_coords
               [k + mesh_coords.size(1) *
                        (mesh_elemtables[c - 1]
-                            .conn[mesh_elemtables[c - 1].conn.size(1) * leid] -
+                            .conn[mesh_elemtables[c - 1]
+                                      .conn.size(1) *
+                                  leid] -
                         1)];
         }
         for (::coder::SizeType d_i{2}; d_i <= npe; d_i++) {
           for (k = 0; k <= b_dim; k++) {
             xs_[k + xs_.size(1) * (b_j - 1)] =
                 xs_[k + xs_.size(1) * (b_j - 1)] +
-                mesh_coords[k + mesh_coords.size(1) *
-                                    (mesh_elemtables[c - 1]
-                                         .conn[(d_i + mesh_elemtables[c - 1]
-                                                              .conn.size(1) *
-                                                          leid) -
-                                               1] -
-                                     1)];
+                mesh_coords
+                    [k + mesh_coords.size(1) *
+                             (mesh_elemtables[c - 1].conn
+                                  [(d_i +
+                                    mesh_elemtables[c - 1]
+                                            .conn.size(1) *
+                                        leid) -
+                                   1] -
+                              1)];
           }
         }
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] =
-              xs_[k + xs_.size(1) * (b_j - 1)] * Ns_[b_j - 1] -
+              xs_[k + xs_.size(1) * (b_j - 1)] *
+                  Ns_[b_j - 1] -
               mesh_coords[k + mesh_coords.size(1) * (b_i - 1)];
         }
       }
@@ -3215,7 +3662,9 @@ c_assemble_body_range(const ::coder::array<int64_T, 1U> &row_ptr,
               }
             }
           }
-          val[b_k - 1] = val[b_k - 1] + coeffs_[j + coeffs_.size(1) * d_i];
+          val[b_k - 1] =
+              val[b_k - 1] +
+              coeffs_[j + coeffs_.size(1) * d_i];
         }
       }
     }
@@ -3286,9 +3735,9 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                       const ::coder::array<int32_T, 1U> &stcl_col_ind,
                       const ::coder::array<int64_T, 1U> &n2e_row_ptr,
                       const ::coder::array<int32_T, 1U> &n2e_col_ind,
-                      const ::coder::array<real_T, 2U> &nrms,
-                      ::coder::SizeType degree, boolean_T interp0,
-                      ::coder::SizeType iend, ::coder::array<real_T, 1U> &val,
+                      const ::coder::array<real_T, 2U> &nrms, ::coder::SizeType degree,
+                      boolean_T interp0, ::coder::SizeType iend,
+                      ::coder::array<real_T, 1U> &val,
                       ::coder::array<boolean_T, 1U> &rdtags)
 {
   static const char_T name[7]{'B', 'u', 'h', 'm', 'a', 'n', 'n'};
@@ -3304,11 +3753,9 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
   ::coder::array<boolean_T, 1U> wgts__omit_rows;
   WlsObject wls_;
   real_T t_data[6];
-  ::coder::SizeType b_i;
   ::coder::SizeType dim;
   ::coder::SizeType loop_ub;
   ::coder::SizeType sigma_tmp;
-  ::coder::SizeType t_size_idx_1;
   boolean_T fullrank;
   fullrank = true;
   wls_.degree = degree;
@@ -3344,8 +3791,6 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
   if (iend >= 1) {
     dim = mesh_coords.size(1);
     loop_ub = mesh_coords.size(1);
-    t_size_idx_1 = nrms.size(1) - 1;
-    b_i = nrms.size(1);
   }
   for (::coder::SizeType i{1}; i <= iend; i++) {
     int64_T n;
@@ -3354,6 +3799,7 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     ::coder::SizeType b_npoints;
     ::coder::SizeType k;
     ::coder::SizeType npoints;
+    ::coder::SizeType t_size_idx_1;
     //  Fetch local data
     n_tmp = stcl_row_ptr[i - 1];
     n = stcl_row_ptr[i] - n_tmp;
@@ -3363,18 +3809,19 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     for (sigma_tmp = 0; sigma_tmp < loop_ub; sigma_tmp++) {
       xs_[sigma_tmp] = 0.0;
     }
-    for (int64_T c_i{2L}; c_i - 1L <= n; c_i++) {
-      k = stcl_col_ind[static_cast<::coder::SizeType>((n_tmp + c_i) - 2L) - 1];
-      nodes_[c_i - 1] = k;
+    for (int64_T b_i{2L}; b_i - 1L <= n; b_i++) {
+      k = stcl_col_ind[static_cast<::coder::SizeType>((n_tmp + b_i) - 2L) - 1];
+      nodes_[b_i - 1] = k;
       for (::coder::SizeType j{0}; j < dim; j++) {
-        xs_[j + xs_.size(1) * (c_i - 1)] =
+        xs_[j + xs_.size(1) * (b_i - 1)] =
             mesh_coords[j + mesh_coords.size(1) * (k - 1)] -
             mesh_coords[j + mesh_coords.size(1) * (i - 1)];
       }
     }
     npoints = xs_.size(0);
     //  Get normal direction
-    if (b_i == 2) {
+    t_size_idx_1 = nrms.size(1) - 1;
+    if (nrms.size(1) == 2) {
       t_data[0] = -nrms[nrms.size(1) * (i - 1) + 1];
       t_data[t_size_idx_1] = nrms[nrms.size(1) * (i - 1)];
     } else {
@@ -3384,8 +3831,8 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
       real_T d1;
       boolean_T guard1{false};
       d = nrms[nrms.size(1) * (i - 1)];
-      d1 = nrms[nrms.size(1) * (i - 1) + 1];
       a_tmp = std::abs(d);
+      d1 = nrms[nrms.size(1) * (i - 1) + 1];
       guard1 = false;
       if (a_tmp > std::abs(d1)) {
         real_T d2;
@@ -3393,7 +3840,7 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
         if (a_tmp > std::abs(d2)) {
           t_data[0] = -d * d1;
           t_data[t_size_idx_1] = 1.0 - d1 * d1;
-          t_data[t_size_idx_1 * 2] = -d1 * d2;
+          t_data[t_size_idx_1 * 2] = -nrms[nrms.size(1) * (i - 1) + 1] * d2;
         } else {
           guard1 = true;
         }
@@ -3402,8 +3849,10 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
       }
       if (guard1) {
         t_data[0] = 1.0 - d * d;
-        t_data[t_size_idx_1] = -d * d1;
-        t_data[t_size_idx_1 * 2] = -d * nrms[nrms.size(1) * (i - 1) + 2];
+        t_data[t_size_idx_1] =
+            -nrms[nrms.size(1) * (i - 1)] * nrms[nrms.size(1) * (i - 1) + 1];
+        t_data[t_size_idx_1 * 2] =
+            -nrms[nrms.size(1) * (i - 1)] * nrms[nrms.size(1) * (i - 1) + 2];
       }
       a_tmp = t_data[t_size_idx_1 * 2];
       a = std::sqrt((t_data[0] * t_data[0] +
@@ -3455,8 +3904,8 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
     }
     //  Compute wls
     wls_init(&wls_, us_, wgts__name, wgts__params_shared,
-             wgts__params_pointwise, wgts__omit_rows, degree, interp0,
-             xs_.size(0));
+             wgts__params_pointwise, wgts__omit_rows, degree,
+             interp0, xs_.size(0));
     if (wls_.rank < 0) {
       //  LAPACK error
       m2cErrMsgIdAndTxt("assemble_surf_range:badLapack",
@@ -3483,9 +3932,7 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
         ::coder::SizeType eid;
         ::coder::SizeType leid;
         ::coder::SizeType npe;
-        eid = n2e_col_ind[static_cast<::coder::SizeType>((n_tmp + b_j) - 1L) -
-                          1] -
-              1;
+        eid = n2e_col_ind[static_cast<::coder::SizeType>((n_tmp + b_j) - 1L) - 1] - 1;
         eids_[b_j - 1] = eid + 1;
         c = mesh_teids[eid] & 255UL;
         leid = (mesh_teids[eid] >> 8) - 1;
@@ -3500,31 +3947,38 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
                    1]
                       .conn.size(1);
         Ns_[b_j - 1] =
-            1.0 / static_cast<real_T>(mesh_elemtables[c - 1].conn.size(1));
+            1.0 /
+            static_cast<real_T>(
+                mesh_elemtables[c - 1].conn.size(1));
         //  Compute localized center
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] = mesh_coords
               [k + mesh_coords.size(1) *
                        (mesh_elemtables[c - 1]
-                            .conn[mesh_elemtables[c - 1].conn.size(1) * leid] -
+                            .conn[mesh_elemtables[c - 1]
+                                      .conn.size(1) *
+                                  leid] -
                         1)];
         }
-        for (::coder::SizeType d_i{2}; d_i <= npe; d_i++) {
+        for (::coder::SizeType c_i{2}; c_i <= npe; c_i++) {
           for (k = 0; k <= b_dim; k++) {
             xs_[k + xs_.size(1) * (b_j - 1)] =
                 xs_[k + xs_.size(1) * (b_j - 1)] +
-                mesh_coords[k + mesh_coords.size(1) *
-                                    (mesh_elemtables[c - 1]
-                                         .conn[(d_i + mesh_elemtables[c - 1]
-                                                              .conn.size(1) *
-                                                          leid) -
-                                               1] -
-                                     1)];
+                mesh_coords
+                    [k + mesh_coords.size(1) *
+                             (mesh_elemtables[c - 1].conn
+                                  [(c_i +
+                                    mesh_elemtables[c - 1]
+                                            .conn.size(1) *
+                                        leid) -
+                                   1] -
+                              1)];
           }
         }
         for (k = 0; k <= b_dim; k++) {
           xs_[k + xs_.size(1) * (b_j - 1)] =
-              xs_[k + xs_.size(1) * (b_j - 1)] * Ns_[b_j - 1] -
+              xs_[k + xs_.size(1) * (b_j - 1)] *
+                  Ns_[b_j - 1] -
               mesh_coords[k + mesh_coords.size(1) * (i - 1)];
         }
       }
@@ -3569,15 +4023,17 @@ c_assemble_surf_range(const ::coder::array<int64_T, 1U> &row_ptr,
       for (::coder::SizeType j{0}; j < b_n; j++) {
         ::coder::SizeType r;
         r = eids_[j];
-        for (::coder::SizeType d_i{0}; d_i < b_m; d_i++) {
+        for (::coder::SizeType c_i{0}; c_i < b_m; c_i++) {
           int64_T b_k;
           b_k = 0L;
           if (r < row_ptr.size(0)) {
             //  Perform linear search
             b_k =
-                m2cFind(col_ind, nodes_[d_i], row_ptr[r - 1], row_ptr[r] - 1L);
+                m2cFind(col_ind, nodes_[c_i], row_ptr[r - 1], row_ptr[r] - 1L);
           }
-          val[b_k - 1] = val[b_k - 1] + coeffs_[j + coeffs_.size(1) * d_i];
+          val[b_k - 1] =
+              val[b_k - 1] +
+              coeffs_[j + coeffs_.size(1) * c_i];
         }
       }
     }
@@ -3609,10 +4065,10 @@ static void call_metis_mesh(int32_T n, ::coder::array<int32_T, 1U> &eptr,
   int32_t ncuts;
 #ifdef OMP4M_HAS_METIS
   //  if we have METIS
-  m2cAssert((int32_T)sizeof(idx_t) == 4,
+  m2cAssert((real_T)sizeof(idx_t) == 4.0,
             "Assuming unsigned 32-bit integer-type for mtmetis_vtx_type.");
   //  setup options
-  m2cAssert((int32_T)METIS_NOPTIONS <= 40, "");
+  m2cAssert((real_T)METIS_NOPTIONS <= 40.0, "");
   METIS_SetDefaultOptions(&opts_data[0]);
   opts_data[(int32_T)METIS_OPTION_NUMBERING] = 1;
   //  1-based
@@ -3620,8 +4076,7 @@ static void call_metis_mesh(int32_T n, ::coder::array<int32_T, 1U> &eptr,
                                NULL, NULL, &nParts, NULL, &opts_data[0], &ncuts,
                                &(cparts.data())[0], &(nparts.data())[0]);
   if (status != (int32_T)METIS_OK) {
-    m2cErrMsgIdAndTxt("metis:MetisError", "METIS returned error %d.",
-                      (int)status);
+    m2cErrMsgIdAndTxt("metis:MetisError", "METIS returned error %d.", (int)status);
   }
 #else
   //  if we do NOT have METIS
@@ -3649,7 +4104,7 @@ static real_T sum(const ::coder::array<real_T, 1U> &x)
       nblocks = 1;
     } else {
       firstBlockLength = 1024;
-      nblocks = x.size(0) / 1024;
+      nblocks = (x.size(0) >> 10);
       lastBlockLength = x.size(0) - (nblocks << 10);
       if (lastBlockLength > 0) {
         nblocks++;
@@ -3692,7 +4147,7 @@ compute_beta_kernel(const ::coder::array<real_T, 2U> &mesh_coords,
                     const ::coder::array<real_T, 1U> &mesh_elemmeas,
                     real_T mesh_globalh, const ::coder::array<real_T, 2U> &df,
                     const ::coder::array<real_T, 2U> &alpha, real_T epsbeta,
-                    ::coder::array<real_T, 2U> &beta)
+                    real_T lref, ::coder::array<real_T, 2U> &beta)
 {
   real_T epsh2;
   ::coder::SizeType iend;
@@ -3729,7 +4184,7 @@ compute_beta_kernel(const ::coder::array<real_T, 2U> &mesh_coords,
     istart = threadID * chunk + u1;
     iend = (istart + chunk) + (threadID < b_remainder);
   }
-  epsh2 = epsbeta * mesh_globalh * mesh_globalh;
+  epsh2 = epsbeta * mesh_globalh * mesh_globalh / (lref * lref);
   //  C++
   for (::coder::SizeType i{istart + 1}; i <= iend; i++) {
     for (::coder::SizeType k{0}; k < nrhs; k++) {
@@ -3803,15 +4258,16 @@ static ::coder::SizeType compute_connected_components(
   return nc;
 }
 
-static void compute_fconn_graph(
-    ::coder::array<boolean_T, 1U> &visited, ::coder::array<int32_T, 1U> &iwork,
-    const ::coder::array<ConnData, 1U> &mesh_elemtables,
-    const ::coder::array<uint64_T, 1U> &mesh_teids,
-    const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
-    const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-    ::coder::SizeType nid, const ::coder::array<int8_T, 2U> &distags,
-    ::coder::SizeType col, ::coder::array<int64_T, 1U> &G_row_ptr,
-    ::coder::array<int32_T, 1U> &G_col_ind, int32_T *G_ncols)
+static void
+compute_fconn_graph(::coder::array<boolean_T, 1U> &visited,
+                    ::coder::array<int32_T, 1U> &iwork,
+                    const ::coder::array<ConnData, 1U> &mesh_elemtables,
+                    const ::coder::array<uint64_T, 1U> &mesh_teids,
+                    const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
+                    const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
+                    ::coder::SizeType nid, const ::coder::array<int8_T, 2U> &distags,
+                    ::coder::SizeType col, ::coder::array<int64_T, 1U> &G_row_ptr,
+                    ::coder::array<int32_T, 1U> &G_col_ind, int32_T *G_ncols)
 {
   uint64_T leid;
   ::coder::SizeType b_iv;
@@ -3828,12 +4284,20 @@ static void compute_fconn_graph(
   ndn = -1;
   for (int64_T i = mesh_node2elems_row_ptr[nid - 1];
        i < mesh_node2elems_row_ptr[nid]; i++) {
-    etable = (mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] & 255UL) - 1;
-    leid = mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] >> 8;
+    etable =
+        (
+            mesh_teids[mesh_node2elems_col_ind[i - 1] -
+                       1] &
+            255UL) -
+        1;
+    leid =
+        mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] >>
+        8;
     npe = mesh_elemtables[etable].conn.size(1);
     for (::coder::SizeType j{0}; j < npe; j++) {
       v = mesh_elemtables[etable]
-              .conn[j + mesh_elemtables[etable].conn.size(1) * (leid - 1)] -
+              .conn[j + mesh_elemtables[etable].conn.size(1) *
+                            (leid - 1)] -
           1;
       if ((distags[(col + distags.size(1) * v) - 1] != 0) && (!visited[v])) {
         ndn++;
@@ -3869,25 +4333,36 @@ static void compute_fconn_graph(
        i < mesh_node2elems_row_ptr[nid]; i++) {
     uint64_T c_tmp;
     ::coder::SizeType b_leid;
-    c_tmp = mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] & 255UL;
-    leid = mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] >> 8;
-    b_leid = (mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] >> 8);
+    c_tmp =
+        mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] &
+        255UL;
+    leid =
+        mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] >>
+        8;
+    b_leid = (
+        mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] >>
+        8);
     npe = mesh_elemtables[c_tmp - 1].conn.size(1) - 1;
     for (::coder::SizeType j{0}; j <= npe; j++) {
       v = mesh_elemtables[c_tmp - 1]
-              .conn[j + mesh_elemtables[c_tmp - 1].conn.size(1) * (leid - 1)] -
+              .conn[j + mesh_elemtables[c_tmp - 1]
+                                .conn.size(1) *
+                            (leid - 1)] -
           1;
       if (distags[(col + distags.size(1) * v) - 1] != 0) {
         b_iv = iwork[v];
         for (::coder::SizeType k{0}; k <= npe; k++) {
           if ((k != j) &&
-              (distags[(col +
-                        distags.size(1) *
-                            (mesh_elemtables[c_tmp - 1].conn
-                                 [k + mesh_elemtables[c_tmp - 1].conn.size(1) *
-                                          (b_leid - 1)] -
-                             1)) -
-                       1] != 0)) {
+              (distags
+                   [(col +
+                     distags.size(1) *
+                         (mesh_elemtables[c_tmp - 1].conn
+                              [k +
+                               mesh_elemtables[c_tmp - 1]
+                                       .conn.size(1) *
+                                   (b_leid - 1)] -
+                          1)) -
+                    1] != 0)) {
             G_row_ptr[b_iv] = G_row_ptr[b_iv] + 1L;
           }
         }
@@ -3897,15 +4372,24 @@ static void compute_fconn_graph(
   for (::coder::SizeType b_i{0}; b_i <= ndn; b_i++) {
     G_row_ptr[b_i + 1] = G_row_ptr[b_i + 1] + G_row_ptr[b_i];
   }
-  G_col_ind.set_size((G_row_ptr[G_row_ptr.size(0) - 1] - 1L));
+  G_col_ind.set_size(
+      (G_row_ptr[G_row_ptr.size(0) - 1] - 1L));
   for (int64_T i = mesh_node2elems_row_ptr[nid - 1];
        i < mesh_node2elems_row_ptr[nid]; i++) {
-    etable = (mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] & 255UL) - 1;
-    leid = mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] >> 8;
+    etable =
+        (
+            mesh_teids[mesh_node2elems_col_ind[i - 1] -
+                       1] &
+            255UL) -
+        1;
+    leid =
+        mesh_teids[mesh_node2elems_col_ind[i - 1] - 1] >>
+        8;
     npe = mesh_elemtables[etable].conn.size(1) - 1;
     for (::coder::SizeType j{0}; j <= npe; j++) {
       v = mesh_elemtables[etable]
-              .conn[j + mesh_elemtables[etable].conn.size(1) * (leid - 1)] -
+              .conn[j + mesh_elemtables[etable].conn.size(1) *
+                            (leid - 1)] -
           1;
       if (distags[(col + distags.size(1) * v) - 1] != 0) {
         b_iv = iwork[v] - 1;
@@ -3913,8 +4397,8 @@ static void compute_fconn_graph(
           if (k != j) {
             ::coder::SizeType v0;
             v0 = mesh_elemtables[etable]
-                     .conn[k +
-                           mesh_elemtables[etable].conn.size(1) * (leid - 1)] -
+                     .conn[k + mesh_elemtables[etable].conn.size(1) *
+                                   (leid - 1)] -
                  1;
             if (distags[(col + distags.size(1) * v0) - 1] != 0) {
               G_col_ind[(G_row_ptr[b_iv]) - 1] = iwork[v0];
@@ -3938,7 +4422,8 @@ static void compute_fconn_graph(
     b_j = G_row_ptr[b_i] + 1L;
     exitg1 = false;
     while ((!exitg1) && (b_j <= G_row_ptr[b_i + 1] - 1L)) {
-      if (G_col_ind[b_j - 1] < G_col_ind[(b_j - 1L) - 1]) {
+      if (G_col_ind[b_j - 1] <
+          G_col_ind[(b_j - 1L) - 1]) {
         ascend = false;
         exitg1 = true;
       } else {
@@ -3947,7 +4432,8 @@ static void compute_fconn_graph(
     }
     if (!ascend) {
       //  sort in place
-      m2cSort(G_col_ind, (G_row_ptr[b_i]), (G_row_ptr[b_i + 1] - 1L));
+      m2cSort(G_col_ind, (G_row_ptr[b_i]),
+              (G_row_ptr[b_i + 1] - 1L));
     }
   }
   offset = 0;
@@ -3980,11 +4466,46 @@ static void compute_fconn_graph(
     ::coder::SizeType newlen;
     newlen = G_col_ind.size(0) - offset;
     if (newlen < 1) {
-      newlen = 0;
+      c_i = 0;
+    } else {
+      c_i = newlen;
     }
-    G_col_ind.set_size(newlen);
+    G_col_ind.set_size(c_i);
   }
   *G_ncols = ndn + 1;
+}
+
+static void compute_lref(const ::coder::array<real_T, 2U> &mesh_coords,
+                         real_T *lref, real_T *buf1, real_T *buf2)
+{
+  ::coder::SizeType i;
+  ::coder::SizeType n;
+  //  compute reference length
+  n = mesh_coords.size(0);
+  i = mesh_coords.size(1);
+  *lref = 0.0;
+  *buf1 = -1.7976931348623157E+308;
+  *buf2 = 1.7976931348623157E+308;
+  for (::coder::SizeType d{0}; d < i; d++) {
+    real_T lmax;
+    real_T lmin;
+    real_T lref_tmp;
+    //  Barrier in parallel
+    lmax = -1.7976931348623157E+308;
+    lmin = 1.7976931348623157E+308;
+    for (::coder::SizeType b_i{0}; b_i < n; b_i++) {
+      lref_tmp = mesh_coords[d + mesh_coords.size(1) * b_i];
+      lmax = std::fmax(lmax, lref_tmp);
+      lmin = std::fmin(lmin, lref_tmp);
+    }
+    *buf1 = std::fmax(*buf1, lmax);
+    *buf2 = std::fmin(*buf2, lmin);
+    lref_tmp = *buf1 - *buf2;
+    *lref += lref_tmp * lref_tmp;
+    *buf1 = -1.7976931348623157E+308;
+    *buf2 = 1.7976931348623157E+308;
+  }
+  *lref = std::sqrt(*lref);
 }
 
 static void
@@ -4060,25 +4581,28 @@ compute_measure_kernel(const ::coder::array<real_T, 2U> &mesh_coords,
   //  Loop begins here
   for (::coder::SizeType b_i{istart + 1}; b_i <= iend; b_i++) {
     uint64_T c;
-    ::coder::SizeType eid;
     c = mesh_teids[b_i - 1] & 255UL;
-    eid = (mesh_teids[b_i - 1] >> 8);
-    loop_ub = mesh_coords.size(1);
-    xs_.set_size(mesh_elemtables[c - 1].conn.size(1), mesh_coords.size(1));
-    u1 = mesh_elemtables[c - 1].conn.size(1);
-    for (::coder::SizeType i{0}; i < u1; i++) {
-      for (::coder::SizeType i1{0}; i1 < loop_ub; i1++) {
-        xs_[i1 + xs_.size(1) * i] =
-            mesh_coords[i1 +
-                        mesh_coords.size(1) *
-                            (mesh_elemtables[c - 1]
-                                 .conn[i + mesh_elemtables[c - 1].conn.size(1) *
-                                               (eid - 1)] -
-                             1)];
+    u1 = (mesh_teids[b_i - 1] >> 8);
+    xs_.set_size(mesh_elemtables[c - 1].conn.size(1),
+                 mesh_coords.size(1));
+    loop_ub = mesh_elemtables[c - 1].conn.size(1);
+    for (::coder::SizeType i{0}; i < loop_ub; i++) {
+      ::coder::SizeType b_loop_ub;
+      b_loop_ub = mesh_coords.size(1);
+      for (::coder::SizeType i1{0}; i1 < b_loop_ub; i1++) {
+        xs_[i1 + xs_.size(1) * i] = mesh_coords
+            [i1 +
+             mesh_coords.size(1) *
+                 (mesh_elemtables[c - 1]
+                      .conn[i + mesh_elemtables[c - 1]
+                                        .conn.size(1) *
+                                    (u1 - 1)] -
+                  1)];
       }
     }
     if (sfes_[c - 1].etypes[0] <= 0) {
-      sfe_init(&sfes_[c - 1], mesh_elemtables[c - 1].etype, xs_);
+      sfe_init(&sfes_[c - 1],
+               mesh_elemtables[c - 1].etype, xs_);
     } else {
       sfe_init(&sfes_[c - 1], xs_);
     }
@@ -4093,11 +4617,9 @@ static void compute_meshsizes_kernel(
     const ::coder::array<int64_T, 1U> &mesh_node2nodes_row_ptr,
     const ::coder::array<int32_T, 1U> &mesh_node2nodes_col_ind,
     const ::coder::array<real_T, 2U> &nrms, ::coder::array<real_T, 1U> &elemh,
-    ::coder::array<real_T, 1U> &nodeh, real_T *globalh)
+    ::coder::array<real_T, 1U> &nodeh)
 {
   real_T t_data[6];
-  real_T d;
-  real_T hmax;
   ::coder::SizeType b_remainder;
   ::coder::SizeType c_i;
   ::coder::SizeType chunk;
@@ -4137,7 +4659,60 @@ static void compute_meshsizes_kernel(
   //  Nodal h
   for (::coder::SizeType i{istart + 1}; i <= iend; i++) {
     int64_T b_i;
+    real_T d;
+    ::coder::SizeType u0;
     nodeh[i - 1] = 0.0;
+    if ((nrms.size(0) != 0) && (nrms.size(1) != 0)) {
+      //  Surface
+      u0 = nrms.size(1) - 1;
+      if (nrms.size(1) == 2) {
+        //  2D
+        t_data[0] = -nrms[nrms.size(1) * (i - 1) + 1];
+        t_data[u0] = nrms[nrms.size(1) * (i - 1)];
+      } else {
+        real_T a;
+        real_T a_tmp;
+        real_T d1;
+        boolean_T guard1{false};
+        d = nrms[nrms.size(1) * (i - 1)];
+        a_tmp = std::abs(d);
+        d1 = nrms[nrms.size(1) * (i - 1) + 1];
+        guard1 = false;
+        if (a_tmp > std::abs(d1)) {
+          real_T d2;
+          d2 = nrms[nrms.size(1) * (i - 1) + 2];
+          if (a_tmp > std::abs(d2)) {
+            t_data[0] = -d * d1;
+            t_data[u0] = 1.0 - d1 * d1;
+            t_data[u0 * 2] = -nrms[nrms.size(1) * (i - 1) + 1] * d2;
+          } else {
+            guard1 = true;
+          }
+        } else {
+          guard1 = true;
+        }
+        if (guard1) {
+          t_data[0] = 1.0 - d * d;
+          t_data[u0] =
+              -nrms[nrms.size(1) * (i - 1)] * nrms[nrms.size(1) * (i - 1) + 1];
+          t_data[u0 * 2] =
+              -nrms[nrms.size(1) * (i - 1)] * nrms[nrms.size(1) * (i - 1) + 2];
+        }
+        a_tmp = t_data[u0 * 2];
+        a = std::sqrt((t_data[0] * t_data[0] + t_data[u0] * t_data[u0]) +
+                      a_tmp * a_tmp);
+        t_data[0] /= a;
+        t_data[u0] /= a;
+        t_data[u0 * 2] /= a;
+        //  cross
+        a_tmp = nrms[nrms.size(1) * (i - 1) + 2];
+        t_data[1] = t_data[u0 * 2] * d1 - t_data[u0] * a_tmp;
+        t_data[u0 + 1] = t_data[0] * a_tmp - d * t_data[u0 * 2];
+        t_data[u0 * 2 + 1] = d * t_data[u0] - t_data[0] * d1;
+      }
+    } else {
+      u0 = dim;
+    }
     b_i = mesh_node2nodes_row_ptr[i - 1];
     if (b_i <= mesh_node2nodes_row_ptr[i] - 1L) {
       c_i = i;
@@ -4148,65 +4723,19 @@ static void compute_meshsizes_kernel(
       real_T v_data[3];
       real_T len;
       for (u1 = 0; u1 < loop_ub; u1++) {
-        v_data[u1] =
-            mesh_coords[u1 + mesh_coords.size(1) *
-                                 (mesh_node2nodes_col_ind[k - 1] - 1)] -
-            mesh_coords[u1 + mesh_coords.size(1) * (c_i - 1)];
+        v_data[u1] = mesh_coords[u1 + mesh_coords.size(1) *
+                                          (mesh_node2nodes_col_ind
+                                               [k - 1] -
+                                           1)] -
+                     mesh_coords[u1 + mesh_coords.size(1) * (c_i - 1)];
       }
       if ((nrms.size(0) != 0) && (nrms.size(1) != 0)) {
         real_T u_data[2];
-        //  Surface
-        u1 = nrms.size(1) - 1;
-        if (nrms.size(1) == 2) {
-          //  2D
-          t_data[0] = -nrms[nrms.size(1) * (i - 1) + 1];
-          t_data[u1] = nrms[nrms.size(1) * (i - 1)];
-        } else {
-          real_T a;
-          real_T a_tmp;
-          real_T d1;
-          boolean_T guard1{false};
-          d = nrms[nrms.size(1) * (i - 1)];
-          a_tmp = std::abs(d);
-          d1 = nrms[nrms.size(1) * (i - 1) + 1];
-          guard1 = false;
-          if (a_tmp > std::abs(d1)) {
-            real_T d2;
-            d2 = nrms[nrms.size(1) * (i - 1) + 2];
-            if (a_tmp > std::abs(d2)) {
-              t_data[0] = -d * d1;
-              t_data[u1] = 1.0 - d1 * d1;
-              t_data[u1 * 2] = -nrms[nrms.size(1) * (i - 1) + 1] * d2;
-            } else {
-              guard1 = true;
-            }
-          } else {
-            guard1 = true;
-          }
-          if (guard1) {
-            t_data[0] = 1.0 - d * d;
-            t_data[u1] = -nrms[nrms.size(1) * (i - 1)] *
-                         nrms[nrms.size(1) * (i - 1) + 1];
-            t_data[u1 * 2] = -nrms[nrms.size(1) * (i - 1)] *
-                             nrms[nrms.size(1) * (i - 1) + 2];
-          }
-          a_tmp = t_data[u1 * 2];
-          a = std::sqrt((t_data[0] * t_data[0] + t_data[u1] * t_data[u1]) +
-                        a_tmp * a_tmp);
-          t_data[0] /= a;
-          t_data[u1] /= a;
-          t_data[u1 * 2] /= a;
-          //  cross
-          a_tmp = nrms[nrms.size(1) * (i - 1) + 2];
-          t_data[1] = t_data[u1 * 2] * d1 - t_data[u1] * a_tmp;
-          t_data[u1 + 1] = t_data[0] * a_tmp - d * t_data[u1 * 2];
-          t_data[u1 * 2 + 1] = d * t_data[u1] - t_data[0] * d1;
-        }
         //  Project
         for (::coder::SizeType ii{0}; ii < dim; ii++) {
           u_data[ii] = 0.0;
           for (::coder::SizeType jj{0}; jj <= dim; jj++) {
-            u_data[ii] += v_data[jj] * t_data[ii + u1 * jj];
+            u_data[ii] += v_data[jj] * t_data[ii + u0 * jj];
           }
         }
         if (dim + 1 == 2) {
@@ -4218,8 +4747,9 @@ static void compute_meshsizes_kernel(
         len = 0.0;
         for (::coder::SizeType ii{0}; ii <= dim; ii++) {
           d = v_data[ii];
-          len += std::sqrt(d * d);
+          len += d * d;
         }
+        len = std::sqrt(len);
       }
       nodeh[i - 1] = nodeh[i - 1] + len;
     }
@@ -4254,30 +4784,23 @@ static void compute_meshsizes_kernel(
     iend = (istart + chunk) + (threadID < b_remainder);
   }
   //  Elemental h
-  hmax = 0.0;
   for (::coder::SizeType i{istart + 1}; i <= iend; i++) {
     real_T h0;
     ::coder::SizeType etable;
     etable = (mesh_teids[i - 1] & 255UL) - 1;
     h0 = 0.0;
-    u1 = mesh_elemtables[etable].conn.size(1) - 1;
-    for (::coder::SizeType j{0}; j <= u1; j++) {
-      h0 += nodeh[mesh_elemtables[etable]
-                      .conn[j + mesh_elemtables[etable].conn.size(1) *
-                                    ((mesh_teids[i - 1] >> 8) - 1)] -
+    u1 = mesh_elemtables[etable].conn.size(1);
+    for (::coder::SizeType j{0}; j < u1; j++) {
+      h0 += nodeh[mesh_elemtables[etable].conn
+                      [j +
+                       mesh_elemtables[etable].conn.size(1) *
+                           ((mesh_teids[i - 1] >> 8) - 1)] -
                   1];
     }
     //  Average
-    d = h0 / static_cast<real_T>(mesh_elemtables[etable].conn.size(1));
-    elemh[i - 1] = d;
-    hmax = std::fmax(hmax, d);
+    elemh[i - 1] =
+        h0 / static_cast<real_T>(mesh_elemtables[etable].conn.size(1));
   }
-#pragma omp barrier
-#pragma omp critical
-  {
-      // critical
-  } // critical
-      *globalh = hmax;
 }
 
 static void compute_meshsizes_kernel(
@@ -4286,11 +4809,8 @@ static void compute_meshsizes_kernel(
     const ::coder::array<uint64_T, 1U> &mesh_teids,
     const ::coder::array<int64_T, 1U> &mesh_node2nodes_row_ptr,
     const ::coder::array<int32_T, 1U> &mesh_node2nodes_col_ind,
-    ::coder::array<real_T, 1U> &elemh, ::coder::array<real_T, 1U> &nodeh,
-    real_T *globalh)
+    ::coder::array<real_T, 1U> &elemh, ::coder::array<real_T, 1U> &nodeh)
 {
-  real_T d;
-  real_T hmax;
   ::coder::SizeType b_remainder;
   ::coder::SizeType c_i;
   ::coder::SizeType chunk;
@@ -4341,16 +4861,19 @@ static void compute_meshsizes_kernel(
       real_T v_data[3];
       real_T len;
       for (u1 = 0; u1 < loop_ub; u1++) {
-        v_data[u1] =
-            mesh_coords[u1 + mesh_coords.size(1) *
-                                 (mesh_node2nodes_col_ind[k - 1] - 1)] -
-            mesh_coords[u1 + mesh_coords.size(1) * (c_i - 1)];
+        v_data[u1] = mesh_coords[u1 + mesh_coords.size(1) *
+                                          (mesh_node2nodes_col_ind
+                                               [k - 1] -
+                                           1)] -
+                     mesh_coords[u1 + mesh_coords.size(1) * (c_i - 1)];
       }
       len = 0.0;
       for (::coder::SizeType ii{0}; ii < dim; ii++) {
+        real_T d;
         d = v_data[ii];
-        len += std::sqrt(d * d);
+        len += d * d;
       }
+      len = std::sqrt(len);
       nodeh[i - 1] = nodeh[i - 1] + len;
     }
     //  average
@@ -4384,30 +4907,23 @@ static void compute_meshsizes_kernel(
     iend = (istart + chunk) + (threadID < b_remainder);
   }
   //  Elemental h
-  hmax = 0.0;
   for (::coder::SizeType i{istart + 1}; i <= iend; i++) {
     real_T h0;
     ::coder::SizeType etable;
     etable = (mesh_teids[i - 1] & 255UL) - 1;
     h0 = 0.0;
-    u1 = mesh_elemtables[etable].conn.size(1) - 1;
-    for (::coder::SizeType j{0}; j <= u1; j++) {
-      h0 += nodeh[mesh_elemtables[etable]
-                      .conn[j + mesh_elemtables[etable].conn.size(1) *
-                                    ((mesh_teids[i - 1] >> 8) - 1)] -
+    u1 = mesh_elemtables[etable].conn.size(1);
+    for (::coder::SizeType j{0}; j < u1; j++) {
+      h0 += nodeh[mesh_elemtables[etable].conn
+                      [j +
+                       mesh_elemtables[etable].conn.size(1) *
+                           ((mesh_teids[i - 1] >> 8) - 1)] -
                   1];
     }
     //  Average
-    d = h0 / static_cast<real_T>(mesh_elemtables[etable].conn.size(1));
-    elemh[i - 1] = d;
-    hmax = std::fmax(hmax, d);
+    elemh[i - 1] =
+        h0 / static_cast<real_T>(mesh_elemtables[etable].conn.size(1));
   }
-#pragma omp barrier
-#pragma omp critical
-  {
-      // critical
-  } // critical
-      *globalh = hmax;
 }
 
 static void
@@ -4460,8 +4976,11 @@ compute_nodal_alpha(const ::coder::array<real_T, 2U> &alphacell,
       for (int64_T j = mesh_node2elems_row_ptr[i - 1];
            j < mesh_node2elems_row_ptr[i]; j++) {
         real_T d;
-        d = std::abs(alphacell[k + alphacell.size(1) *
-                                       (mesh_node2elems_col_ind[j - 1] - 1)]);
+        d = std::abs(
+            alphacell[k + alphacell.size(1) *
+                              (mesh_node2elems_col_ind[j -
+                                                       1] -
+                               1)]);
         if (a < d) {
           a = d;
         }
@@ -4502,6 +5021,23 @@ static void compute_stencils_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
   }
   //  Serial
   compute_stencils_kernel_2d(mesh, stclidx, krings[0], bounds);
+}
+
+static void compute_stencils_3d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                const real_T krings[4])
+{
+  int32_T bounds[2];
+  bounds[0] = 0;
+  //  Whether to filter stencils by tangent plane
+  bounds[1] = static_cast<::coder::SizeType>(
+      std::round(20.0 * (krings[0] + 0.33333333333333331) *
+                 (krings[0] + 0.66666666666666663) * (krings[0] + 1.0)));
+  //  Ensure that max is no smaller than corresponding min
+  if (bounds[1] <= 0) {
+    bounds[1] = 0;
+  }
+  //  Serial
+  compute_stencils_kernel_3d(mesh, stclidx, krings[0], bounds);
 }
 
 static void compute_stencils_kernel_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
@@ -4548,10 +5084,10 @@ static void compute_stencils_kernel_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
         mesh->stencils[stclidx - 1].ngbelems.row_ptr[i];
   }
   //  Allocate space for col_inds and actual nnzs
-  mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size(
-      (mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
-  mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size(
-      (mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
+  mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size((
+      mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
+  mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size((
+      mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
   mesh->iwork1.set_size(n);
   mesh->iwork2.set_size(n);
   vtags_.set_size(mesh->coords.size(0));
@@ -4590,12 +5126,14 @@ static void compute_stencils_kernel_1d(WlsMesh *mesh, ::coder::SizeType stclidx,
     mesh->stencils[stclidx - 1].reflected[i] = reflected;
     mesh->iwork1[i] = nverts;
     for (int64_T j{1L}; j <= nverts; j++) {
-      mesh->stencils[stclidx - 1].ngbverts.col_ind[(vstart + j) - 1] =
+      mesh->stencils[stclidx - 1]
+          .ngbverts.col_ind[(vstart + j) - 1] =
           ngbvs_[j - 1];
     }
     mesh->iwork2[i] = nfaces;
     for (int64_T j{1L}; j <= nfaces; j++) {
-      mesh->stencils[stclidx - 1].ngbelems.col_ind[(estart + j) - 1] =
+      mesh->stencils[stclidx - 1]
+          .ngbelems.col_ind[(estart + j) - 1] =
           ngbfs_[j - 1];
     }
   }
@@ -4622,7 +5160,6 @@ static void compute_stencils_kernel_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
   boolean_T hadoverflow;
   boolean_T overflow;
   boolean_T reflected;
-  //  Determine total number of vertices
   if (mesh->stencils[stclidx - 1].vidmap.size(0) == 0) {
     n = mesh->coords.size(0);
   } else {
@@ -4651,10 +5188,10 @@ static void compute_stencils_kernel_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
         mesh->stencils[stclidx - 1].ngbelems.row_ptr[i];
   }
   //  Allocate space for col_inds and actual nnzs
-  mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size(
-      (mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
-  mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size(
-      (mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
+  mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size((
+      mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
+  mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size((
+      mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
   mesh->iwork1.set_size(n);
   mesh->iwork2.set_size(n);
   vtags_.set_size(mesh->coords.size(0));
@@ -4698,12 +5235,14 @@ static void compute_stencils_kernel_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
     mesh->stencils[stclidx - 1].reflected[i] = reflected;
     mesh->iwork1[i] = nverts;
     for (int64_T j{1L}; j <= nverts; j++) {
-      mesh->stencils[stclidx - 1].ngbverts.col_ind[(vstart + j) - 1] =
+      mesh->stencils[stclidx - 1]
+          .ngbverts.col_ind[(vstart + j) - 1] =
           ngbvs_[j - 1];
     }
     mesh->iwork2[i] = nfaces;
     for (int64_T j{1L}; j <= nfaces; j++) {
-      mesh->stencils[stclidx - 1].ngbelems.col_ind[(estart + j) - 1] =
+      mesh->stencils[stclidx - 1]
+          .ngbelems.col_ind[(estart + j) - 1] =
           ngbfs_[j - 1];
     }
   }
@@ -4714,8 +5253,123 @@ static void compute_stencils_kernel_2d(WlsMesh *mesh, ::coder::SizeType stclidx,
                mesh->stencils[stclidx - 1].ngbelems.col_ind, mesh->iwork2);
 }
 
-//  crsAx_kernel - Kernel function for evaluating A*x in each thread
-static void crsAx_kernel(const ::coder::array<int64_T, 1U> &row_ptr,
+static void compute_stencils_kernel_3d(WlsMesh *mesh, ::coder::SizeType stclidx,
+                                       real_T ring, const int32_T bounds[2])
+{
+  ::coder::array<uint64_T, 1U> hebuf_;
+  ::coder::array<int32_T, 1U> ngbfs_;
+  ::coder::array<int32_T, 1U> ngbvs_;
+  ::coder::array<boolean_T, 1U> b_mesh;
+  ::coder::array<boolean_T, 1U> buffertags_;
+  ::coder::array<boolean_T, 1U> ftags_;
+  ::coder::array<boolean_T, 1U> vtags_;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType n;
+  int32_T nfaces;
+  int32_T nverts;
+  boolean_T hadoverflow;
+  boolean_T overflow;
+  boolean_T reflected;
+  if (mesh->stencils[stclidx - 1].vidmap.size(0) == 0) {
+    n = mesh->coords.size(0);
+  } else {
+    n = mesh->stencils[stclidx - 1].vidmap.size(0);
+  }
+  //  Determine partitioning
+  mesh->stencils[stclidx - 1].reflected.set_size(n);
+  mesh->stencils[stclidx - 1].ngbverts.row_ptr.set_size(n + 1);
+  mesh->stencils[stclidx - 1].ngbverts.row_ptr[0] = 1L;
+  mesh->stencils[stclidx - 1].ngbverts.ncols = mesh->coords.size(0);
+  mesh->stencils[stclidx - 1].ngbelems.row_ptr.set_size(n + 1);
+  mesh->stencils[stclidx - 1].ngbelems.row_ptr[0] = 1L;
+  mesh->stencils[stclidx - 1].ngbelems.ncols = mesh->teids.size(0);
+  //  Assemble rowptrs
+  for (::coder::SizeType i{0}; i < n; i++) {
+    //  Get vertex ID
+    mesh->stencils[stclidx - 1].ngbverts.row_ptr[i + 1] = bounds[1];
+    mesh->stencils[stclidx - 1].ngbelems.row_ptr[i + 1] = bounds[1] << 1;
+  }
+  for (::coder::SizeType i{0}; i < n; i++) {
+    mesh->stencils[stclidx - 1].ngbverts.row_ptr[i + 1] =
+        mesh->stencils[stclidx - 1].ngbverts.row_ptr[i + 1] +
+        mesh->stencils[stclidx - 1].ngbverts.row_ptr[i];
+    mesh->stencils[stclidx - 1].ngbelems.row_ptr[i + 1] =
+        mesh->stencils[stclidx - 1].ngbelems.row_ptr[i + 1] +
+        mesh->stencils[stclidx - 1].ngbelems.row_ptr[i];
+  }
+  //  Allocate space for col_inds and actual nnzs
+  mesh->stencils[stclidx - 1].ngbverts.col_ind.set_size((
+      mesh->stencils[stclidx - 1].ngbverts.row_ptr[n] - 1L));
+  mesh->stencils[stclidx - 1].ngbelems.col_ind.set_size((
+      mesh->stencils[stclidx - 1].ngbelems.row_ptr[n] - 1L));
+  mesh->iwork1.set_size(n);
+  mesh->iwork2.set_size(n);
+  vtags_.set_size(mesh->coords.size(0));
+  loop_ub = mesh->coords.size(0);
+  for (::coder::SizeType b_i{0}; b_i < loop_ub; b_i++) {
+    vtags_[b_i] = false;
+  }
+  ftags_.set_size(mesh->teids.size(0));
+  loop_ub = mesh->teids.size(0);
+  for (::coder::SizeType b_i{0}; b_i < loop_ub; b_i++) {
+    ftags_[b_i] = false;
+  }
+  buffertags_.set_size(mesh->teids.size(0));
+  loop_ub = mesh->teids.size(0);
+  for (::coder::SizeType b_i{0}; b_i < loop_ub; b_i++) {
+    buffertags_[b_i] = false;
+  }
+  // Local buffers with patterns "\w_mesh" are legitimate
+  //  Boundary nodes
+  sfemesh_determine_bndnodes(mesh->coords, mesh->elemtables, mesh->sibhfs,
+                             b_mesh);
+  //  Construct global to local normal mapping
+  hadoverflow = false;
+  //  Loop begins
+  for (::coder::SizeType i{0}; i < n; i++) {
+    int64_T estart;
+    int64_T vstart;
+    ::coder::SizeType vid;
+    vstart = mesh->stencils[stclidx - 1].ngbverts.row_ptr[i] - 1L;
+    estart = mesh->stencils[stclidx - 1].ngbelems.row_ptr[i] - 1L;
+    //  Prevent Coder from creating copies of rowptrs
+    //  Get vertex ID
+    if (mesh->stencils[stclidx - 1].vidmap.size(0) == 0) {
+      vid = i + 1;
+    } else {
+      vid = mesh->stencils[stclidx - 1].vidmap[i];
+    }
+    obtain_nring_3d(mesh->elemtables, mesh->teids, mesh->sibhfs, mesh->v2hfid,
+                    vid, ring, bounds[1], vtags_, ftags_, buffertags_,
+                    mesh->bridges, ngbvs_, &nverts, ngbfs_, &nfaces, hebuf_,
+                    &reflected, &overflow);
+    if ((!hadoverflow) && overflow) {
+      m2cWarnMsgIdAndTxt("obtain_nring_3d:overflow",
+                         "Buffers are too small to contain neighborhood");
+      hadoverflow = true;
+    }
+    mesh->stencils[stclidx - 1].reflected[i] = reflected;
+    mesh->iwork1[i] = nverts;
+    for (int64_T j{1L}; j <= nverts; j++) {
+      mesh->stencils[stclidx - 1]
+          .ngbverts.col_ind[(vstart + j) - 1] =
+          ngbvs_[j - 1];
+    }
+    mesh->iwork2[i] = nfaces;
+    for (int64_T j{1L}; j <= nfaces; j++) {
+      mesh->stencils[stclidx - 1]
+          .ngbelems.col_ind[(estart + j) - 1] =
+          ngbfs_[j - 1];
+    }
+  }
+  //  Compress
+  crs_compress(mesh->stencils[stclidx - 1].ngbverts.row_ptr,
+               mesh->stencils[stclidx - 1].ngbverts.col_ind, mesh->iwork1);
+  crs_compress(mesh->stencils[stclidx - 1].ngbelems.row_ptr,
+               mesh->stencils[stclidx - 1].ngbelems.col_ind, mesh->iwork2);
+}
+
+static void crsAx_worker(const ::coder::array<int64_T, 1U> &row_ptr,
                          const ::coder::array<int32_T, 1U> &col_ind,
                          const ::coder::array<real_T, 1U> &val,
                          const ::coder::array<real_T, 2U> &x,
@@ -4764,14 +5418,15 @@ static void crsAx_kernel(const ::coder::array<int64_T, 1U> &row_ptr,
       for (::coder::SizeType k{0}; k <= nrhs; k++) {
         b[k + b.size(1) * (i - 1)] =
             b[k + b.size(1) * (i - 1)] +
-            val[j - 1] * x[k + x.size(1) * (col_ind[j - 1] - 1)];
+            val[j - 1] *
+                x[k + x.size(1) * (col_ind[j - 1] - 1)];
       }
     }
   }
 }
 
 // crsCompress - Compresses a CRS graph or matrix with (optionally) nnz in
-static void crsCompress(CrsMatrix *A, const ::coder::array<int32_T, 1U> &nnzs)
+static void crsCompress(CrsMatrixD *A, const ::coder::array<int32_T, 1U> &nnzs)
 {
   ::coder::array<real_T, 1U> val;
   ::coder::array<int32_T, 1U> col_ind;
@@ -4829,7 +5484,8 @@ static void crsCompress(CrsMatrix *A, const ::coder::array<int32_T, 1U> &nnzs)
     loop_ub = j;
   }
   A->val.set_size(loop_ub);
-  if (j > A->col_ind.size(0) / 2) {
+  if (j >
+      static_cast<::coder::SizeType>((A->col_ind.size(0)) >> 1)) {
     //  make copies
     col_ind.set_size(u1);
     for (::coder::SizeType i{0}; i < u1; i++) {
@@ -4858,11 +5514,12 @@ static void crsCompress(CrsMatrix *A, const ::coder::array<int32_T, 1U> &nnzs)
 }
 
 //  crsProdMatVec - Compute b=A*x for CRS matrix A and vector(s) x.
-static inline void crsProdMatVec(const ::coder::array<int64_T, 1U> &A_row_ptr,
-                                 const ::coder::array<int32_T, 1U> &A_col_ind,
-                                 const ::coder::array<real_T, 1U> &A_val,
-                                 const ::coder::array<real_T, 2U> &x,
-                                 ::coder::array<real_T, 2U> &b)
+static inline
+void crsProdMatVec(const ::coder::array<int64_T, 1U> &A_row_ptr,
+                          const ::coder::array<int32_T, 1U> &A_col_ind,
+                          const ::coder::array<real_T, 1U> &A_val,
+                          const ::coder::array<real_T, 2U> &x,
+                          ::coder::array<real_T, 2U> &b)
 {
   crs_prod_mat_vec(A_row_ptr, A_col_ind, A_val, x, b);
 }
@@ -4927,19 +5584,21 @@ static void crs_compress(::coder::array<int64_T, 1U> &row_ptr,
 }
 
 //  crs_prod_mat_vec - Compute b=A*x for CRS matrix A and vector(s) x.
-static inline void crs_prod_mat_vec(const ::coder::array<int64_T, 1U> &A_rowptr,
-                                    const ::coder::array<int32_T, 1U> &A_colind,
-                                    const ::coder::array<real_T, 1U> &A_val,
-                                    const ::coder::array<real_T, 2U> &x,
-                                    ::coder::array<real_T, 2U> &b)
+static inline
+void crs_prod_mat_vec(const ::coder::array<int64_T, 1U> &A_rowptr,
+                             const ::coder::array<int32_T, 1U> &A_colind,
+                             const ::coder::array<real_T, 1U> &A_val,
+                             const ::coder::array<real_T, 2U> &x,
+                             ::coder::array<real_T, 2U> &b)
 {
-  crsAx_kernel(A_rowptr, A_colind, A_val, x, b);
+  crsAx_worker(A_rowptr, A_colind, A_val, x, b);
 }
 
 // determine_rdnodes - Determine rank-deficient (RD) nodes
-static inline void determine_rdnodes(boolean_T fullrank,
-                                     ::coder::array<boolean_T, 1U> &rdtags,
-                                     ::coder::array<int32_T, 1U> &rdnodes)
+static inline
+void determine_rdnodes(boolean_T fullrank,
+                              ::coder::array<boolean_T, 1U> &rdtags,
+                              ::coder::array<int32_T, 1U> &rdnodes)
 {
   if (fullrank) {
     rdnodes.set_size(0);
@@ -4967,8 +5626,7 @@ static inline void determine_rdnodes(boolean_T fullrank,
   }
 }
 
-static void extract_sub(::coder::SizeType n,
-                        const ::coder::array<int32_T, 1U> &crange,
+static void extract_sub(::coder::SizeType n, const ::coder::array<int32_T, 1U> &crange,
                         const ::coder::array<int32_T, 1U> &eptr,
                         const ::coder::array<int32_T, 1U> &eind,
                         ::coder::array<int32_T, 1U> &iwork,
@@ -5043,9 +5701,8 @@ static void extract_sub(::coder::SizeType n,
   *nnodes = y;
 }
 
-static real_T find_kth_shortest_dist(::coder::array<real_T, 1U> &arr,
-                                     ::coder::SizeType k, ::coder::SizeType l,
-                                     ::coder::SizeType r)
+static real_T find_kth_shortest_dist(::coder::array<real_T, 1U> &arr, ::coder::SizeType k,
+                                     ::coder::SizeType l, ::coder::SizeType r)
 {
   real_T dist;
   real_T val;
@@ -5101,9 +5758,8 @@ static real_T find_kth_shortest_dist(::coder::array<real_T, 1U> &arr,
 }
 
 //  gen_vander  Wrapper function for computing confluent Vandermonde matrix in
-static void gen_vander(const ::coder::array<real_T, 2U> &us,
-                       ::coder::SizeType npoints, ::coder::SizeType degree,
-                       ::coder::array<real_T, 2U> &V)
+static void gen_vander(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                       ::coder::SizeType degree, ::coder::array<real_T, 2U> &V)
 {
   switch (us.size(1)) {
   case 1: {
@@ -5197,8 +5853,8 @@ static void gen_vander(const ::coder::array<real_T, 2U> &us,
 }
 
 //  gen_vander  Wrapper function for computing confluent Vandermonde matrix in
-static void gen_vander(const ::coder::array<real_T, 2U> &us,
-                       ::coder::SizeType npoints, ::coder::SizeType degree,
+static void gen_vander(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                       ::coder::SizeType degree,
                        const ::coder::array<real_T, 1U> &weights,
                        ::coder::array<real_T, 2U> &V)
 {
@@ -5320,23 +5976,89 @@ static void gen_vander(const ::coder::array<real_T, 2U> &us,
 }
 
 //  gen_vander_2d  Generate generalized/confluent Vandermonde matrix in 2D.
-static void gen_vander_2d(const ::coder::array<real_T, 2U> &us,
-                          ::coder::SizeType npoints, ::coder::SizeType degree,
+static void gen_vander_2d(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                          ::coder::SizeType degree, ::coder::array<real_T, 2U> &V)
+{
+  ::coder::SizeType c;
+  ::coder::SizeType i;
+  if (npoints == 0) {
+    npoints = us.size(0);
+  } else if (npoints > us.size(0)) {
+    m2cErrMsgIdAndTxt("wlslib:BufferTooSmall", "Input us is too small.");
+  }
+  //  Number of row blocks
+  if (degree >= 0) {
+    i = static_cast<::coder::SizeType>(
+        static_cast<::coder::SizeType>((degree + 1) * (degree + 2)) >> 1);
+  } else {
+    i = (1 - degree) * (1 - degree);
+  }
+  V.set_size(i, us.size(0));
+  //  compute 0th order generalized Vandermonde matrix
+  if (degree != 0) {
+    for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
+      V[iPnt] = 1.0;
+      V[iPnt + V.size(1)] = us[us.size(1) * iPnt];
+      V[iPnt + V.size(1) * 2] = us[us.size(1) * iPnt + 1];
+    }
+  } else {
+    for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
+      V[iPnt] = 1.0;
+    }
+  }
+  c = 3;
+  if (degree < 0) {
+    i = -degree;
+  } else {
+    i = degree;
+  }
+  for (::coder::SizeType deg{2}; deg <= i; deg++) {
+    for (::coder::SizeType j{0}; j < deg; j++) {
+      for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
+        V[iPnt + V.size(1) * c] =
+            V[iPnt + V.size(1) * (c - deg)] * us[us.size(1) * iPnt];
+      }
+      c++;
+    }
+    for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
+      V[iPnt + V.size(1) * c] =
+          V[iPnt + V.size(1) * ((c - deg) - 1)] * us[us.size(1) * iPnt + 1];
+    }
+    c++;
+  }
+  //  Compute the bi-degree terms if degree<0
+  i = -degree;
+  for (::coder::SizeType deg{i}; deg >= 1; deg--) {
+    for (::coder::SizeType k{0}; k < deg; k++) {
+      for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
+        V[iPnt + V.size(1) * c] =
+            V[iPnt + V.size(1) * (c - deg)] * us[us.size(1) * iPnt];
+      }
+      c++;
+    }
+  }
+  //  compute higher order confluent Vandermonde matrix blocks incrementally
+}
+
+//  gen_vander_2d  Generate generalized/confluent Vandermonde matrix in 2D.
+static void gen_vander_2d(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                          ::coder::SizeType degree,
                           const ::coder::array<real_T, 1U> &weights,
                           ::coder::array<real_T, 2U> &V)
 {
-  ::coder::SizeType b_degree;
   ::coder::SizeType c;
+  ::coder::SizeType i;
   if (npoints > us.size(0)) {
     m2cErrMsgIdAndTxt("wlslib:BufferTooSmall", "Input us is too small.");
   }
   //  Number of row blocks
   if (degree >= 0) {
-    b_degree = (degree + 1) * (degree + 2) / 2;
+    i = static_cast<::coder::SizeType>(
+        static_cast<::coder::SizeType>((degree + 1) * (degree + 2)) >> 1);
   } else {
-    b_degree = (1 - degree) * (1 - degree);
+    i = (1 - degree) * (1 - degree);
   }
-  V.set_size(b_degree, us.size(0));
+  V.set_size(i, us.size(0));
   //  compute 0th order generalized Vandermonde matrix
   if (weights.size(0) == 0) {
     if (degree != 0) {
@@ -5363,11 +6085,11 @@ static void gen_vander_2d(const ::coder::array<real_T, 2U> &us,
   }
   c = 3;
   if (degree < 0) {
-    b_degree = -degree;
+    i = -degree;
   } else {
-    b_degree = degree;
+    i = degree;
   }
-  for (::coder::SizeType deg{2}; deg <= b_degree; deg++) {
+  for (::coder::SizeType deg{2}; deg <= i; deg++) {
     for (::coder::SizeType j{0}; j < deg; j++) {
       for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
         V[iPnt + V.size(1) * c] =
@@ -5382,73 +6104,8 @@ static void gen_vander_2d(const ::coder::array<real_T, 2U> &us,
     c++;
   }
   //  Compute the bi-degree terms if degree<0
-  b_degree = -degree;
-  for (::coder::SizeType deg{b_degree}; deg >= 1; deg--) {
-    for (::coder::SizeType k{0}; k < deg; k++) {
-      for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
-        V[iPnt + V.size(1) * c] =
-            V[iPnt + V.size(1) * (c - deg)] * us[us.size(1) * iPnt];
-      }
-      c++;
-    }
-  }
-  //  compute higher order confluent Vandermonde matrix blocks incrementally
-}
-
-//  gen_vander_2d  Generate generalized/confluent Vandermonde matrix in 2D.
-static void gen_vander_2d(const ::coder::array<real_T, 2U> &us,
-                          ::coder::SizeType npoints, ::coder::SizeType degree,
-                          ::coder::array<real_T, 2U> &V)
-{
-  ::coder::SizeType b_degree;
-  ::coder::SizeType c;
-  if (npoints == 0) {
-    npoints = us.size(0);
-  } else if (npoints > us.size(0)) {
-    m2cErrMsgIdAndTxt("wlslib:BufferTooSmall", "Input us is too small.");
-  }
-  //  Number of row blocks
-  if (degree >= 0) {
-    b_degree = (degree + 1) * (degree + 2) / 2;
-  } else {
-    b_degree = (1 - degree) * (1 - degree);
-  }
-  V.set_size(b_degree, us.size(0));
-  //  compute 0th order generalized Vandermonde matrix
-  if (degree != 0) {
-    for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
-      V[iPnt] = 1.0;
-      V[iPnt + V.size(1)] = us[us.size(1) * iPnt];
-      V[iPnt + V.size(1) * 2] = us[us.size(1) * iPnt + 1];
-    }
-  } else {
-    for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
-      V[iPnt] = 1.0;
-    }
-  }
-  c = 3;
-  if (degree < 0) {
-    b_degree = -degree;
-  } else {
-    b_degree = degree;
-  }
-  for (::coder::SizeType deg{2}; deg <= b_degree; deg++) {
-    for (::coder::SizeType j{0}; j < deg; j++) {
-      for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
-        V[iPnt + V.size(1) * c] =
-            V[iPnt + V.size(1) * (c - deg)] * us[us.size(1) * iPnt];
-      }
-      c++;
-    }
-    for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
-      V[iPnt + V.size(1) * c] =
-          V[iPnt + V.size(1) * ((c - deg) - 1)] * us[us.size(1) * iPnt + 1];
-    }
-    c++;
-  }
-  //  Compute the bi-degree terms if degree<0
-  b_degree = -degree;
-  for (::coder::SizeType deg{b_degree}; deg >= 1; deg--) {
+  i = -degree;
+  for (::coder::SizeType deg{i}; deg >= 1; deg--) {
     for (::coder::SizeType k{0}; k < deg; k++) {
       for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
         V[iPnt + V.size(1) * c] =
@@ -5461,11 +6118,9 @@ static void gen_vander_2d(const ::coder::array<real_T, 2U> &us,
 }
 
 //  gen_vander_3d  Generate generalized/confluent Vandermonde matrix in 3D.
-static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
-                          ::coder::SizeType npoints, ::coder::SizeType degree,
-                          ::coder::array<real_T, 2U> &V)
+static void gen_vander_3d(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                          ::coder::SizeType degree, ::coder::array<real_T, 2U> &V)
 {
-  ::coder::SizeType b_degree;
   ::coder::SizeType c;
   ::coder::SizeType d;
   ::coder::SizeType deg;
@@ -5477,11 +6132,12 @@ static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
   }
   //  Allocate storage for V
   if (degree >= 0) {
-    b_degree = (degree + 1) * (degree + 2) * (degree + 3) / 6;
+    i = static_cast<::coder::SizeType>(
+        static_cast<::coder::SizeType>((degree + 1) * (degree + 2) * (degree + 3)) / 6U);
   } else {
-    b_degree = (1 - degree) * (1 - degree) * (1 - degree);
+    i = (1 - degree) * (1 - degree) * (1 - degree);
   }
-  V.set_size(b_degree, us.size(0));
+  V.set_size(i, us.size(0));
   //  compute 0th order generalized Vandermonde matrix
   if (degree != 0) {
     for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
@@ -5545,6 +6201,7 @@ static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
       ::coder::SizeType counterBottomRow;
       ::coder::SizeType gap;
       ::coder::SizeType nTermsInPrevLayer;
+      ::coder::SizeType x;
       //  Within each level, x^deg is at the peak of Pascal triangle
       cornerTriangle = (cornerTriangle + p) + degree;
       counterBottomRow = 1;
@@ -5558,18 +6215,18 @@ static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
         counterBottomRow++;
       }
       deg--;
-      b_degree = ((degree + degree) + p) - 1;
-      if (b_degree < 0) {
-        b_degree = 0;
+      x = ((degree + degree) + p) - 1;
+      if (x < 0) {
+        x = 0;
       }
-      excess += b_degree;
+      excess += x;
       d = (d + p) + 1;
       // number of terms in Pascal tetrahedron
       nTermsInPrevLayer = nTermsInLayer;
       nTermsInLayer = d + 3 * (excess - cornerTriangle);
       gap = (nTermsInPrevLayer + counterBottomRow) - 1;
-      b_degree = nTermsInLayer - counterBottomRow;
-      for (::coder::SizeType j{0}; j <= b_degree; j++) {
+      x = nTermsInLayer - counterBottomRow;
+      for (::coder::SizeType j{0}; j <= x; j++) {
         for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
           V[iPnt + V.size(1) * c] =
               V[iPnt + V.size(1) * (c - gap)] * us[us.size(1) * iPnt + 2];
@@ -5582,12 +6239,11 @@ static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
 }
 
 //  gen_vander_3d  Generate generalized/confluent Vandermonde matrix in 3D.
-static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
-                          ::coder::SizeType npoints, ::coder::SizeType degree,
+static void gen_vander_3d(const ::coder::array<real_T, 2U> &us, ::coder::SizeType npoints,
+                          ::coder::SizeType degree,
                           const ::coder::array<real_T, 1U> &weights,
                           ::coder::array<real_T, 2U> &V)
 {
-  ::coder::SizeType b_degree;
   ::coder::SizeType c;
   ::coder::SizeType d;
   ::coder::SizeType deg;
@@ -5597,11 +6253,12 @@ static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
   }
   //  Allocate storage for V
   if (degree >= 0) {
-    b_degree = (degree + 1) * (degree + 2) * (degree + 3) / 6;
+    i = static_cast<::coder::SizeType>(
+        static_cast<::coder::SizeType>((degree + 1) * (degree + 2) * (degree + 3)) / 6U);
   } else {
-    b_degree = (1 - degree) * (1 - degree) * (1 - degree);
+    i = (1 - degree) * (1 - degree) * (1 - degree);
   }
-  V.set_size(b_degree, us.size(0));
+  V.set_size(i, us.size(0));
   //  compute 0th order generalized Vandermonde matrix
   if (weights.size(0) == 0) {
     if (degree != 0) {
@@ -5678,6 +6335,7 @@ static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
       ::coder::SizeType counterBottomRow;
       ::coder::SizeType gap;
       ::coder::SizeType nTermsInPrevLayer;
+      ::coder::SizeType x;
       //  Within each level, x^deg is at the peak of Pascal triangle
       cornerTriangle = (cornerTriangle + p) + degree;
       counterBottomRow = 1;
@@ -5691,18 +6349,18 @@ static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
         counterBottomRow++;
       }
       deg--;
-      b_degree = ((degree + degree) + p) - 1;
-      if (b_degree < 0) {
-        b_degree = 0;
+      x = ((degree + degree) + p) - 1;
+      if (x < 0) {
+        x = 0;
       }
-      excess += b_degree;
+      excess += x;
       d = (d + p) + 1;
       // number of terms in Pascal tetrahedron
       nTermsInPrevLayer = nTermsInLayer;
       nTermsInLayer = d + 3 * (excess - cornerTriangle);
       gap = (nTermsInPrevLayer + counterBottomRow) - 1;
-      b_degree = nTermsInLayer - counterBottomRow;
-      for (::coder::SizeType j{0}; j <= b_degree; j++) {
+      x = nTermsInLayer - counterBottomRow;
+      for (::coder::SizeType j{0}; j <= x; j++) {
         for (::coder::SizeType iPnt{0}; iPnt < npoints; iPnt++) {
           V[iPnt + V.size(1) * c] =
               V[iPnt + V.size(1) * (c - gap)] * us[us.size(1) * iPnt + 2];
@@ -5715,57 +6373,65 @@ static void gen_vander_3d(const ::coder::array<real_T, 2U> &us,
 }
 
 // hexa_125 - Triquartic hexahedral element with equidistant points
-static inline void hexa_125(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[125], real_T sdvals[375])
+static inline
+void hexa_125(real_T xi, real_T eta, real_T zeta, real_T sfvals[125],
+                     real_T sdvals[375])
 {
   ::sfe_sfuncs::hexa_125_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // hexa_216 - Triquintic hexahedral element with equidistant points
-static inline void hexa_216(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[216], real_T sdvals[648])
+static inline
+void hexa_216(real_T xi, real_T eta, real_T zeta, real_T sfvals[216],
+                     real_T sdvals[648])
 {
   ::sfe_sfuncs::hexa_216_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // hexa_343 - Trisextic hexahedral element with equidistant points
-static inline void hexa_343(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[343], real_T sdvals[1029])
+static inline
+void hexa_343(real_T xi, real_T eta, real_T zeta, real_T sfvals[343],
+                     real_T sdvals[1029])
 {
   ::sfe_sfuncs::hexa_343_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // hexa_64 - Tricubic hexahedral element with equidistant nodes
-static inline void hexa_64(real_T xi, real_T eta, real_T zeta,
-                           real_T sfvals[64], real_T sdvals[192])
+static inline
+void hexa_64(real_T xi, real_T eta, real_T zeta, real_T sfvals[64],
+                    real_T sdvals[192])
 {
   ::sfe_sfuncs::hexa_64_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // hexa_gl_125 - Triquartic hexahedral element with Gauss-Lobatto points
-static inline void hexa_gl_125(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[125], real_T sdvals[375])
+static inline
+void hexa_gl_125(real_T xi, real_T eta, real_T zeta, real_T sfvals[125],
+                        real_T sdvals[375])
 {
   ::sfe_sfuncs::hexa_gl_125_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // hexa_gl_216 - Triquintic hexahedral element with equidistant points
-static inline void hexa_gl_216(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[216], real_T sdvals[648])
+static inline
+void hexa_gl_216(real_T xi, real_T eta, real_T zeta, real_T sfvals[216],
+                        real_T sdvals[648])
 {
   ::sfe_sfuncs::hexa_gl_216_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // hexa_gl_343 - Trisextic hexahedral element with equidistant points
-static inline void hexa_gl_343(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[343], real_T sdvals[1029])
+static inline
+void hexa_gl_343(real_T xi, real_T eta, real_T zeta, real_T sfvals[343],
+                        real_T sdvals[1029])
 {
   ::sfe_sfuncs::hexa_gl_343_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // hexa_gl_64 - Tricubic hexahedral element with Gauss-Lobatto nodes
-static inline void hexa_gl_64(real_T xi, real_T eta, real_T zeta,
-                              real_T sfvals[64], real_T sdvals[192])
+static inline
+void hexa_gl_64(real_T xi, real_T eta, real_T zeta, real_T sfvals[64],
+                       real_T sdvals[192])
 {
   ::sfe_sfuncs::hexa_gl_64_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
@@ -5775,14 +6441,14 @@ static void init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
                         const ::coder::array<ConnData, 1U> &mesh_elemtables,
                         const ::coder::array<uint64_T, 1U> &mesh_teids,
                         const ::coder::array<Stencils, 1U> &mesh_stencils,
-                        ::coder::SizeType stclid,
-                        ::coder::array<int64_T, 1U> &A_row_ptr,
+                        ::coder::SizeType stclid, ::coder::array<int64_T, 1U> &A_row_ptr,
                         ::coder::array<int32_T, 1U> &A_col_ind,
                         ::coder::array<real_T, 1U> &A_val, int32_T *A_ncols,
                         ::coder::array<int32_T, 1U> &nnzs)
 {
   ::coder::array<int32_T, 1U> nodes_;
   ::coder::array<boolean_T, 1U> visited_;
+  ::coder::SizeType eid;
   ::coder::SizeType i;
   ::coder::SizeType i1;
   ::coder::SizeType j;
@@ -5805,7 +6471,6 @@ static void init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
     npe = mesh_elemtables[etable].conn.size(1);
     i1 = mesh_elemtables[etable].conn.size(0);
     for (::coder::SizeType e{0}; e < i1; e++) {
-      ::coder::SizeType eid;
       //  Element ID
       eid = mesh_elemtables[etable].istart + e;
       j = 0;
@@ -5816,7 +6481,8 @@ static void init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
         for (int64_T k = mesh_stencils[stclid - 1].ngbverts.row_ptr[nid - 1];
              k < mesh_stencils[stclid - 1].ngbverts.row_ptr[nid]; k++) {
           //  Check if already visited
-          loop_ub = mesh_stencils[stclid - 1].ngbverts.col_ind[k - 1];
+          loop_ub = mesh_stencils[stclid - 1]
+                        .ngbverts.col_ind[k - 1];
           if (!visited_[loop_ub - 1]) {
             j++;
             nodes_[j - 1] = loop_ub;
@@ -5837,7 +6503,8 @@ static void init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
     }
   }
   //  Allocate col_ind and val
-  A_col_ind.set_size((A_row_ptr[A_row_ptr.size(0) - 1] - 1L));
+  A_col_ind.set_size(
+      (A_row_ptr[A_row_ptr.size(0) - 1] - 1L));
   A_val.set_size((A_row_ptr[A_row_ptr.size(0) - 1] - 1L));
   loop_ub = (A_row_ptr[A_row_ptr.size(0) - 1] - 1L);
   for (i1 = 0; i1 < loop_ub; i1++) {
@@ -5848,8 +6515,8 @@ static void init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
     npe = mesh_elemtables[etable].conn.size(1);
     i1 = mesh_elemtables[etable].conn.size(0);
     for (::coder::SizeType e{0}; e < i1; e++) {
-      int64_T istart;
       //  Element ID
+      eid = mesh_elemtables[etable].istart + e;
       j = -1;
       for (::coder::SizeType b_i{0}; b_i < npe; b_i++) {
         nid = mesh_elemtables[etable]
@@ -5858,7 +6525,8 @@ static void init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
         for (int64_T k = mesh_stencils[stclid - 1].ngbverts.row_ptr[nid - 1];
              k < mesh_stencils[stclid - 1].ngbverts.row_ptr[nid]; k++) {
           //  Check if already visited
-          loop_ub = mesh_stencils[stclid - 1].ngbverts.col_ind[k - 1];
+          loop_ub = mesh_stencils[stclid - 1]
+                        .ngbverts.col_ind[k - 1];
           if (!visited_[loop_ub - 1]) {
             j++;
             nodes_[j] = loop_ub;
@@ -5867,18 +6535,16 @@ static void init_osusop(const ::coder::array<real_T, 2U> &mesh_coords,
         }
       }
       //  Put to A and reset visited nodes
-      istart = A_row_ptr[(mesh_elemtables[etable].istart + e) - 1];
       for (::coder::SizeType b_i{0}; b_i <= j; b_i++) {
         visited_[nodes_[b_i] - 1] = false;
-        A_col_ind[static_cast<::coder::SizeType>((istart + (b_i + 1)) - 1L) -
+        A_col_ind[static_cast<::coder::SizeType>((A_row_ptr[eid - 1] + (b_i + 1)) - 1L) -
                   1] = nodes_[b_i];
       }
     }
   }
 }
 
-static void insert_mem_crs(::coder::SizeType i,
-                           ::coder::array<int64_T, 1U> &row_ptr,
+static void insert_mem_crs(::coder::SizeType i, ::coder::array<int64_T, 1U> &row_ptr,
                            ::coder::array<int32_T, 1U> &col_ind,
                            ::coder::array<real_T, 1U> &val)
 {
@@ -5966,8 +6632,8 @@ static void insert_mem_crs(::coder::SizeType i,
 }
 
 // m2cFind - Search the position (index) of a `key` in a given `keys`
-static int64_T m2cFind(const ::coder::array<int32_T, 1U> &keys,
-                       ::coder::SizeType key, int64_T b_first, int64_T last)
+static int64_T m2cFind(const ::coder::array<int32_T, 1U> &keys, ::coder::SizeType key,
+                       int64_T b_first, int64_T last)
 {
   int64_T i;
   int64_T k;
@@ -5986,8 +6652,9 @@ static int64_T m2cFind(const ::coder::array<int32_T, 1U> &keys,
 }
 
 //  m2cSort - Sort keys in an array using std::sort in C++ STL.
-static inline void m2cSort(::coder::array<int32_T, 1U> &keys,
-                           ::coder::SizeType b_first, ::coder::SizeType last)
+static inline
+void m2cSort(::coder::array<int32_T, 1U> &keys, ::coder::SizeType b_first,
+                    ::coder::SizeType last)
 {
   if (last > b_first) {
     auto last_ptr = 1 + (&keys[last - 1]);
@@ -6005,7 +6672,8 @@ static void mark_discontinuities_kernel(
     const ::coder::array<real_T, 2U> &fs, const ::coder::array<real_T, 2U> &df,
     const ::coder::array<real_T, 2U> &alpha,
     const ::coder::array<real_T, 2U> &beta, real_T cglobal, real_T clocal,
-    real_T kappa1, real_T kappa0, ::coder::array<int8_T, 2U> &distags)
+    real_T kappa1, real_T kappa0, real_T lref,
+    ::coder::array<int8_T, 2U> &distags)
 {
   real_T thres;
   ::coder::SizeType iend;
@@ -6042,7 +6710,7 @@ static void mark_discontinuities_kernel(
     istart = threadID * chunk + u1;
     iend = (istart + chunk) + (threadID < b_remainder);
   }
-  thres = cglobal * std::pow(mesh_globalh, 1.5);
+  thres = cglobal * std::pow(mesh_globalh / lref, 1.5);
   for (::coder::SizeType i{istart + 1}; i <= iend; i++) {
     for (::coder::SizeType k{0}; k < nrhs; k++) {
       int64_T j;
@@ -6062,20 +6730,27 @@ static void mark_discontinuities_kernel(
         ::coder::SizeType u0;
         u0 = mesh_node2elems_col_ind[j - 1] - 1;
         c = mesh_teids[u0] & 255UL;
-        leid = (mesh_teids[mesh_node2elems_col_ind[j - 1] - 1] >> 8);
+        leid = (
+            mesh_teids[mesh_node2elems_col_ind[j - 1] -
+                       1] >>
+            8);
         b_fmax = -1.7976931348623157E+308;
         b_fmin = 1.7976931348623157E+308;
-        u1 = mesh_elemtables[(mesh_teids[mesh_node2elems_col_ind[j - 1] - 1] &
-                              255UL) -
+        u1 = mesh_elemtables[(
+                                 mesh_teids[mesh_node2elems_col_ind
+                                                [j - 1] -
+                                            1] &
+                                 255UL) -
                              1]
                  .conn.size(1);
         for (::coder::SizeType ii{0}; ii < u1; ii++) {
           real_T fvalue;
           fvalue =
               fs[k + fs.size(1) *
-                         (mesh_elemtables[c - 1]
-                              .conn[ii + mesh_elemtables[c - 1].conn.size(1) *
-                                             (leid - 1)] -
+                         (mesh_elemtables[c - 1].conn
+                              [ii + mesh_elemtables[c - 1]
+                                            .conn.size(1) *
+                                        (leid - 1)] -
                           1)];
           if (b_fmax < fvalue) {
             b_fmax = fvalue;
@@ -6115,218 +6790,218 @@ static void mark_discontinuities_kernel(
 static uint8_T obtain_facets(::coder::SizeType etype)
 {
   const static std::vector<std::vector<uint8_T>> FACETS{
-      {1, 1},                         // SFE_BAR_2
-      {},                             // 37
-      {},                             // 38
-      {},                             // 39
-      {1, 1},                         // SFE_BAR_3
-      {},                             // 41
-      {},                             // 42
-      {},                             // 43
-      {1, 1},                         // SFE_BAR_4
-      {1, 1},                         // SFE_BAR_FEK_4
-      {},                             // 46
-      {},                             // 47
-      {1, 1},                         // SFE_BAR_5
-      {1, 1},                         // SFE_BAR_FEK_5
-      {},                             // 50
-      {},                             // 51
-      {1, 1},                         // SFE_BAR_6
-      {1, 1},                         // SFE_BAR_FEK_6
-      {},                             // 54
-      {},                             // 55
-      {1, 1},                         // SFE_BAR_7
-      {1, 1},                         // SFE_BAR_FEK_7
-      {},                             // 58
-      {},                             // 59
-      {},                             // 60
-      {},                             // 61
-      {},                             // 62
-      {},                             // 63
-      {},                             // 64
-      {},                             // 65
-      {},                             // 66
-      {},                             // 67
-      {36, 36, 36},                   // SFE_TRI_3
-      {},                             // 69
-      {},                             // 70
-      {},                             // 71
-      {40, 40, 40},                   // SFE_TRI_6
-      {},                             // 73
-      {},                             // 74
-      {},                             // 75
-      {44, 44, 44},                   // SFE_TRI_10
-      {45, 45, 45},                   // SFE_TRI_FEK_10
-      {},                             // 78
-      {},                             // 79
-      {48, 48, 48},                   // SFE_TRI_15
-      {49, 49, 49},                   // SFE_TRI_GL_15
-      {48, 48, 48},                   // SFE_TRI_FEK_15
-      {},                             // 83
-      {52, 52, 52},                   // SFE_TRI_21
-      {53, 53, 53},                   // SFE_TRI_GL_21
-      {52, 52, 52},                   // SFE_TRI_FEK_21
-      {},                             // 87
-      {56, 56, 56},                   // SFE_TRI_28
-      {57, 57, 57},                   // SFE_TRI_GL_28
-      {56, 56, 56},                   // SFE_TRI_FEK_28
-      {},                             // 91
-      {},                             // 92
-      {},                             // 93
-      {},                             // 94
-      {},                             // 95
-      {},                             // 96
-      {},                             // 97
-      {},                             // 98
-      {},                             // 99
-      {36, 36, 36, 36},               // SFE_QUAD_4
-      {},                             // 101
-      {},                             // 102
-      {},                             // 103
-      {40, 40, 40, 40},               // SFE_QUAD_9
-      {},                             // 105
-      {},                             // 106
-      {},                             // 107
-      {44, 44, 44, 44},               // SFE_QUAD_16
-      {45, 45, 45, 45},               // SFE_QUAD_FEK_16
-      {},                             // 110
-      {},                             // 111
-      {48, 48, 48, 48},               // SFE_QUAD_25
-      {49, 49, 49, 49},               // SFE_QUAD_FEK_25
-      {},                             // 114
-      {},                             // 115
-      {52, 52, 52, 52},               // SFE_QUAD_36
-      {53, 53, 53, 53},               // SFE_QUAD_FEK_36
-      {},                             // 118
-      {},                             // 119
-      {56, 56, 56, 56},               // SFE_QUAD_49
-      {57, 57, 57, 57},               // SFE_QUAD_FEK_49
-      {},                             // 122
-      {},                             // 123
-      {},                             // 124
-      {},                             // 125
-      {},                             // 126
-      {},                             // 127
-      {},                             // 128
-      {},                             // 129
-      {},                             // 130
-      {},                             // 131
-      {68, 68, 68, 68},               // SFE_TET_4
-      {},                             // 133
-      {},                             // 134
-      {},                             // 135
-      {72, 72, 72, 72},               // SFE_TET_10
-      {},                             // 137
-      {},                             // 138
-      {},                             // 139
-      {76, 76, 76, 76},               // SFE_TET_20
-      {77, 77, 77, 77},               // SFE_TET_FEK_20
-      {},                             // 142
-      {},                             // 143
-      {80, 80, 80, 80},               // SFE_TET_35
-      {81, 81, 81, 81},               // SFE_TET_GL_35
-      {82, 82, 82, 82},               // SFE_TET_FEK_35
-      {},                             // 147
-      {84, 84, 84, 84},               // SFE_TET_56
-      {85, 85, 85, 85},               // SFE_TET_GL_56
-      {86, 86, 86, 86},               // SFE_TET_FEK_56
-      {},                             // 151
-      {88, 88, 88, 88},               // SFE_TET_84
-      {89, 89, 89, 89},               // SFE_TET_GL_84
-      {90, 90, 90, 90},               // SFE_TET_FEK_84
-      {},                             // 155
-      {},                             // 156
-      {},                             // 157
-      {},                             // 158
-      {},                             // 159
-      {},                             // 160
-      {},                             // 161
-      {},                             // 162
-      {},                             // 163
-      {100, 68, 68, 68, 68},          // SFE_PYRA_5
-      {},                             // 165
-      {},                             // 166
-      {},                             // 167
-      {104, 72, 72, 72, 72},          // SFE_PYRA_14
-      {},                             // 169
-      {},                             // 170
-      {},                             // 171
-      {108, 76, 76, 76, 76},          // SFE_PYRA_30
-      {109, 77, 77, 77, 77},          // SFE_PYRA_FEK_30
-      {},                             // 174
-      {},                             // 175
-      {112, 80, 80, 80, 80},          // SFE_PYRA_55
-      {113, 81, 81, 81, 81},          // SFE_PYRA_GL_55
-      {112, 82, 82, 82, 82},          // SFE_PYRA_FEK_55
-      {},                             // 179
-      {116, 84, 84, 84, 84},          // SFE_PYRA_91
-      {},                             // 181
-      {},                             // 182
-      {},                             // 183
-      {},                             // 184
-      {},                             // 185
-      {},                             // 186
-      {},                             // 187
-      {},                             // 188
-      {},                             // 189
-      {},                             // 190
-      {},                             // 191
-      {},                             // 192
-      {},                             // 193
-      {},                             // 194
-      {},                             // 195
-      {100, 100, 100, 68, 68},        // SFE_PRISM_6
-      {},                             // 197
-      {},                             // 198
-      {},                             // 199
-      {104, 104, 104, 72, 72},        // SFE_PRISM_18
-      {},                             // 201
-      {},                             // 202
-      {},                             // 203
-      {108, 108, 108, 76, 76},        // SFE_PRISM_40
-      {109, 109, 109, 77, 77},        // SFE_PRISM_FEK_40
-      {},                             // 206
-      {},                             // 207
-      {112, 112, 112, 80, 80},        // SFE_PRISM_75
-      {113, 113, 113, 81, 81},        // SFE_PRISM_GL_75
-      {112, 112, 112, 82, 82},        // SFE_PRISM_FEK_75
-      {},                             // 211
-      {116, 116, 116, 84, 84},        // SFE_PRISM_126
-      {117, 117, 117, 85, 85},        // SFE_PRISM_GL_126
-      {},                             // 214
-      {},                             // 215
-      {120, 120, 120, 88, 88},        // SFE_PRISM_196
-      {},                             // 217
-      {},                             // 218
-      {},                             // 219
-      {},                             // 220
-      {},                             // 221
-      {},                             // 222
-      {},                             // 223
-      {},                             // 224
-      {},                             // 225
-      {},                             // 226
-      {},                             // 227
+      {1, 1}, // SFE_BAR_2
+      {}, // 37
+      {}, // 38
+      {}, // 39
+      {1, 1}, // SFE_BAR_3
+      {}, // 41
+      {}, // 42
+      {}, // 43
+      {1, 1}, // SFE_BAR_4
+      {1, 1}, // SFE_BAR_FEK_4
+      {}, // 46
+      {}, // 47
+      {1, 1}, // SFE_BAR_5
+      {1, 1}, // SFE_BAR_FEK_5
+      {}, // 50
+      {}, // 51
+      {1, 1}, // SFE_BAR_6
+      {1, 1}, // SFE_BAR_FEK_6
+      {}, // 54
+      {}, // 55
+      {1, 1}, // SFE_BAR_7
+      {1, 1}, // SFE_BAR_FEK_7
+      {}, // 58
+      {}, // 59
+      {}, // 60
+      {}, // 61
+      {}, // 62
+      {}, // 63
+      {}, // 64
+      {}, // 65
+      {}, // 66
+      {}, // 67
+      {36, 36, 36}, // SFE_TRI_3
+      {}, // 69
+      {}, // 70
+      {}, // 71
+      {40, 40, 40}, // SFE_TRI_6
+      {}, // 73
+      {}, // 74
+      {}, // 75
+      {44, 44, 44}, // SFE_TRI_10
+      {45, 45, 45}, // SFE_TRI_FEK_10
+      {}, // 78
+      {}, // 79
+      {48, 48, 48}, // SFE_TRI_15
+      {49, 49, 49}, // SFE_TRI_GL_15
+      {48, 48, 48}, // SFE_TRI_FEK_15
+      {}, // 83
+      {52, 52, 52}, // SFE_TRI_21
+      {53, 53, 53}, // SFE_TRI_GL_21
+      {52, 52, 52}, // SFE_TRI_FEK_21
+      {}, // 87
+      {56, 56, 56}, // SFE_TRI_28
+      {57, 57, 57}, // SFE_TRI_GL_28
+      {56, 56, 56}, // SFE_TRI_FEK_28
+      {}, // 91
+      {}, // 92
+      {}, // 93
+      {}, // 94
+      {}, // 95
+      {}, // 96
+      {}, // 97
+      {}, // 98
+      {}, // 99
+      {36, 36, 36, 36}, // SFE_QUAD_4
+      {}, // 101
+      {}, // 102
+      {}, // 103
+      {40, 40, 40, 40}, // SFE_QUAD_9
+      {}, // 105
+      {}, // 106
+      {}, // 107
+      {44, 44, 44, 44}, // SFE_QUAD_16
+      {45, 45, 45, 45}, // SFE_QUAD_FEK_16
+      {}, // 110
+      {}, // 111
+      {48, 48, 48, 48}, // SFE_QUAD_25
+      {49, 49, 49, 49}, // SFE_QUAD_FEK_25
+      {}, // 114
+      {}, // 115
+      {52, 52, 52, 52}, // SFE_QUAD_36
+      {53, 53, 53, 53}, // SFE_QUAD_FEK_36
+      {}, // 118
+      {}, // 119
+      {56, 56, 56, 56}, // SFE_QUAD_49
+      {57, 57, 57, 57}, // SFE_QUAD_FEK_49
+      {}, // 122
+      {}, // 123
+      {}, // 124
+      {}, // 125
+      {}, // 126
+      {}, // 127
+      {}, // 128
+      {}, // 129
+      {}, // 130
+      {}, // 131
+      {68, 68, 68, 68}, // SFE_TET_4
+      {}, // 133
+      {}, // 134
+      {}, // 135
+      {72, 72, 72, 72}, // SFE_TET_10
+      {}, // 137
+      {}, // 138
+      {}, // 139
+      {76, 76, 76, 76}, // SFE_TET_20
+      {77, 77, 77, 77}, // SFE_TET_FEK_20
+      {}, // 142
+      {}, // 143
+      {80, 80, 80, 80}, // SFE_TET_35
+      {81, 81, 81, 81}, // SFE_TET_GL_35
+      {82, 82, 82, 82}, // SFE_TET_FEK_35
+      {}, // 147
+      {84, 84, 84, 84}, // SFE_TET_56
+      {85, 85, 85, 85}, // SFE_TET_GL_56
+      {86, 86, 86, 86}, // SFE_TET_FEK_56
+      {}, // 151
+      {88, 88, 88, 88}, // SFE_TET_84
+      {89, 89, 89, 89}, // SFE_TET_GL_84
+      {90, 90, 90, 90}, // SFE_TET_FEK_84
+      {}, // 155
+      {}, // 156
+      {}, // 157
+      {}, // 158
+      {}, // 159
+      {}, // 160
+      {}, // 161
+      {}, // 162
+      {}, // 163
+      {100, 68, 68, 68, 68}, // SFE_PYRA_5
+      {}, // 165
+      {}, // 166
+      {}, // 167
+      {104, 72, 72, 72, 72}, // SFE_PYRA_14
+      {}, // 169
+      {}, // 170
+      {}, // 171
+      {108, 76, 76, 76, 76}, // SFE_PYRA_30
+      {109, 77, 77, 77, 77}, // SFE_PYRA_FEK_30
+      {}, // 174
+      {}, // 175
+      {112, 80, 80, 80, 80}, // SFE_PYRA_55
+      {113, 81, 81, 81, 81}, // SFE_PYRA_GL_55
+      {112, 82, 82, 82, 82}, // SFE_PYRA_FEK_55
+      {}, // 179
+      {116, 84, 84, 84, 84}, // SFE_PYRA_91
+      {}, // 181
+      {}, // 182
+      {}, // 183
+      {}, // 184
+      {}, // 185
+      {}, // 186
+      {}, // 187
+      {}, // 188
+      {}, // 189
+      {}, // 190
+      {}, // 191
+      {}, // 192
+      {}, // 193
+      {}, // 194
+      {}, // 195
+      {100, 100, 100, 68, 68}, // SFE_PRISM_6
+      {}, // 197
+      {}, // 198
+      {}, // 199
+      {104, 104, 104, 72, 72}, // SFE_PRISM_18
+      {}, // 201
+      {}, // 202
+      {}, // 203
+      {108, 108, 108, 76, 76}, // SFE_PRISM_40
+      {109, 109, 109, 77, 77}, // SFE_PRISM_FEK_40
+      {}, // 206
+      {}, // 207
+      {112, 112, 112, 80, 80}, // SFE_PRISM_75
+      {113, 113, 113, 81, 81}, // SFE_PRISM_GL_75
+      {112, 112, 112, 82, 82}, // SFE_PRISM_FEK_75
+      {}, // 211
+      {116, 116, 116, 84, 84}, // SFE_PRISM_126
+      {117, 117, 117, 85, 85}, // SFE_PRISM_GL_126
+      {}, // 214
+      {}, // 215
+      {120, 120, 120, 88, 88}, // SFE_PRISM_196
+      {}, // 217
+      {}, // 218
+      {}, // 219
+      {}, // 220
+      {}, // 221
+      {}, // 222
+      {}, // 223
+      {}, // 224
+      {}, // 225
+      {}, // 226
+      {}, // 227
       {100, 100, 100, 100, 100, 100}, // SFE_HEXA_8
-      {},                             // 229
-      {},                             // 230
-      {},                             // 231
+      {}, // 229
+      {}, // 230
+      {}, // 231
       {104, 104, 104, 104, 104, 104}, // SFE_HEXA_27
-      {},                             // 233
-      {},                             // 234
-      {},                             // 235
+      {}, // 233
+      {}, // 234
+      {}, // 235
       {108, 108, 108, 108, 108, 108}, // SFE_HEXA_64
       {109, 109, 109, 109, 109, 109}, // SFE_HEXA_FEK_64
-      {},                             // 238
-      {},                             // 239
+      {}, // 238
+      {}, // 239
       {112, 112, 112, 112, 112, 112}, // SFE_HEXA_125
       {113, 113, 113, 113, 113, 113}, // SFE_HEXA_FEK_125
-      {},                             // 242
-      {},                             // 243
+      {}, // 242
+      {}, // 243
       {116, 116, 116, 116, 116, 116}, // SFE_HEXA_216
       {117, 117, 117, 117, 117, 117}, // SFE_HEXA_FEK_216
-      {},                             // 246
-      {},                             // 247
+      {}, // 246
+      {}, // 247
       {120, 120, 120, 120, 120, 120}, // SFE_HEXA_343
       {121, 121, 121, 121, 121, 121}, // SFE_HEXA_FEK_343
   };
@@ -6340,270 +7015,274 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
 {
   ::coder::SizeType n;
   const static std::vector<std::vector<uint8_T>> FACETS{
-      {1, 1},                         // SFE_BAR_2
-      {},                             // 37
-      {},                             // 38
-      {},                             // 39
-      {1, 1},                         // SFE_BAR_3
-      {},                             // 41
-      {},                             // 42
-      {},                             // 43
-      {1, 1},                         // SFE_BAR_4
-      {1, 1},                         // SFE_BAR_FEK_4
-      {},                             // 46
-      {},                             // 47
-      {1, 1},                         // SFE_BAR_5
-      {1, 1},                         // SFE_BAR_FEK_5
-      {},                             // 50
-      {},                             // 51
-      {1, 1},                         // SFE_BAR_6
-      {1, 1},                         // SFE_BAR_FEK_6
-      {},                             // 54
-      {},                             // 55
-      {1, 1},                         // SFE_BAR_7
-      {1, 1},                         // SFE_BAR_FEK_7
-      {},                             // 58
-      {},                             // 59
-      {},                             // 60
-      {},                             // 61
-      {},                             // 62
-      {},                             // 63
-      {},                             // 64
-      {},                             // 65
-      {},                             // 66
-      {},                             // 67
-      {36, 36, 36},                   // SFE_TRI_3
-      {},                             // 69
-      {},                             // 70
-      {},                             // 71
-      {40, 40, 40},                   // SFE_TRI_6
-      {},                             // 73
-      {},                             // 74
-      {},                             // 75
-      {44, 44, 44},                   // SFE_TRI_10
-      {45, 45, 45},                   // SFE_TRI_FEK_10
-      {},                             // 78
-      {},                             // 79
-      {48, 48, 48},                   // SFE_TRI_15
-      {49, 49, 49},                   // SFE_TRI_GL_15
-      {48, 48, 48},                   // SFE_TRI_FEK_15
-      {},                             // 83
-      {52, 52, 52},                   // SFE_TRI_21
-      {53, 53, 53},                   // SFE_TRI_GL_21
-      {52, 52, 52},                   // SFE_TRI_FEK_21
-      {},                             // 87
-      {56, 56, 56},                   // SFE_TRI_28
-      {57, 57, 57},                   // SFE_TRI_GL_28
-      {56, 56, 56},                   // SFE_TRI_FEK_28
-      {},                             // 91
-      {},                             // 92
-      {},                             // 93
-      {},                             // 94
-      {},                             // 95
-      {},                             // 96
-      {},                             // 97
-      {},                             // 98
-      {},                             // 99
-      {36, 36, 36, 36},               // SFE_QUAD_4
-      {},                             // 101
-      {},                             // 102
-      {},                             // 103
-      {40, 40, 40, 40},               // SFE_QUAD_9
-      {},                             // 105
-      {},                             // 106
-      {},                             // 107
-      {44, 44, 44, 44},               // SFE_QUAD_16
-      {45, 45, 45, 45},               // SFE_QUAD_FEK_16
-      {},                             // 110
-      {},                             // 111
-      {48, 48, 48, 48},               // SFE_QUAD_25
-      {49, 49, 49, 49},               // SFE_QUAD_FEK_25
-      {},                             // 114
-      {},                             // 115
-      {52, 52, 52, 52},               // SFE_QUAD_36
-      {53, 53, 53, 53},               // SFE_QUAD_FEK_36
-      {},                             // 118
-      {},                             // 119
-      {56, 56, 56, 56},               // SFE_QUAD_49
-      {57, 57, 57, 57},               // SFE_QUAD_FEK_49
-      {},                             // 122
-      {},                             // 123
-      {},                             // 124
-      {},                             // 125
-      {},                             // 126
-      {},                             // 127
-      {},                             // 128
-      {},                             // 129
-      {},                             // 130
-      {},                             // 131
-      {68, 68, 68, 68},               // SFE_TET_4
-      {},                             // 133
-      {},                             // 134
-      {},                             // 135
-      {72, 72, 72, 72},               // SFE_TET_10
-      {},                             // 137
-      {},                             // 138
-      {},                             // 139
-      {76, 76, 76, 76},               // SFE_TET_20
-      {77, 77, 77, 77},               // SFE_TET_FEK_20
-      {},                             // 142
-      {},                             // 143
-      {80, 80, 80, 80},               // SFE_TET_35
-      {81, 81, 81, 81},               // SFE_TET_GL_35
-      {82, 82, 82, 82},               // SFE_TET_FEK_35
-      {},                             // 147
-      {84, 84, 84, 84},               // SFE_TET_56
-      {85, 85, 85, 85},               // SFE_TET_GL_56
-      {86, 86, 86, 86},               // SFE_TET_FEK_56
-      {},                             // 151
-      {88, 88, 88, 88},               // SFE_TET_84
-      {89, 89, 89, 89},               // SFE_TET_GL_84
-      {90, 90, 90, 90},               // SFE_TET_FEK_84
-      {},                             // 155
-      {},                             // 156
-      {},                             // 157
-      {},                             // 158
-      {},                             // 159
-      {},                             // 160
-      {},                             // 161
-      {},                             // 162
-      {},                             // 163
-      {100, 68, 68, 68, 68},          // SFE_PYRA_5
-      {},                             // 165
-      {},                             // 166
-      {},                             // 167
-      {104, 72, 72, 72, 72},          // SFE_PYRA_14
-      {},                             // 169
-      {},                             // 170
-      {},                             // 171
-      {108, 76, 76, 76, 76},          // SFE_PYRA_30
-      {109, 77, 77, 77, 77},          // SFE_PYRA_FEK_30
-      {},                             // 174
-      {},                             // 175
-      {112, 80, 80, 80, 80},          // SFE_PYRA_55
-      {113, 81, 81, 81, 81},          // SFE_PYRA_GL_55
-      {112, 82, 82, 82, 82},          // SFE_PYRA_FEK_55
-      {},                             // 179
-      {116, 84, 84, 84, 84},          // SFE_PYRA_91
-      {},                             // 181
-      {},                             // 182
-      {},                             // 183
-      {},                             // 184
-      {},                             // 185
-      {},                             // 186
-      {},                             // 187
-      {},                             // 188
-      {},                             // 189
-      {},                             // 190
-      {},                             // 191
-      {},                             // 192
-      {},                             // 193
-      {},                             // 194
-      {},                             // 195
-      {100, 100, 100, 68, 68},        // SFE_PRISM_6
-      {},                             // 197
-      {},                             // 198
-      {},                             // 199
-      {104, 104, 104, 72, 72},        // SFE_PRISM_18
-      {},                             // 201
-      {},                             // 202
-      {},                             // 203
-      {108, 108, 108, 76, 76},        // SFE_PRISM_40
-      {109, 109, 109, 77, 77},        // SFE_PRISM_FEK_40
-      {},                             // 206
-      {},                             // 207
-      {112, 112, 112, 80, 80},        // SFE_PRISM_75
-      {113, 113, 113, 81, 81},        // SFE_PRISM_GL_75
-      {112, 112, 112, 82, 82},        // SFE_PRISM_FEK_75
-      {},                             // 211
-      {116, 116, 116, 84, 84},        // SFE_PRISM_126
-      {117, 117, 117, 85, 85},        // SFE_PRISM_GL_126
-      {},                             // 214
-      {},                             // 215
-      {120, 120, 120, 88, 88},        // SFE_PRISM_196
-      {},                             // 217
-      {},                             // 218
-      {},                             // 219
-      {},                             // 220
-      {},                             // 221
-      {},                             // 222
-      {},                             // 223
-      {},                             // 224
-      {},                             // 225
-      {},                             // 226
-      {},                             // 227
+      {1, 1}, // SFE_BAR_2
+      {}, // 37
+      {}, // 38
+      {}, // 39
+      {1, 1}, // SFE_BAR_3
+      {}, // 41
+      {}, // 42
+      {}, // 43
+      {1, 1}, // SFE_BAR_4
+      {1, 1}, // SFE_BAR_FEK_4
+      {}, // 46
+      {}, // 47
+      {1, 1}, // SFE_BAR_5
+      {1, 1}, // SFE_BAR_FEK_5
+      {}, // 50
+      {}, // 51
+      {1, 1}, // SFE_BAR_6
+      {1, 1}, // SFE_BAR_FEK_6
+      {}, // 54
+      {}, // 55
+      {1, 1}, // SFE_BAR_7
+      {1, 1}, // SFE_BAR_FEK_7
+      {}, // 58
+      {}, // 59
+      {}, // 60
+      {}, // 61
+      {}, // 62
+      {}, // 63
+      {}, // 64
+      {}, // 65
+      {}, // 66
+      {}, // 67
+      {36, 36, 36}, // SFE_TRI_3
+      {}, // 69
+      {}, // 70
+      {}, // 71
+      {40, 40, 40}, // SFE_TRI_6
+      {}, // 73
+      {}, // 74
+      {}, // 75
+      {44, 44, 44}, // SFE_TRI_10
+      {45, 45, 45}, // SFE_TRI_FEK_10
+      {}, // 78
+      {}, // 79
+      {48, 48, 48}, // SFE_TRI_15
+      {49, 49, 49}, // SFE_TRI_GL_15
+      {48, 48, 48}, // SFE_TRI_FEK_15
+      {}, // 83
+      {52, 52, 52}, // SFE_TRI_21
+      {53, 53, 53}, // SFE_TRI_GL_21
+      {52, 52, 52}, // SFE_TRI_FEK_21
+      {}, // 87
+      {56, 56, 56}, // SFE_TRI_28
+      {57, 57, 57}, // SFE_TRI_GL_28
+      {56, 56, 56}, // SFE_TRI_FEK_28
+      {}, // 91
+      {}, // 92
+      {}, // 93
+      {}, // 94
+      {}, // 95
+      {}, // 96
+      {}, // 97
+      {}, // 98
+      {}, // 99
+      {36, 36, 36, 36}, // SFE_QUAD_4
+      {}, // 101
+      {}, // 102
+      {}, // 103
+      {40, 40, 40, 40}, // SFE_QUAD_9
+      {}, // 105
+      {}, // 106
+      {}, // 107
+      {44, 44, 44, 44}, // SFE_QUAD_16
+      {45, 45, 45, 45}, // SFE_QUAD_FEK_16
+      {}, // 110
+      {}, // 111
+      {48, 48, 48, 48}, // SFE_QUAD_25
+      {49, 49, 49, 49}, // SFE_QUAD_FEK_25
+      {}, // 114
+      {}, // 115
+      {52, 52, 52, 52}, // SFE_QUAD_36
+      {53, 53, 53, 53}, // SFE_QUAD_FEK_36
+      {}, // 118
+      {}, // 119
+      {56, 56, 56, 56}, // SFE_QUAD_49
+      {57, 57, 57, 57}, // SFE_QUAD_FEK_49
+      {}, // 122
+      {}, // 123
+      {}, // 124
+      {}, // 125
+      {}, // 126
+      {}, // 127
+      {}, // 128
+      {}, // 129
+      {}, // 130
+      {}, // 131
+      {68, 68, 68, 68}, // SFE_TET_4
+      {}, // 133
+      {}, // 134
+      {}, // 135
+      {72, 72, 72, 72}, // SFE_TET_10
+      {}, // 137
+      {}, // 138
+      {}, // 139
+      {76, 76, 76, 76}, // SFE_TET_20
+      {77, 77, 77, 77}, // SFE_TET_FEK_20
+      {}, // 142
+      {}, // 143
+      {80, 80, 80, 80}, // SFE_TET_35
+      {81, 81, 81, 81}, // SFE_TET_GL_35
+      {82, 82, 82, 82}, // SFE_TET_FEK_35
+      {}, // 147
+      {84, 84, 84, 84}, // SFE_TET_56
+      {85, 85, 85, 85}, // SFE_TET_GL_56
+      {86, 86, 86, 86}, // SFE_TET_FEK_56
+      {}, // 151
+      {88, 88, 88, 88}, // SFE_TET_84
+      {89, 89, 89, 89}, // SFE_TET_GL_84
+      {90, 90, 90, 90}, // SFE_TET_FEK_84
+      {}, // 155
+      {}, // 156
+      {}, // 157
+      {}, // 158
+      {}, // 159
+      {}, // 160
+      {}, // 161
+      {}, // 162
+      {}, // 163
+      {100, 68, 68, 68, 68}, // SFE_PYRA_5
+      {}, // 165
+      {}, // 166
+      {}, // 167
+      {104, 72, 72, 72, 72}, // SFE_PYRA_14
+      {}, // 169
+      {}, // 170
+      {}, // 171
+      {108, 76, 76, 76, 76}, // SFE_PYRA_30
+      {109, 77, 77, 77, 77}, // SFE_PYRA_FEK_30
+      {}, // 174
+      {}, // 175
+      {112, 80, 80, 80, 80}, // SFE_PYRA_55
+      {113, 81, 81, 81, 81}, // SFE_PYRA_GL_55
+      {112, 82, 82, 82, 82}, // SFE_PYRA_FEK_55
+      {}, // 179
+      {116, 84, 84, 84, 84}, // SFE_PYRA_91
+      {}, // 181
+      {}, // 182
+      {}, // 183
+      {}, // 184
+      {}, // 185
+      {}, // 186
+      {}, // 187
+      {}, // 188
+      {}, // 189
+      {}, // 190
+      {}, // 191
+      {}, // 192
+      {}, // 193
+      {}, // 194
+      {}, // 195
+      {100, 100, 100, 68, 68}, // SFE_PRISM_6
+      {}, // 197
+      {}, // 198
+      {}, // 199
+      {104, 104, 104, 72, 72}, // SFE_PRISM_18
+      {}, // 201
+      {}, // 202
+      {}, // 203
+      {108, 108, 108, 76, 76}, // SFE_PRISM_40
+      {109, 109, 109, 77, 77}, // SFE_PRISM_FEK_40
+      {}, // 206
+      {}, // 207
+      {112, 112, 112, 80, 80}, // SFE_PRISM_75
+      {113, 113, 113, 81, 81}, // SFE_PRISM_GL_75
+      {112, 112, 112, 82, 82}, // SFE_PRISM_FEK_75
+      {}, // 211
+      {116, 116, 116, 84, 84}, // SFE_PRISM_126
+      {117, 117, 117, 85, 85}, // SFE_PRISM_GL_126
+      {}, // 214
+      {}, // 215
+      {120, 120, 120, 88, 88}, // SFE_PRISM_196
+      {}, // 217
+      {}, // 218
+      {}, // 219
+      {}, // 220
+      {}, // 221
+      {}, // 222
+      {}, // 223
+      {}, // 224
+      {}, // 225
+      {}, // 226
+      {}, // 227
       {100, 100, 100, 100, 100, 100}, // SFE_HEXA_8
-      {},                             // 229
-      {},                             // 230
-      {},                             // 231
+      {}, // 229
+      {}, // 230
+      {}, // 231
       {104, 104, 104, 104, 104, 104}, // SFE_HEXA_27
-      {},                             // 233
-      {},                             // 234
-      {},                             // 235
+      {}, // 233
+      {}, // 234
+      {}, // 235
       {108, 108, 108, 108, 108, 108}, // SFE_HEXA_64
       {109, 109, 109, 109, 109, 109}, // SFE_HEXA_FEK_64
-      {},                             // 238
-      {},                             // 239
+      {}, // 238
+      {}, // 239
       {112, 112, 112, 112, 112, 112}, // SFE_HEXA_125
       {113, 113, 113, 113, 113, 113}, // SFE_HEXA_FEK_125
-      {},                             // 242
-      {},                             // 243
+      {}, // 242
+      {}, // 243
       {116, 116, 116, 116, 116, 116}, // SFE_HEXA_216
       {117, 117, 117, 117, 117, 117}, // SFE_HEXA_FEK_216
-      {},                             // 246
-      {},                             // 247
+      {}, // 246
+      {}, // 247
       {120, 120, 120, 120, 120, 120}, // SFE_HEXA_343
       {121, 121, 121, 121, 121, 121}, // SFE_HEXA_FEK_343
   };
   const static std::vector<std::vector<std::vector<int16_T>>> LIDS{
-      {{1}, {2}},                                             // SFE_BAR_2
-      {{}},                                                   // 37
-      {{}},                                                   // 38
-      {{}},                                                   // 39
-      {{1}, {2}},                                             // SFE_BAR_3
-      {{}},                                                   // 41
-      {{}},                                                   // 42
-      {{}},                                                   // 43
-      {{1}, {2}},                                             // SFE_BAR_4
-      {{1}, {2}},                                             // SFE_BAR_FEK_4
-      {{}},                                                   // 46
-      {{}},                                                   // 47
-      {{1}, {2}},                                             // SFE_BAR_5
-      {{1}, {2}},                                             // SFE_BAR_FEK_5
-      {{}},                                                   // 50
-      {{}},                                                   // 51
-      {{1}, {2}},                                             // SFE_BAR_6
-      {{1}, {2}},                                             // SFE_BAR_FEK_6
-      {{}},                                                   // 54
-      {{}},                                                   // 55
-      {{1}, {2}},                                             // SFE_BAR_7
-      {{1}, {2}},                                             // SFE_BAR_FEK_7
-      {{}},                                                   // 58
-      {{}},                                                   // 59
-      {{}},                                                   // 60
-      {{}},                                                   // 61
-      {{}},                                                   // 62
-      {{}},                                                   // 63
-      {{}},                                                   // 64
-      {{}},                                                   // 65
-      {{}},                                                   // 66
-      {{}},                                                   // 67
-      {{1, 2}, {2, 3}, {3, 1}},                               // SFE_TRI_3
-      {{}},                                                   // 69
-      {{}},                                                   // 70
-      {{}},                                                   // 71
-      {{1, 2, 4}, {2, 3, 5}, {3, 1, 6}},                      // SFE_TRI_6
-      {{}},                                                   // 73
-      {{}},                                                   // 74
-      {{}},                                                   // 75
-      {{1, 2, 4, 5}, {2, 3, 6, 7}, {3, 1, 8, 9}},             // SFE_TRI_10
-      {{1, 2, 4, 5}, {2, 3, 6, 7}, {3, 1, 8, 9}},             // SFE_TRI_FEK_10
-      {{}},                                                   // 78
-      {{}},                                                   // 79
+      {{1}, {2}}, // SFE_BAR_2
+      {{}}, // 37
+      {{}}, // 38
+      {{}}, // 39
+      {{1}, {2}}, // SFE_BAR_3
+      {{}}, // 41
+      {{}}, // 42
+      {{}}, // 43
+      {{1}, {2}}, // SFE_BAR_4
+      {{1}, {2}}, // SFE_BAR_FEK_4
+      {{}}, // 46
+      {{}}, // 47
+      {{1}, {2}}, // SFE_BAR_5
+      {{1}, {2}}, // SFE_BAR_FEK_5
+      {{}}, // 50
+      {{}}, // 51
+      {{1}, {2}}, // SFE_BAR_6
+      {{1}, {2}}, // SFE_BAR_FEK_6
+      {{}}, // 54
+      {{}}, // 55
+      {{1}, {2}}, // SFE_BAR_7
+      {{1}, {2}}, // SFE_BAR_FEK_7
+      {{}}, // 58
+      {{}}, // 59
+      {{}}, // 60
+      {{}}, // 61
+      {{}}, // 62
+      {{}}, // 63
+      {{}}, // 64
+      {{}}, // 65
+      {{}}, // 66
+      {{}}, // 67
+      {{1, 2}, {2, 3}, {3, 1}}, // SFE_TRI_3
+      {{}}, // 69
+      {{}}, // 70
+      {{}}, // 71
+      {{1, 2, 4}, {2, 3, 5}, {3, 1, 6}}, // SFE_TRI_6
+      {{}}, // 73
+      {{}}, // 74
+      {{}}, // 75
+      {{1, 2, 4, 5}, {2, 3, 6, 7}, {3, 1, 8, 9}}, // SFE_TRI_10
+      {{1, 2, 4, 5}, {2, 3, 6, 7}, {3, 1, 8, 9}}, // SFE_TRI_FEK_10
+      {{}}, // 78
+      {{}}, // 79
       {{1, 2, 4, 5, 6}, {2, 3, 7, 8, 9}, {3, 1, 10, 11, 12}}, // SFE_TRI_15
-      {{1, 2, 4, 5, 6}, {2, 3, 7, 8, 9}, {3, 1, 10, 11, 12}}, // SFE_TRI_GL_15
-      {{1, 2, 4, 5, 6}, {2, 3, 7, 8, 9}, {3, 1, 10, 11, 12}}, // SFE_TRI_FEK_15
-      {{}},                                                   // 83
+      {{1, 2, 4, 5, 6},
+       {2, 3, 7, 8, 9},
+       {3, 1, 10, 11, 12}}, // SFE_TRI_GL_15
+      {{1, 2, 4, 5, 6},
+       {2, 3, 7, 8, 9},
+       {3, 1, 10, 11, 12}}, // SFE_TRI_FEK_15
+      {{}}, // 83
       {{1, 2, 4, 5, 6, 7},
        {2, 3, 8, 9, 10, 11},
        {3, 1, 12, 13, 14, 15}}, // SFE_TRI_21
@@ -6613,7 +7292,7 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
       {{1, 2, 4, 5, 6, 7},
        {2, 3, 8, 9, 10, 11},
        {3, 1, 12, 13, 14, 15}}, // SFE_TRI_FEK_21
-      {{}},                     // 87
+      {{}}, // 87
       {{1, 2, 4, 5, 6, 7, 8},
        {2, 3, 9, 10, 11, 12, 13},
        {3, 1, 14, 15, 16, 17, 18}}, // SFE_TRI_28
@@ -6622,24 +7301,24 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {3, 1, 14, 15, 16, 17, 18}}, // SFE_TRI_GL_28
       {{1, 2, 4, 5, 6, 7, 8},
        {2, 3, 9, 10, 11, 12, 13},
-       {3, 1, 14, 15, 16, 17, 18}},                 // SFE_TRI_FEK_28
-      {{}},                                         // 91
-      {{}},                                         // 92
-      {{}},                                         // 93
-      {{}},                                         // 94
-      {{}},                                         // 95
-      {{}},                                         // 96
-      {{}},                                         // 97
-      {{}},                                         // 98
-      {{}},                                         // 99
-      {{1, 2}, {2, 3}, {3, 4}, {4, 1}},             // SFE_QUAD_4
-      {{}},                                         // 101
-      {{}},                                         // 102
-      {{}},                                         // 103
+       {3, 1, 14, 15, 16, 17, 18}}, // SFE_TRI_FEK_28
+      {{}}, // 91
+      {{}}, // 92
+      {{}}, // 93
+      {{}}, // 94
+      {{}}, // 95
+      {{}}, // 96
+      {{}}, // 97
+      {{}}, // 98
+      {{}}, // 99
+      {{1, 2}, {2, 3}, {3, 4}, {4, 1}}, // SFE_QUAD_4
+      {{}}, // 101
+      {{}}, // 102
+      {{}}, // 103
       {{1, 2, 5}, {2, 3, 6}, {3, 4, 7}, {4, 1, 8}}, // SFE_QUAD_9
-      {{}},                                         // 105
-      {{}},                                         // 106
-      {{}},                                         // 107
+      {{}}, // 105
+      {{}}, // 106
+      {{}}, // 107
       {{1, 2, 5, 6},
        {2, 3, 7, 8},
        {3, 4, 9, 10},
@@ -6648,8 +7327,8 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {2, 3, 7, 8},
        {3, 4, 9, 10},
        {4, 1, 11, 12}}, // SFE_QUAD_FEK_16
-      {{}},             // 110
-      {{}},             // 111
+      {{}}, // 110
+      {{}}, // 111
       {{1, 2, 5, 6, 7},
        {2, 3, 8, 9, 10},
        {3, 4, 11, 12, 13},
@@ -6658,8 +7337,8 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {2, 3, 8, 9, 10},
        {3, 4, 11, 12, 13},
        {4, 1, 14, 15, 16}}, // SFE_QUAD_FEK_25
-      {{}},                 // 114
-      {{}},                 // 115
+      {{}}, // 114
+      {{}}, // 115
       {{1, 2, 5, 6, 7, 8},
        {2, 3, 9, 10, 11, 12},
        {3, 4, 13, 14, 15, 16},
@@ -6668,8 +7347,8 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {2, 3, 9, 10, 11, 12},
        {3, 4, 13, 14, 15, 16},
        {4, 1, 17, 18, 19, 20}}, // SFE_QUAD_FEK_36
-      {{}},                     // 118
-      {{}},                     // 119
+      {{}}, // 118
+      {{}}, // 119
       {{1, 2, 5, 6, 7, 8, 9},
        {2, 3, 10, 11, 12, 13, 14},
        {3, 4, 15, 16, 17, 18, 19},
@@ -6677,28 +7356,28 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
       {{1, 2, 5, 6, 7, 8, 9},
        {2, 3, 10, 11, 12, 13, 14},
        {3, 4, 15, 16, 17, 18, 19},
-       {4, 1, 20, 21, 22, 23, 24}},                 // SFE_QUAD_FEK_49
-      {{}},                                         // 122
-      {{}},                                         // 123
-      {{}},                                         // 124
-      {{}},                                         // 125
-      {{}},                                         // 126
-      {{}},                                         // 127
-      {{}},                                         // 128
-      {{}},                                         // 129
-      {{}},                                         // 130
-      {{}},                                         // 131
+       {4, 1, 20, 21, 22, 23, 24}}, // SFE_QUAD_FEK_49
+      {{}}, // 122
+      {{}}, // 123
+      {{}}, // 124
+      {{}}, // 125
+      {{}}, // 126
+      {{}}, // 127
+      {{}}, // 128
+      {{}}, // 129
+      {{}}, // 130
+      {{}}, // 131
       {{1, 3, 2}, {1, 2, 4}, {2, 3, 4}, {3, 1, 4}}, // SFE_TET_4
-      {{}},                                         // 133
-      {{}},                                         // 134
-      {{}},                                         // 135
+      {{}}, // 133
+      {{}}, // 134
+      {{}}, // 135
       {{1, 3, 2, 7, 6, 5},
        {1, 2, 4, 5, 9, 8},
        {2, 3, 4, 6, 10, 9},
        {3, 1, 4, 7, 8, 10}}, // SFE_TET_10
-      {{}},                  // 137
-      {{}},                  // 138
-      {{}},                  // 139
+      {{}}, // 137
+      {{}}, // 138
+      {{}}, // 139
       {{1, 3, 2, 10, 9, 8, 7, 6, 5, 17},
        {1, 2, 4, 5, 6, 13, 14, 12, 11, 18},
        {2, 3, 4, 7, 8, 15, 16, 14, 13, 19},
@@ -6707,12 +7386,13 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {1, 2, 4, 5, 6, 13, 14, 12, 11, 18},
        {2, 3, 4, 7, 8, 15, 16, 14, 13, 19},
        {3, 1, 4, 9, 10, 11, 12, 16, 15, 20}}, // SFE_TET_FEK_20
-      {{}},                                   // 142
-      {{}},                                   // 143
+      {{}}, // 142
+      {{}}, // 143
       {{1, 3, 2, 13, 12, 11, 10, 9, 8, 7, 6, 5, 23, 25, 24},
        {1, 2, 4, 5, 6, 7, 17, 18, 19, 16, 15, 14, 26, 27, 28},
        {2, 3, 4, 8, 9, 10, 20, 21, 22, 19, 18, 17, 29, 30, 31},
-       {3, 1, 4, 11, 12, 13, 14, 15, 16, 22, 21, 20, 32, 33, 34}}, // SFE_TET_35
+       {3, 1, 4, 11, 12, 13, 14, 15, 16, 22, 21, 20, 32, 33,
+        34}}, // SFE_TET_35
       {{1, 3, 2, 13, 12, 11, 10, 9, 8, 7, 6, 5, 23, 25, 24},
        {1, 2, 4, 5, 6, 7, 17, 18, 19, 16, 15, 14, 26, 27, 28},
        {2, 3, 4, 8, 9, 10, 20, 21, 22, 19, 18, 17, 29, 30, 31},
@@ -6723,7 +7403,7 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {2, 3, 4, 8, 9, 10, 20, 21, 22, 19, 18, 17, 29, 30, 31},
        {3, 1, 4, 11, 12, 13, 14, 15, 16, 22, 21, 20, 32, 33,
         34}}, // SFE_TET_FEK_35
-      {{}},   // 147
+      {{}}, // 147
       {{1, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9,
         8, 7, 6, 5,  29, 34, 33, 32, 31, 30},
        {1,  2,  4,  5,  6,  7,  8,  21, 22, 23, 24,
@@ -6748,15 +7428,15 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
         24, 23, 22, 21, 41, 42, 43, 44, 45, 46},
        {3,  1,  4,  13, 14, 15, 16, 17, 18, 19, 20,
         28, 27, 26, 25, 47, 48, 49, 50, 51, 52}}, // SFE_TET_FEK_56
-      {{}},                                       // 151
+      {{}}, // 151
       {{1, 3, 2, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9,
         8, 7, 6, 5,  35, 43, 42, 41, 40, 39, 38, 37, 36, 44},
        {1,  2,  4,  5,  6,  7,  8,  9,  25, 26, 27, 28, 29, 24,
         23, 22, 21, 20, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54},
        {2,  3,  4,  10, 11, 12, 13, 14, 30, 31, 32, 33, 34, 29,
         28, 27, 26, 25, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64},
-       {3,  1,  4,  15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 34,
-        33, 32, 31, 30, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74}}, // SFE_TET_84
+       {3,  1,  4,  15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 34, 33,
+        32, 31, 30, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74}}, // SFE_TET_84
       {{1, 3, 2, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9,
         8, 7, 6, 5,  35, 43, 42, 41, 40, 39, 38, 37, 36, 44},
        {1,  2,  4,  5,  6,  7,  8,  9,  25, 26, 27, 28, 29, 24,
@@ -6773,44 +7453,45 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
         28, 27, 26, 25, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64},
        {3,  1,  4,  15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 34, 33,
         32, 31, 30, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74}}, // SFE_TET_FEK_84
-      {{}},                                                   // 155
-      {{}},                                                   // 156
-      {{}},                                                   // 157
-      {{}},                                                   // 158
-      {{}},                                                   // 159
-      {{}},                                                   // 160
-      {{}},                                                   // 161
-      {{}},                                                   // 162
-      {{}},                                                   // 163
+      {{}}, // 155
+      {{}}, // 156
+      {{}}, // 157
+      {{}}, // 158
+      {{}}, // 159
+      {{}}, // 160
+      {{}}, // 161
+      {{}}, // 162
+      {{}}, // 163
       {{1, 4, 3, 2},
        {1, 2, 5, 0},
        {2, 3, 5, 0},
        {3, 4, 5, 0},
        {4, 1, 5, 0}}, // SFE_PYRA_5
-      {{}},           // 165
-      {{}},           // 166
-      {{}},           // 167
+      {{}}, // 165
+      {{}}, // 166
+      {{}}, // 167
       {{1, 4, 3, 2, 9, 8, 7, 6, 14},
        {1, 2, 5, 6, 11, 10, 0, 0, 0},
        {2, 3, 5, 7, 12, 11, 0, 0, 0},
        {3, 4, 5, 8, 13, 12, 0, 0, 0},
        {4, 1, 5, 9, 10, 13, 0, 0, 0}}, // SFE_PYRA_14
-      {{}},                            // 169
-      {{}},                            // 170
-      {{}},                            // 171
+      {{}}, // 169
+      {{}}, // 170
+      {{}}, // 171
       {{1, 4, 3, 2, 13, 12, 11, 10, 9, 8, 7, 6, 22, 25, 24, 23},
        {1, 2, 5, 6, 7, 16, 17, 15, 14, 26, 0, 0, 0, 0, 0, 0},
        {2, 3, 5, 8, 9, 18, 19, 17, 16, 27, 0, 0, 0, 0, 0, 0},
        {3, 4, 5, 10, 11, 20, 21, 19, 18, 28, 0, 0, 0, 0, 0, 0},
-       {4, 1, 5, 12, 13, 14, 15, 21, 20, 29, 0, 0, 0, 0, 0, 0}}, // SFE_PYRA_30
+       {4, 1, 5, 12, 13, 14, 15, 21, 20, 29, 0, 0, 0, 0, 0,
+        0}}, // SFE_PYRA_30
       {{1, 4, 3, 2, 13, 12, 11, 10, 9, 8, 7, 6, 22, 25, 24, 23},
        {1, 2, 5, 6, 7, 16, 17, 15, 14, 26, 0, 0, 0, 0, 0, 0},
        {2, 3, 5, 8, 9, 18, 19, 17, 16, 27, 0, 0, 0, 0, 0, 0},
        {3, 4, 5, 10, 11, 20, 21, 19, 18, 28, 0, 0, 0, 0, 0, 0},
        {4, 1, 5, 12, 13, 14, 15, 21, 20, 29, 0, 0, 0, 0, 0,
         0}}, // SFE_PYRA_FEK_30
-      {{}},  // 174
-      {{}},  // 175
+      {{}}, // 174
+      {{}}, // 175
       {{1, 4, 3, 2,  17, 16, 15, 14, 13, 12, 11, 10, 9,
         8, 7, 6, 30, 37, 36, 35, 34, 33, 32, 31, 38},
        {1,  2,  5, 6, 7, 8, 21, 22, 23, 20, 19, 18, 39,
@@ -6841,7 +7522,7 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
         46, 47, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0},
        {4,  1,  5, 15, 16, 17, 18, 19, 20, 29, 28, 27, 48,
         49, 50, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0}}, // SFE_PYRA_FEK_55
-      {{}},                                             // 179
+      {{}}, // 179
       {{1, 4, 3,  2,  21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9,  8,
         7, 6, 38, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 50, 53, 52, 51},
        {1,  2,  5,  6, 7, 8, 9, 26, 27, 28, 29, 25, 24, 23, 22, 54, 55, 56,
@@ -6853,50 +7534,51 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {4,  1,  5,  18, 19, 20, 21, 22, 23, 24, 25, 37,
         36, 35, 34, 72, 73, 74, 75, 76, 77, 0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}}, // SFE_PYRA_91
-      {{}},                                              // 181
-      {{}},                                              // 182
-      {{}},                                              // 183
-      {{}},                                              // 184
-      {{}},                                              // 185
-      {{}},                                              // 186
-      {{}},                                              // 187
-      {{}},                                              // 188
-      {{}},                                              // 189
-      {{}},                                              // 190
-      {{}},                                              // 191
-      {{}},                                              // 192
-      {{}},                                              // 193
-      {{}},                                              // 194
-      {{}},                                              // 195
+      {{}}, // 181
+      {{}}, // 182
+      {{}}, // 183
+      {{}}, // 184
+      {{}}, // 185
+      {{}}, // 186
+      {{}}, // 187
+      {{}}, // 188
+      {{}}, // 189
+      {{}}, // 190
+      {{}}, // 191
+      {{}}, // 192
+      {{}}, // 193
+      {{}}, // 194
+      {{}}, // 195
       {{1, 2, 5, 4},
        {2, 3, 6, 5},
        {3, 1, 4, 6},
        {1, 3, 2, 0},
        {4, 5, 6, 0}}, // SFE_PRISM_6
-      {{}},           // 197
-      {{}},           // 198
-      {{}},           // 199
+      {{}}, // 197
+      {{}}, // 198
+      {{}}, // 199
       {{1, 2, 5, 4, 7, 11, 13, 10, 16},
        {2, 3, 6, 5, 8, 12, 14, 11, 17},
        {3, 1, 4, 6, 9, 10, 15, 12, 18},
        {1, 3, 2, 9, 8, 7, 0, 0, 0},
        {4, 5, 6, 13, 14, 15, 0, 0, 0}}, // SFE_PRISM_18
-      {{}},                             // 201
-      {{}},                             // 202
-      {{}},                             // 203
+      {{}}, // 201
+      {{}}, // 202
+      {{}}, // 203
       {{1, 2, 5, 4, 7, 8, 15, 16, 20, 19, 14, 13, 26, 27, 28, 29},
        {2, 3, 6, 5, 9, 10, 17, 18, 22, 21, 16, 15, 30, 31, 32, 33},
        {3, 1, 4, 6, 11, 12, 13, 14, 24, 23, 18, 17, 34, 35, 36, 37},
        {1, 3, 2, 12, 11, 10, 9, 8, 7, 25, 0, 0, 0, 0, 0, 0},
-       {4, 5, 6, 19, 20, 21, 22, 23, 24, 38, 0, 0, 0, 0, 0, 0}}, // SFE_PRISM_40
+       {4, 5, 6, 19, 20, 21, 22, 23, 24, 38, 0, 0, 0, 0, 0,
+        0}}, // SFE_PRISM_40
       {{1, 2, 5, 4, 7, 8, 15, 16, 20, 19, 14, 13, 26, 27, 28, 29},
        {2, 3, 6, 5, 9, 10, 17, 18, 22, 21, 16, 15, 30, 31, 32, 33},
        {3, 1, 4, 6, 11, 12, 13, 14, 24, 23, 18, 17, 34, 35, 36, 37},
        {1, 3, 2, 12, 11, 10, 9, 8, 7, 25, 0, 0, 0, 0, 0, 0},
        {4, 5, 6, 19, 20, 21, 22, 23, 24, 38, 0, 0, 0, 0, 0,
         0}}, // SFE_PRISM_FEK_40
-      {{}},  // 206
-      {{}},  // 207
+      {{}}, // 206
+      {{}}, // 207
       {{1,  2,  5,  4,  7,  8,  9,  19, 20, 21, 27, 26, 25,
         18, 17, 16, 37, 38, 39, 40, 41, 42, 43, 44, 45},
        {2,  3,  6,  5,  10, 11, 12, 22, 23, 24, 30, 29, 28,
@@ -6927,7 +7609,7 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
         36, 35, 0, 0,  0,  0,  0,  0,  0,  0, 0, 0},
        {4,  5,  6, 25, 26, 27, 28, 29, 30, 31, 32, 33, 64,
         65, 66, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0}}, // SFE_PRISM_FEK_75
-      {{}},                                             // 211
+      {{}}, // 211
       {{1,  2,  5,  4,  7,  8,  9,  10, 23, 24, 25, 26, 34, 33, 32, 31, 24, 23,
         22, 21, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58},
        {2,  3,  6,  5,  11, 12, 13, 14, 27, 28, 29, 30, 38, 37, 36, 35, 26, 25,
@@ -6947,11 +7629,11 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
         28, 27, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90},
        {1,  3,  2,  18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 91, 96, 95,
         94, 93, 92, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0, 0,  0,  0},
-       {4,  5,  6,  31, 32, 33, 34,  35,  36,  37, 38, 39,
-        40, 41, 42, 97, 98, 99, 100, 101, 102, 0,  0,  0,
-        0,  0,  0,  0,  0,  0,  0,   0,   0,   0,  0,  0}}, // SFE_PRISM_GL_126
-      {{}},                                                 // 214
-      {{}},                                                 // 215
+       {4,  5,  6,  31, 32, 33,  34,  35,  36, 37, 38, 39, 40,
+        41, 42, 97, 98, 99, 100, 101, 102, 0,  0,  0,  0,  0,
+        0,  0,  0,  0,  0,  0,   0,   0,   0,  0}}, // SFE_PRISM_GL_126
+      {{}}, // 214
+      {{}}, // 215
       {{1,  2,  5,  4,  7,  8,  9,  10, 11, 27, 28, 29, 30, 31, 41, 40, 39,
         38, 37, 26, 25, 24, 23, 22, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
         62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76},
@@ -6970,35 +7652,35 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
         47,  48,  49, 50, 51, 137, 138, 139, 140, 141, 142, 143, 144,
         145, 146, 0,  0,  0,  0,   0,   0,   0,   0,   0,   0,   0,
         0,   0,   0,  0,  0,  0,   0,   0,   0,   0}}, // SFE_PRISM_196
-      {{}},                                            // 217
-      {{}},                                            // 218
-      {{}},                                            // 219
-      {{}},                                            // 220
-      {{}},                                            // 221
-      {{}},                                            // 222
-      {{}},                                            // 223
-      {{}},                                            // 224
-      {{}},                                            // 225
-      {{}},                                            // 226
-      {{}},                                            // 227
+      {{}}, // 217
+      {{}}, // 218
+      {{}}, // 219
+      {{}}, // 220
+      {{}}, // 221
+      {{}}, // 222
+      {{}}, // 223
+      {{}}, // 224
+      {{}}, // 225
+      {{}}, // 226
+      {{}}, // 227
       {{1, 4, 3, 2},
        {1, 2, 6, 5},
        {2, 3, 7, 6},
        {3, 4, 8, 7},
        {1, 5, 8, 4},
        {5, 6, 7, 8}}, // SFE_HEXA_8
-      {{}},           // 229
-      {{}},           // 230
-      {{}},           // 231
+      {{}}, // 229
+      {{}}, // 230
+      {{}}, // 231
       {{1, 4, 3, 2, 12, 11, 10, 9, 21},
        {1, 2, 6, 5, 9, 14, 17, 13, 22},
        {2, 3, 7, 6, 10, 15, 18, 14, 23},
        {3, 4, 8, 7, 11, 16, 19, 15, 24},
        {1, 5, 8, 4, 13, 20, 16, 12, 25},
        {5, 6, 7, 8, 17, 18, 19, 20, 26}}, // SFE_HEXA_27
-      {{}},                               // 233
-      {{}},                               // 234
-      {{}},                               // 235
+      {{}}, // 233
+      {{}}, // 234
+      {{}}, // 235
       {{1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 33, 36, 35, 34},
        {1, 2, 6, 5, 9, 10, 19, 20, 26, 25, 18, 17, 37, 38, 39, 40},
        {2, 3, 7, 6, 11, 12, 21, 22, 28, 27, 20, 19, 41, 42, 43, 44},
@@ -7013,8 +7695,8 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {1, 5, 8, 4, 17, 18, 32, 31, 24, 23, 15, 16, 50, 51, 52, 49},
        {5, 6, 7, 8, 25, 26, 27, 28, 29, 30, 31, 32, 53, 54, 55,
         56}}, // SFE_HEXA_FEK_64
-      {{}},   // 238
-      {{}},   // 239
+      {{}}, // 238
+      {{}}, // 239
       {{1,  4,  3, 2,  20, 19, 18, 17, 16, 15, 14, 13, 12,
         11, 10, 9, 45, 52, 51, 50, 49, 48, 47, 46, 53},
        {1,  2,  6,  5,  9,  10, 11, 24, 25, 26, 35, 34, 33,
@@ -7039,8 +7721,8 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
         18, 19, 20, 83, 84, 85, 86, 87, 88, 81, 82, 89},
        {5,  6,  7,  8,  33, 34, 35, 36, 37, 38, 39, 40, 41,
         42, 43, 44, 90, 91, 92, 93, 94, 95, 96, 97, 98}}, // SFE_HEXA_FEK_125
-      {{}},                                               // 242
-      {{}},                                               // 243
+      {{}}, // 242
+      {{}}, // 243
       {{1,  4, 3,  2,  24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11,
         10, 9, 57, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 69, 72, 71, 70},
        {1,  2,  6,  5,  9,  10, 11, 12, 29, 30, 31, 32, 44, 43, 42, 41, 28, 27,
@@ -7073,8 +7755,8 @@ static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
        {5,   6,   7,   8,   41,  42,  43,  44,  45,  46,  47,  48,  49,
         50,  51,  52,  53,  54,  55,  56,  137, 138, 139, 140, 141, 142,
         143, 144, 145, 146, 147, 148, 149, 150, 151, 152}}, // SFE_HEXA_FEK_216
-      {{}},                                                 // 246
-      {{}},                                                 // 247
+      {{}}, // 246
+      {{}}, // 247
       {{1,  4,  3,  2,  28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16,
         15, 14, 13, 12, 11, 10, 9,  69, 84, 83, 82, 81, 80, 79, 78, 77, 76,
         75, 74, 73, 72, 71, 70, 85, 92, 91, 90, 89, 88, 87, 86, 93},
@@ -7142,8 +7824,7 @@ static void obtain_nring_1d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
                             const ::coder::array<uint64_T, 1U> &mesh_teids,
                             const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
                             const ::coder::array<uint64_T, 1U> &mesh_v2hfid,
-                            ::coder::SizeType vid, real_T ring,
-                            ::coder::SizeType maxnpnts,
+                            ::coder::SizeType vid, real_T ring, ::coder::SizeType maxnpnts,
                             ::coder::array<boolean_T, 1U> &vtags,
                             ::coder::array<boolean_T, 1U> &ftags,
                             ::coder::array<int32_T, 1U> &ngbvs, int32_T *nverts,
@@ -7165,43 +7846,82 @@ static void obtain_nring_1d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
   hebuf.set_size(maxnpnts);
   oneringonly = ring == 1.0;
   //  One ring comes from elements on both sides of vertex
-  if (mesh_sibhfs[c_tmp + mesh_sibhfs.size(1) * (fid - 1)] != 0UL) {
+  if (mesh_sibhfs[c_tmp +
+                  mesh_sibhfs.size(1) * (fid - 1)] !=
+      0UL) {
     uint64_T c;
     *nverts = 2;
     *nfaces = 2;
     ngbvs[0] =
-        mesh_elemtables[(mesh_teids[fid - 1] & 255UL) - 1]
-            .conn[(mesh_elemtables[(mesh_teids[fid - 1] & 255UL) - 1].conn.size(
-                       1) *
-                       ((mesh_teids[fid - 1] >> 8) - 1) -
+        mesh_elemtables[(
+                            mesh_teids[fid - 1] & 255UL) -
+                        1]
+            .conn[(mesh_elemtables[(
+                                       mesh_teids[fid -
+                                                  1] &
+                                       255UL) -
+                                   1]
+                           .conn.size(1) *
+                       ((
+                            mesh_teids[fid - 1] >> 8) -
+                        1) -
                    c_tmp) +
                   1];
     ngbfs[0] = fid;
-    oppfid = mesh_sibhfs[c_tmp + mesh_sibhfs.size(1) * (fid - 1)] >> 8;
-    c = mesh_sibhfs[c_tmp + mesh_sibhfs.size(1) * (fid - 1)] & 255UL;
-    ngbvs[1] = mesh_elemtables[(mesh_teids[oppfid - 1] & 255UL) - 1]
-                   .conn[(mesh_elemtables[(mesh_teids[oppfid - 1] & 255UL) - 1]
-                                  .conn.size(1) *
-                              ((mesh_teids[oppfid - 1] >> 8) - 1) -
-                          c) +
-                         1];
+    oppfid =
+        mesh_sibhfs[c_tmp +
+                    mesh_sibhfs.size(1) * (fid - 1)] >>
+        8;
+    c = mesh_sibhfs[c_tmp +
+                    mesh_sibhfs.size(1) * (fid - 1)] &
+        255UL;
+    ngbvs[1] =
+        mesh_elemtables[(
+                            mesh_teids[oppfid - 1] &
+                            255UL) -
+                        1]
+            .conn[(mesh_elemtables[(
+                                       mesh_teids[oppfid -
+                                                  1] &
+                                       255UL) -
+                                   1]
+                           .conn.size(1) *
+                       ((
+                            mesh_teids[oppfid - 1] >> 8) -
+                        1) -
+                   c) +
+                  1];
     ngbfs[1] = oppfid;
     if (!oneringonly) {
-      hebuf[0] = ((fid << 8) + (2 - c_tmp)) - 1UL;
-      hebuf[1] = ((oppfid << 8) + (2 - c)) - 1UL;
+      hebuf[0] = ((fid << 8) +
+                  static_cast<uint64_T>(2 - c_tmp)) -
+                 1UL;
+      hebuf[1] =
+          ((oppfid << 8) + static_cast<uint64_T>(2 - c)) -
+          1UL;
     }
   } else {
     //  If vertex is border edge, insert its incident border vertex.
     *nverts = 1;
     ngbvs[0] =
-        mesh_elemtables[(mesh_teids[fid - 1] & 255UL) - 1]
-            .conn[(mesh_elemtables[(mesh_teids[fid - 1] & 255UL) - 1].conn.size(
-                       1) *
-                       ((mesh_teids[fid - 1] >> 8) - 1) -
+        mesh_elemtables[(
+                            mesh_teids[fid - 1] & 255UL) -
+                        1]
+            .conn[(mesh_elemtables[(
+                                       mesh_teids[fid -
+                                                  1] &
+                                       255UL) -
+                                   1]
+                           .conn.size(1) *
+                       ((
+                            mesh_teids[fid - 1] >> 8) -
+                        1) -
                    c_tmp) +
                   1];
     if (!oneringonly) {
-      hebuf[0] = ((fid << 8) + (2 - c_tmp)) - 1UL;
+      hebuf[0] = ((fid << 8) +
+                  static_cast<uint64_T>(2 - c_tmp)) -
+                 1UL;
       ring *= 2.0;
     }
   }
@@ -7238,7 +7958,9 @@ static void obtain_nring_1d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
           ::coder::SizeType lid_tmp;
           fid = hebuf[ii - 1] >> 8;
           lid_tmp = (c_tmp & 255UL);
-          oppfid = mesh_sibhfs[lid_tmp + mesh_sibhfs.size(1) * (fid - 1)] >> 8;
+          oppfid = mesh_sibhfs[lid_tmp + mesh_sibhfs.size(1) *
+                                             (fid - 1)] >>
+                   8;
           if ((*overflow) ||
               ((!vtags[ngbvs[ii - 1] - 1]) && (*nverts >= maxnpnts))) {
             *overflow = true;
@@ -7248,21 +7970,35 @@ static void obtain_nring_1d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
           if ((oppfid != 0UL) && (!*overflow)) {
             ::coder::SizeType vopp;
             lid_tmp = static_cast<::coder::SizeType>(
-                mesh_sibhfs[lid_tmp + mesh_sibhfs.size(1) * (fid - 1)] & 255UL);
+                mesh_sibhfs[lid_tmp + mesh_sibhfs.size(1) *
+                                          (fid - 1)] &
+                255UL);
             vopp =
-                mesh_elemtables[(mesh_teids[oppfid - 1] & 255UL) - 1]
+                mesh_elemtables[(
+                                    mesh_teids[oppfid -
+                                               1] &
+                                    255UL) -
+                                1]
                     .conn[(mesh_elemtables[static_cast<::coder::SizeType>(
-                                               mesh_teids[(oppfid)-1] & 255UL) -
+                                               mesh_teids[(
+                                                              oppfid) -
+                                                          1] &
+                                               255UL) -
                                            1]
                                    .conn.size(1) *
-                               ((mesh_teids[oppfid - 1] >> 8) - 1) -
+                               ((
+                                    mesh_teids[oppfid -
+                                               1] >>
+                                    8) -
+                                1) -
                            lid_tmp) +
                           1];
             (*nverts)++;
             (*nfaces)++;
             ngbvs[*nverts - 1] = vopp;
             ngbfs[*nfaces - 1] = oppfid;
-            hebuf[*nverts - 1] = ((oppfid << 8) + (2 - lid_tmp)) - 1UL;
+            hebuf[*nverts - 1] =
+                ((oppfid << 8) + static_cast<uint64_T>(2 - lid_tmp)) - 1UL;
             vtags[vopp - 1] = true;
           } else if ((oppfid == 0UL) && (!*overflow)) {
             *reflected = true;
@@ -7293,8 +8029,7 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
                             const ::coder::array<uint64_T, 1U> &mesh_teids,
                             const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
                             const ::coder::array<uint64_T, 1U> &mesh_v2hfid,
-                            ::coder::SizeType vid, real_T ring,
-                            ::coder::SizeType maxnpnts,
+                            ::coder::SizeType vid, real_T ring, ::coder::SizeType maxnpnts,
                             ::coder::array<boolean_T, 1U> &vtags,
                             ::coder::array<boolean_T, 1U> &ftags,
                             const ::coder::array<int32_T, 1U> &bridges,
@@ -7315,6 +8050,7 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
   ::coder::SizeType lid_prv;
   ::coder::SizeType maxnf;
   ::coder::SizeType ngbvs_tmp;
+  boolean_T on_bdy;
   boolean_T oneringonly;
   maxnf = maxnpnts << 1;
   //  element space
@@ -7329,30 +8065,40 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
   ngbfs.set_size(maxnf);
   hebuf.set_size(maxnpnts);
   oneringonly = ring == 1.0;
-  if (mesh_sibhfs[c_tmp + mesh_sibhfs.size(1) * (fid - 1)] != 0UL) {
+  on_bdy = false;
+  if (mesh_sibhfs[c_tmp +
+                  mesh_sibhfs.size(1) * (fid - 1)] !=
+      0UL) {
     fid_in = fid;
   } else {
     fid_in = 0UL;
     //  Get shape of the element
     *nverts = 1;
-    ngbvs_tmp = (mesh_teids[fid - 1] & 255UL) - 1;
+    ngbvs_tmp = (mesh_teids[fid - 1] &
+                                     255UL) -
+                1;
     ngbvs[0] =
         mesh_elemtables[ngbvs_tmp]
             .conn[(nxt[c_tmp +
                        ((1 - ((mesh_elemtables[ngbvs_tmp].etype >> 5 & 7) == 2))
                         << 2)] +
                    mesh_elemtables[ngbvs_tmp].conn.size(1) *
-                       ((mesh_teids[fid - 1] >> 8) - 1)) -
+                       ((
+                            mesh_teids[fid - 1] >> 8) -
+                        1)) -
                   1];
     if (!oneringonly) {
       hebuf[0] = 0UL;
     }
+    on_bdy = true;
   }
   //  Rotate counterclockwise order around vertex and insert vertices
   do {
     exitg1 = 0;
     //  Get shape of the element
-    ngbvs_tmp = (mesh_teids[fid - 1] & 255UL) - 1;
+    ngbvs_tmp = (mesh_teids[fid - 1] &
+                                     255UL) -
+                1;
     lid_prv =
         prv[lid +
             ((1 - ((mesh_elemtables[ngbvs_tmp].etype >> 5 & 7) == 2)) << 2)];
@@ -7360,20 +8106,26 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
       (*nverts)++;
       ngbvs[*nverts - 1] =
           mesh_elemtables[ngbvs_tmp]
-              .conn[(lid_prv + mesh_elemtables[ngbvs_tmp].conn.size(1) *
-                                   ((mesh_teids[fid - 1] >> 8) - 1)) -
+              .conn[(lid_prv +
+                     mesh_elemtables[ngbvs_tmp].conn.size(1) *
+                         ((
+                              mesh_teids[fid - 1] >> 8) -
+                          1)) -
                     1];
       (*nfaces)++;
       ngbfs[*nfaces - 1] = fid;
       if (!oneringonly) {
         //  Save a starting edge for newly inserted vertex to allow early
-        hebuf[*nverts - 1] = ((fid << 8) + lid_prv) - 1UL;
+        hebuf[*nverts - 1] =
+            ((fid << 8) + static_cast<uint64_T>(lid_prv)) - 1UL;
       }
     } else {
       *overflow = true;
     }
     //  Opposite face ID
-    opp = mesh_sibhfs[(lid_prv + mesh_sibhfs.size(1) * (fid - 1)) - 1];
+    opp = mesh_sibhfs[(lid_prv +
+                       mesh_sibhfs.size(1) * (fid - 1)) -
+                      1];
     fid = opp >> 8;
     if (fid == fid_in) {
       exitg1 = 1;
@@ -7451,14 +8203,21 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
               boolean_T b;
               b = ftags[c_tmp - 1];
               if (!b) {
-                ngbvs_tmp = (mesh_teids[c_tmp - 1] & 255UL) - 1;
+                ngbvs_tmp =
+                    (
+                        mesh_teids[c_tmp - 1] & 255UL) -
+                    1;
                 v = mesh_elemtables[ngbvs_tmp].conn
                         [(prv[(oppe & 255UL) +
                               ((1 - ((mesh_elemtables[ngbvs_tmp].etype >> 5 &
                                       7) == 2))
                                << 2)] +
                           mesh_elemtables[ngbvs_tmp].conn.size(1) *
-                              ((mesh_teids[c_tmp - 1] >> 8) - 1)) -
+                              ((
+                                   mesh_teids[c_tmp -
+                                              1] >>
+                                   8) -
+                               1)) -
                          1] -
                     1;
                 if ((*overflow) || ((!vtags[v]) && (*nverts >= maxnpnts)) ||
@@ -7487,23 +8246,32 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
               if ((oppe == 0UL) && (orig_ring == ring)) {
                 //  Reflect rings to enlarge the number of remaining rings
                 *reflected = true;
-                ring = orig_ring + (orig_ring - cur_ring);
+                ring = (orig_ring + (orig_ring - cur_ring)) +
+                       0.5 * static_cast<real_T>(on_bdy);
               }
               oppe = mesh_sibhfs[mesh_sibhfs.size(1) * ngbvs_tmp + 1];
               c_tmp = oppe >> 8;
               if ((oppe != 0UL) && (!ftags[c_tmp - 1])) {
-                ngbvs_tmp = (mesh_teids[c_tmp - 1] & 255UL) - 1;
+                ngbvs_tmp =
+                    (
+                        mesh_teids[c_tmp - 1] & 255UL) -
+                    1;
                 v = mesh_elemtables[ngbvs_tmp].conn
                         [(prv[(oppe & 255UL) +
                               ((1 - ((mesh_elemtables[ngbvs_tmp].etype >> 5 &
                                       7) == 2))
                                << 2)] +
                           mesh_elemtables[ngbvs_tmp].conn.size(1) *
-                              ((mesh_teids[c_tmp - 1] >> 8) - 1)) -
+                              ((
+                                   mesh_teids[c_tmp -
+                                              1] >>
+                                   8) -
+                               1)) -
                          1] -
                     1;
                 if ((*overflow) || ((!vtags[v]) && (*nverts >= maxnpnts)) ||
-                    ((!ftags[c_tmp - 1]) && (*nfaces >= maxnf))) {
+                    ((!ftags[c_tmp - 1]) &&
+                     (*nfaces >= maxnf))) {
                   *overflow = true;
                 } else {
                   *overflow = false;
@@ -7522,28 +8290,39 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 if ((oppe == 0UL) && (orig_ring == ring)) {
                   //  Reflect rings to enlarge the number of remaining rings
                   *reflected = true;
-                  ring = orig_ring + (orig_ring - cur_ring);
+                  ring = (orig_ring + (orig_ring - cur_ring)) +
+                         0.5 * static_cast<real_T>(on_bdy);
                 }
                 oppe = mesh_sibhfs[mesh_sibhfs.size(1) * ngbvs_tmp + 2];
                 c_tmp = oppe >> 8;
-                if ((oppe != 0UL) && (!ftags[c_tmp - 1])) {
-                  ngbvs_tmp = (mesh_teids[c_tmp - 1] & 255UL) - 1;
+                if ((oppe != 0UL) &&
+                    (!ftags[c_tmp - 1])) {
+                  ngbvs_tmp =
+                      (
+                          mesh_teids[c_tmp - 1] & 255UL) -
+                      1;
                   v = mesh_elemtables[ngbvs_tmp].conn
                           [(prv[(oppe & 255UL) +
                                 ((1 - ((mesh_elemtables[ngbvs_tmp].etype >> 5 &
                                         7) == 2))
                                  << 2)] +
                             mesh_elemtables[ngbvs_tmp].conn.size(1) *
-                                ((mesh_teids[c_tmp - 1] >> 8) - 1)) -
+                                ((
+                                     mesh_teids[c_tmp -
+                                                1] >>
+                                     8) -
+                                 1)) -
                            1] -
                       1;
                   if ((*overflow) || ((!vtags[v]) && (*nverts >= maxnpnts)) ||
-                      ((!ftags[c_tmp - 1]) && (*nfaces >= maxnf))) {
+                      ((!ftags[c_tmp - 1]) &&
+                       (*nfaces >= maxnf))) {
                     *overflow = true;
                   } else {
                     *overflow = false;
                   }
-                  if ((!ftags[c_tmp - 1]) && (!*overflow)) {
+                  if ((!ftags[c_tmp - 1]) &&
+                      (!*overflow)) {
                     (*nfaces)++;
                     ngbfs[*nfaces - 1] = c_tmp;
                     ftags[c_tmp - 1] = true;
@@ -7556,7 +8335,8 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 } else if ((oppe == 0UL) && (orig_ring == ring)) {
                   //  Reflect rings to enlarge the number of remaining rings
                   *reflected = true;
-                  ring = orig_ring + (orig_ring - cur_ring);
+                  ring = (orig_ring + (orig_ring - cur_ring)) +
+                         0.5 * static_cast<real_T>(on_bdy);
                 }
               }
             }
@@ -7564,7 +8344,9 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
             //  Insert missing vertices in quads
             v = mesh_elemtables[lid_tmp]
                     .conn[mesh_elemtables[lid_tmp].conn.size(1) *
-                          ((mesh_teids[ngbfs[ii - 1] - 1] >> 8) - 1)];
+                          ((mesh_teids[ngbfs[ii - 1] - 1] >>
+                                                8) -
+                           1)];
             if (!vtags[v - 1]) {
               if (*nverts >= maxnpnts) {
                 *overflow = true;
@@ -7576,7 +8358,9 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
             } else {
               v = mesh_elemtables[lid_tmp]
                       .conn[mesh_elemtables[lid_tmp].conn.size(1) *
-                                ((mesh_teids[ngbfs[ii - 1] - 1] >> 8) - 1) +
+                                ((
+                                     mesh_teids[ngbfs[ii - 1] - 1] >> 8) -
+                                 1) +
                             1];
               if (!vtags[v - 1]) {
                 if (*nverts >= maxnpnts) {
@@ -7589,7 +8373,9 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
               } else {
                 v = mesh_elemtables[lid_tmp]
                         .conn[mesh_elemtables[lid_tmp].conn.size(1) *
-                                  ((mesh_teids[ngbfs[ii - 1] - 1] >> 8) - 1) +
+                                  ((
+                                       mesh_teids[ngbfs[ii - 1] - 1] >> 8) -
+                                   1) +
                               2];
                 if (!vtags[v - 1]) {
                   if (*nverts >= maxnpnts) {
@@ -7602,7 +8388,9 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 } else {
                   v = mesh_elemtables[lid_tmp]
                           .conn[mesh_elemtables[lid_tmp].conn.size(1) *
-                                    ((mesh_teids[ngbfs[ii - 1] - 1] >> 8) - 1) +
+                                    ((
+                                         mesh_teids[ngbfs[ii - 1] - 1] >> 8) -
+                                     1) +
                                 3];
                   if (!vtags[v - 1]) {
                     if (*nverts >= maxnpnts) {
@@ -7653,25 +8441,37 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
           lid = ngbvs_tmp;
           pos =
               1 -
-              ((mesh_elemtables[(mesh_teids[fid - 1] & 255UL) - 1].etype >> 5 &
+              ((mesh_elemtables[(
+                                    mesh_teids[fid - 1] &
+                                    255UL) -
+                                1]
+                        .etype >>
+                    5 &
                 7) == 2);
           //  Allow early termination of the loop if an incident halfedge
           c_tmp = hebuf[ii - 1];
           if ((c_tmp != 0UL) &&
-              (mesh_sibhfs[ngbvs_tmp + mesh_sibhfs.size(1) * (fid - 1)] !=
+              (mesh_sibhfs[ngbvs_tmp + mesh_sibhfs.size(1) *
+                                           (fid - 1)] !=
                0UL)) {
             allow_early_term = true;
             fid = hebuf[ii - 1] >> 8;
             lid = (c_tmp & 255UL);
-            pos = 1 -
-                  ((mesh_elemtables[(mesh_teids[fid - 1] & 255UL) - 1].etype >>
-                        5 &
-                    7) == 2);
+            pos =
+                1 - ((mesh_elemtables[(
+                                          mesh_teids[fid -
+                                                     1] &
+                                          255UL) -
+                                      1]
+                              .etype >>
+                          5 &
+                      7) == 2);
           } else {
             allow_early_term = false;
           }
           //  Starting point of counterclockwise rotation
-          if (mesh_sibhfs[lid + mesh_sibhfs.size(1) * (fid - 1)] != 0UL) {
+          if (mesh_sibhfs[lid + mesh_sibhfs.size(1) *
+                                    (fid - 1)] != 0UL) {
             fid_in = fid;
           } else {
             fid_in = 0UL;
@@ -7679,16 +8479,28 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 (orig_ring == ring)) {
               //  Reflect rings to enlarge the number of remaining rings
               *reflected = true;
-              ring = orig_ring + (orig_ring - cur_ring);
+              ring = (orig_ring + (orig_ring - cur_ring)) +
+                     0.5 * static_cast<real_T>(on_bdy);
             }
           }
           ngbvs_tmp = lid + (pos << 2);
-          v = mesh_elemtables[(mesh_teids[fid - 1] & 255UL) - 1]
-                  .conn[(nxt[ngbvs_tmp] +
-                         mesh_elemtables[(mesh_teids[fid - 1] & 255UL) - 1]
-                                 .conn.size(1) *
-                             ((mesh_teids[fid - 1] >> 8) - 1)) -
-                        1] -
+          v = mesh_elemtables[(
+                                  mesh_teids[fid - 1] &
+                                  255UL) -
+                              1]
+                  .conn
+                      [(nxt[ngbvs_tmp] +
+                        mesh_elemtables
+                                [(
+                                     mesh_teids[fid - 1] &
+                                     255UL) -
+                                 1]
+                                    .conn.size(1) *
+                            ((
+                                 mesh_teids[fid - 1] >>
+                                 8) -
+                             1)) -
+                       1] -
               1;
           if ((*overflow) || ((!vtags[v]) && (*nverts >= maxnpnts))) {
             *overflow = true;
@@ -7700,7 +8512,8 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
             ngbvs[*nverts - 1] = v + 1;
             vtags[v] = true;
             //  Save starting position for next vertex
-            hebuf[*nverts - 1] = ((fid << 8) + nxt[ngbvs_tmp]) - 1UL;
+            hebuf[*nverts - 1] =
+                ((fid << 8) + static_cast<uint64_T>(nxt[ngbvs_tmp])) - 1UL;
           }
           //  Rotate counterclockwise around the vertex.
           isfirst = true;
@@ -7709,7 +8522,9 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
           do {
             exitg2 = 0;
             //  Insert vertx into list
-            ngbvs_tmp = (mesh_teids[fid - 1] & 255UL) - 1;
+            ngbvs_tmp = (
+                            mesh_teids[fid - 1] & 255UL) -
+                        1;
             lid_prv =
                 prv[lid +
                     ((1 - ((mesh_elemtables[ngbvs_tmp].etype >> 5 & 7) == 2))
@@ -7724,13 +8539,18 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
               }
             } else {
               //  If the face has already been inserted, then the vertex
-              v = mesh_elemtables[ngbvs_tmp]
-                      .conn[(lid_prv + mesh_elemtables[ngbvs_tmp].conn.size(1) *
-                                           ((mesh_teids[fid - 1] >> 8) - 1)) -
-                            1] -
+              v = mesh_elemtables[ngbvs_tmp].conn
+                      [(lid_prv +
+                        mesh_elemtables[ngbvs_tmp].conn.size(1) *
+                            ((
+                                 mesh_teids[fid - 1] >>
+                                 8) -
+                             1)) -
+                       1] -
                   1;
               if ((*overflow) || ((!vtags[v]) && (*nverts >= maxnpnts)) ||
-                  ((!ftags[fid - 1]) && (*nfaces >= maxnf))) {
+                  ((!ftags[fid - 1]) &&
+                   (*nfaces >= maxnf))) {
                 *overflow = true;
               } else {
                 *overflow = false;
@@ -7740,7 +8560,8 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
                 ngbvs[*nverts - 1] = v + 1;
                 vtags[v] = true;
                 //  Save starting position for next ring
-                hebuf[*nverts - 1] = ((fid << 8) + lid_prv) - 1UL;
+                hebuf[*nverts - 1] =
+                    ((fid << 8) + static_cast<uint64_T>(lid_prv)) - 1UL;
               }
               if ((!ftags[fid - 1]) && (!*overflow)) {
                 (*nfaces)++;
@@ -7752,7 +8573,9 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
             }
             if (guard2) {
               opp =
-                  mesh_sibhfs[(lid_prv + mesh_sibhfs.size(1) * (fid - 1)) - 1];
+                  mesh_sibhfs[(lid_prv + mesh_sibhfs.size(1) *
+                                             (fid - 1)) -
+                              1];
               fid = opp >> 8;
               if (fid == fid_in) {
                 exitg2 = 1;
@@ -7791,11 +8614,702 @@ static void obtain_nring_2d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
   }
 }
 
+// obtain_nring_3d - Collect n-ring vertices of a 3D tetrahedral mesh
+static void obtain_nring_3d(const ::coder::array<ConnData, 1U> &mesh_elemtables,
+                            const ::coder::array<uint64_T, 1U> &mesh_teids,
+                            const ::coder::array<uint64_T, 2U> &mesh_sibhfs,
+                            const ::coder::array<uint64_T, 1U> &mesh_v2hfid,
+                            ::coder::SizeType vid, real_T ring, ::coder::SizeType maxnpnts,
+                            ::coder::array<boolean_T, 1U> &vtags,
+                            ::coder::array<boolean_T, 1U> &etags,
+                            ::coder::array<boolean_T, 1U> &buffertags,
+                            const ::coder::array<int32_T, 1U> &bridges,
+                            ::coder::array<int32_T, 1U> &ngbvs, int32_T *nverts,
+                            ::coder::array<int32_T, 1U> &ngbes, int32_T *nelems,
+                            ::coder::array<uint64_T, 1U> &hebuf,
+                            boolean_T *reflected, boolean_T *overflow)
+{
+  static const int8_T elem_edge_faces[12]{1, 2, 1, 3, 1, 4, 2, 4, 3, 2, 4, 3};
+  static const int8_T elem_edges[12]{1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4};
+  static const int8_T face_nodes[12]{1, 3, 2, 1, 2, 4, 2, 3, 4, 3, 1, 4};
+  static const int8_T facenodes[12]{1, 2, 4, 1, 2, 3, 1, 3, 4, 2, 3, 4};
+  static const int8_T oriented_edges[12]{-3, -2, -1, 1, 5, -4,
+                                         2,  6,  -5, 3, 4, -6};
+  static const int8_T b_iv[4]{4, 3, 1, 2};
+  ::coder::array<int32_T, 1U> stack_;
+  uint64_T leid;
+  uint64_T ngb;
+  ::coder::SizeType conntableidx;
+  ::coder::SizeType eid;
+  ::coder::SizeType i;
+  ::coder::SizeType lvid;
+  ::coder::SizeType maxne;
+  ::coder::SizeType size_stack;
+  ::coder::SizeType v;
+  maxne = maxnpnts << 2;
+  //  element space
+  *nverts = 0;
+  *nelems = 0;
+  *overflow = false;
+  //  Create output and buffers
+  ngbvs.set_size(maxnpnts);
+  ngbes.set_size(maxne);
+  stack_.set_size(maxne);
+  hebuf.set_size(maxnpnts);
+  size_stack = 0;
+  stack_[0] = (mesh_v2hfid[vid - 1] >> 8);
+  vtags[vid - 1] = true;
+  while (size_stack + 1 > 0) {
+    //  pop element on stack
+    eid = stack_[size_stack] - 1;
+    size_stack--;
+    conntableidx = (mesh_teids[eid] & 255UL);
+    leid = mesh_teids[eid] >> 8;
+    //  append element
+    if (!etags[eid]) {
+      if (*nelems >= maxne) {
+        *overflow = true;
+      } else {
+        (*nelems)++;
+        ngbes[*nelems - 1] = eid + 1;
+      }
+      etags[eid] = true;
+    }
+    lvid = -1;
+    //  stores which vertex is within the element
+    v = mesh_elemtables[conntableidx - 1]
+            .conn[mesh_elemtables[conntableidx - 1].conn.size(1) *
+                  (leid - 1)];
+    if (v == vid) {
+      lvid = 0;
+    }
+    if (!vtags[v - 1]) {
+      vtags[v - 1] = true;
+      if (*nverts >= maxnpnts) {
+        *overflow = true;
+      } else {
+        (*nverts)++;
+        ngbvs[*nverts - 1] = v;
+      }
+    }
+    v = mesh_elemtables[conntableidx - 1]
+            .conn[mesh_elemtables[conntableidx - 1].conn.size(1) *
+                      (leid - 1) +
+                  1];
+    if (v == vid) {
+      lvid = 1;
+    }
+    if (!vtags[v - 1]) {
+      vtags[v - 1] = true;
+      if (*nverts >= maxnpnts) {
+        *overflow = true;
+      } else {
+        (*nverts)++;
+        ngbvs[*nverts - 1] = v;
+      }
+    }
+    v = mesh_elemtables[conntableidx - 1]
+            .conn[mesh_elemtables[conntableidx - 1].conn.size(1) *
+                      (leid - 1) +
+                  2];
+    if (v == vid) {
+      lvid = 2;
+    }
+    if (!vtags[v - 1]) {
+      vtags[v - 1] = true;
+      if (*nverts >= maxnpnts) {
+        *overflow = true;
+      } else {
+        (*nverts)++;
+        ngbvs[*nverts - 1] = v;
+      }
+    }
+    v = mesh_elemtables[conntableidx - 1]
+            .conn[mesh_elemtables[conntableidx - 1].conn.size(1) *
+                      (leid - 1) +
+                  3];
+    if (v == vid) {
+      lvid = 3;
+    }
+    if (!vtags[v - 1]) {
+      vtags[v - 1] = true;
+      if (*nverts >= maxnpnts) {
+        *overflow = true;
+      } else {
+        (*nverts)++;
+        ngbvs[*nverts - 1] = v;
+      }
+    }
+    //  push unvisited neighbor element onto stack
+    ngb =
+        mesh_sibhfs[(facenodes[3 * lvid] + mesh_sibhfs.size(1) * eid) - 1] >> 8;
+    if ((ngb != 0UL) && (!etags[ngb - 1])) {
+      size_stack++;
+      stack_[size_stack] = ngb;
+    }
+    ngb = mesh_sibhfs[(facenodes[3 * lvid + 1] + mesh_sibhfs.size(1) * eid) -
+                      1] >>
+          8;
+    if ((ngb != 0UL) && (!etags[ngb - 1])) {
+      size_stack++;
+      stack_[size_stack] = ngb;
+    }
+    ngb = mesh_sibhfs[(facenodes[3 * lvid + 2] + mesh_sibhfs.size(1) * eid) -
+                      1] >>
+          8;
+    if ((ngb != 0UL) && (!etags[ngb - 1])) {
+      size_stack++;
+      stack_[size_stack] = ngb;
+    }
+  }
+  //  Handling bridges
+  if ((bridges.size(0) != 0) && (*nverts < maxnpnts)) {
+    i = bridges[vid - 1];
+    if (i > 0) {
+      //  use tags
+      vtags[vid - 1] = true;
+      for (::coder::SizeType b_i{0}; b_i < *nverts; b_i++) {
+        vtags[ngbvs[b_i] - 1] = true;
+      }
+      if (!vtags[i - 1]) {
+        //  reset tags
+        vtags[vid - 1] = false;
+        for (::coder::SizeType b_i{0}; b_i < *nverts; b_i++) {
+          vtags[ngbvs[b_i] - 1] = false;
+        }
+        (*nverts)++;
+        ngbvs[*nverts - 1] = i;
+      }
+    }
+  }
+  *reflected = false;
+  if (ring == 1.0) {
+    //  Reset flags
+    vtags[vid - 1] = false;
+    for (::coder::SizeType b_i{0}; b_i < *nverts; b_i++) {
+      vtags[ngbvs[b_i] - 1] = false;
+    }
+    for (::coder::SizeType b_i{0}; b_i < *nelems; b_i++) {
+      etags[ngbes[b_i] - 1] = false;
+    }
+  } else {
+    ::coder::SizeType cur_ring;
+    ::coder::SizeType iter;
+    ::coder::SizeType nverts_pre;
+    ::coder::SizeType orig_ring;
+    ::coder::SizeType ring_full;
+    //  Define buffers and prepare tags for further processing
+    nverts_pre = 0;
+    //  Second, build full-size ring
+    ring_full = static_cast<::coder::SizeType>(std::round(3.0 * ring));
+    //  multiply by three to avoid using doubles
+    orig_ring = ring_full;
+    //  store original ring size
+    cur_ring = 3;
+    iter = 0;
+    while ((cur_ring < ring_full) && (!*overflow) && (iter < 100)) {
+      ::coder::SizeType nverts_last;
+      nverts_last = *nverts;
+      i = ring_full - cur_ring;
+      if (i == 1) {
+        //  expand by 1/3 ring
+        i = *nelems;
+        for (::coder::SizeType ii{0}; ii < i; ii++) {
+          uint64_T oppeid;
+          //  all elems and vertices connected to elems by face
+          eid = ngbes[ii] - 1;
+          if (mesh_sibhfs[mesh_sibhfs.size(1) * eid] != 0UL) {
+            oppeid = mesh_sibhfs[mesh_sibhfs.size(1) * eid] >> 8;
+            if (!etags[oppeid - 1]) {
+              etags[oppeid - 1] = true;
+              if (*nelems >= maxne) {
+                *overflow = true;
+              } else {
+                (*nelems)++;
+                ngbes[*nelems - 1] = oppeid;
+              }
+              //  find node opposite of face
+              v = mesh_elemtables[(
+                                      mesh_teids[oppeid -
+                                                 1] &
+                                      255UL) -
+                                  1]
+                      .conn
+                          [(b_iv[(
+                                mesh_sibhfs[mesh_sibhfs.size(1) * eid] &
+                                255UL)] +
+                            mesh_elemtables[static_cast<::coder::SizeType>(
+                                                mesh_teids[(
+                                                               oppeid) -
+                                                           1] &
+                                                255UL) -
+                                            1]
+                                    .conn.size(1) *
+                                ((
+                                     mesh_teids[oppeid -
+                                                1] >>
+                                     8) -
+                                 1)) -
+                           1];
+              if (!vtags[v - 1]) {
+                vtags[v - 1] = true;
+                if (*nverts >= maxnpnts) {
+                  *overflow = true;
+                } else {
+                  (*nverts)++;
+                  ngbvs[*nverts - 1] = v;
+                }
+              }
+            }
+          }
+          if (mesh_sibhfs[mesh_sibhfs.size(1) * eid + 1] != 0UL) {
+            oppeid = mesh_sibhfs[mesh_sibhfs.size(1) * eid + 1] >> 8;
+            if (!etags[oppeid - 1]) {
+              etags[oppeid - 1] = true;
+              if (*nelems >= maxne) {
+                *overflow = true;
+              } else {
+                (*nelems)++;
+                ngbes[*nelems - 1] = oppeid;
+              }
+              //  find node opposite of face
+              v = mesh_elemtables[(
+                                      mesh_teids[oppeid -
+                                                 1] &
+                                      255UL) -
+                                  1]
+                      .conn
+                          [(b_iv[(
+                                mesh_sibhfs[mesh_sibhfs.size(1) * eid + 1] &
+                                255UL)] +
+                            mesh_elemtables[static_cast<::coder::SizeType>(
+                                                mesh_teids[(
+                                                               oppeid) -
+                                                           1] &
+                                                255UL) -
+                                            1]
+                                    .conn.size(1) *
+                                ((
+                                     mesh_teids[oppeid -
+                                                1] >>
+                                     8) -
+                                 1)) -
+                           1];
+              if (!vtags[v - 1]) {
+                vtags[v - 1] = true;
+                if (*nverts >= maxnpnts) {
+                  *overflow = true;
+                } else {
+                  (*nverts)++;
+                  ngbvs[*nverts - 1] = v;
+                }
+              }
+            }
+          }
+          if (mesh_sibhfs[mesh_sibhfs.size(1) * eid + 2] != 0UL) {
+            oppeid = mesh_sibhfs[mesh_sibhfs.size(1) * eid + 2] >> 8;
+            if (!etags[oppeid - 1]) {
+              etags[oppeid - 1] = true;
+              if (*nelems >= maxne) {
+                *overflow = true;
+              } else {
+                (*nelems)++;
+                ngbes[*nelems - 1] = oppeid;
+              }
+              //  find node opposite of face
+              v = mesh_elemtables[(
+                                      mesh_teids[oppeid -
+                                                 1] &
+                                      255UL) -
+                                  1]
+                      .conn
+                          [(b_iv[(
+                                mesh_sibhfs[mesh_sibhfs.size(1) * eid + 2] &
+                                255UL)] +
+                            mesh_elemtables[static_cast<::coder::SizeType>(
+                                                mesh_teids[(
+                                                               oppeid) -
+                                                           1] &
+                                                255UL) -
+                                            1]
+                                    .conn.size(1) *
+                                ((
+                                     mesh_teids[oppeid -
+                                                1] >>
+                                     8) -
+                                 1)) -
+                           1];
+              if (!vtags[v - 1]) {
+                vtags[v - 1] = true;
+                if (*nverts >= maxnpnts) {
+                  *overflow = true;
+                } else {
+                  (*nverts)++;
+                  ngbvs[*nverts - 1] = v;
+                }
+              }
+            }
+          }
+          if (mesh_sibhfs[mesh_sibhfs.size(1) * eid + 3] != 0UL) {
+            oppeid = mesh_sibhfs[mesh_sibhfs.size(1) * eid + 3] >> 8;
+            if (!etags[oppeid - 1]) {
+              etags[oppeid - 1] = true;
+              if (*nelems >= maxne) {
+                *overflow = true;
+              } else {
+                (*nelems)++;
+                ngbes[*nelems - 1] = oppeid;
+              }
+              //  find node opposite of face
+              v = mesh_elemtables[(
+                                      mesh_teids[oppeid -
+                                                 1] &
+                                      255UL) -
+                                  1]
+                      .conn
+                          [(b_iv[(
+                                mesh_sibhfs[mesh_sibhfs.size(1) * eid + 3] &
+                                255UL)] +
+                            mesh_elemtables[static_cast<::coder::SizeType>(
+                                                mesh_teids[(
+                                                               oppeid) -
+                                                           1] &
+                                                255UL) -
+                                            1]
+                                    .conn.size(1) *
+                                ((
+                                     mesh_teids[oppeid -
+                                                1] >>
+                                     8) -
+                                 1)) -
+                           1];
+              if (!vtags[v - 1]) {
+                vtags[v - 1] = true;
+                if (*nverts >= maxnpnts) {
+                  *overflow = true;
+                } else {
+                  (*nverts)++;
+                  ngbvs[*nverts - 1] = v;
+                }
+              }
+            }
+          }
+        }
+        cur_ring++;
+      } else if (i == 2) {
+        //  expand by 2/3 ring
+        i = *nelems;
+        for (::coder::SizeType ii{0}; ii < i; ii++) {
+          for (::coder::SizeType edge{0}; edge < 6; edge++) {
+            ::coder::SizeType vert;
+            boolean_T exitg1;
+            eid = ngbes[ii];
+            vert = 0;
+            exitg1 = false;
+            while ((!exitg1) && (vert < 2)) {
+              ::coder::SizeType edge_curr;
+              ::coder::SizeType eid_curr;
+              ::coder::SizeType v2;
+              ::coder::SizeType vert_curr;
+              boolean_T exitg2;
+              v2 = mesh_elemtables[(mesh_teids[eid - 1] &
+                                                        255UL) -
+                                   1]
+                       .conn[(elem_edges[vert + (edge << 1)] +
+                              mesh_elemtables[(
+                                                  mesh_teids[eid - 1] & 255UL) -
+                                              1]
+                                      .conn.size(1) *
+                                  ((mesh_teids[eid - 1] >>
+                                                        8) -
+                                   1)) -
+                             1];
+              eid_curr = eid;
+              edge_curr = edge + 1;
+              vert_curr = vert;
+              exitg2 = false;
+              while ((!exitg2) && (!*overflow)) {
+                uint64_T b_eid;
+                uint64_T c;
+                uint64_T opp;
+                opp = mesh_sibhfs[(elem_edge_faces[vert_curr +
+                                                   ((edge_curr - 1) << 1)] +
+                                   mesh_sibhfs.size(1) * (eid_curr - 1)) -
+                                  1];
+                b_eid = opp >> 8;
+                eid_curr = (opp >> 8);
+                c = opp & 255UL;
+                if ((b_eid == eid) ||
+                    (b_eid == 0)) {
+                  exitg2 = true;
+                } else {
+                  ::coder::SizeType kk;
+                  ::coder::SizeType x;
+                  boolean_T exitg3;
+                  conntableidx =
+                      (
+                          mesh_teids[b_eid - 1] & 255UL) -
+                      1;
+                  leid = mesh_teids[eid_curr - 1] >> 8;
+                  kk = 0;
+                  exitg3 = false;
+                  while ((!exitg3) && (kk < 4)) {
+                    x = kk + 3 * c;
+                    if (mesh_elemtables[conntableidx]
+                            .conn[(face_nodes[x] +
+                                   mesh_elemtables[conntableidx].conn.size(1) *
+                                       (leid - 1)) -
+                                  1] == v2) {
+                      edge_curr = oriented_edges[x];
+                      exitg3 = true;
+                    } else {
+                      kk++;
+                    }
+                  }
+                  vert_curr = edge_curr < 0;
+                  if (!etags[b_eid - 1]) {
+                    ::coder::SizeType vt;
+                    etags[b_eid - 1] = true;
+                    if (*nelems >= maxne) {
+                      *overflow = true;
+                    } else {
+                      (*nelems)++;
+                      ngbes[*nelems - 1] = b_eid;
+                    }
+                    vt = mesh_elemtables[conntableidx]
+                             .conn[mesh_elemtables[conntableidx].conn.size(1) *
+                                   (leid - 1)];
+                    if (!vtags[vt - 1]) {
+                      vtags[vt - 1] = true;
+                      if (*nverts >= maxnpnts) {
+                        *overflow = true;
+                      } else {
+                        (*nverts)++;
+                        ngbvs[*nverts - 1] = vt;
+                      }
+                    }
+                    vt = mesh_elemtables[conntableidx]
+                             .conn[mesh_elemtables[conntableidx].conn.size(1) *
+                                       (leid - 1) +
+                                   1];
+                    if (!vtags[vt - 1]) {
+                      vtags[vt - 1] = true;
+                      if (*nverts >= maxnpnts) {
+                        *overflow = true;
+                      } else {
+                        (*nverts)++;
+                        ngbvs[*nverts - 1] = vt;
+                      }
+                    }
+                    vt = mesh_elemtables[conntableidx]
+                             .conn[mesh_elemtables[conntableidx].conn.size(1) *
+                                       (leid - 1) +
+                                   2];
+                    if (!vtags[vt - 1]) {
+                      vtags[vt - 1] = true;
+                      if (*nverts >= maxnpnts) {
+                        *overflow = true;
+                      } else {
+                        (*nverts)++;
+                        ngbvs[*nverts - 1] = vt;
+                      }
+                    }
+                    vt = mesh_elemtables[conntableidx]
+                             .conn[mesh_elemtables[conntableidx].conn.size(1) *
+                                       (leid - 1) +
+                                   3];
+                    if (!vtags[vt - 1]) {
+                      vtags[vt - 1] = true;
+                      if (*nverts >= maxnpnts) {
+                        *overflow = true;
+                      } else {
+                        (*nverts)++;
+                        ngbvs[*nverts - 1] = vt;
+                      }
+                    }
+                  }
+                  x = edge_curr;
+                  if (x < 0) {
+                    edge_curr = -x;
+                  } else {
+                    edge_curr = x;
+                  }
+                }
+              }
+              if (eid_curr != 0) {
+                exitg1 = true;
+              } else {
+                vert++;
+              }
+            }
+          }
+        }
+        cur_ring += 2;
+      } else {
+        //  expand by full ring
+        i = nverts_pre + 1;
+        for (::coder::SizeType ii{i}; ii <= nverts_last; ii++) {
+          uint64_T b_eid;
+          ::coder::SizeType x;
+          x = ngbvs[ii - 1];
+          b_eid = mesh_v2hfid[ngbvs[ii - 1] - 1] >> 8;
+          if ((mesh_sibhfs[(mesh_v2hfid[x - 1] & 255UL) +
+                           mesh_sibhfs.size(1) *
+                               (b_eid - 1)] == 0UL) &&
+              (orig_ring == ring_full)) {
+            //  reflecting ring
+            ring_full = (orig_ring + orig_ring) - cur_ring;
+            *reflected = true;
+          }
+          size_stack = 0;
+          stack_[0] = b_eid;
+          while ((size_stack + 1 > 0) && (!*overflow)) {
+            //  pop element on stack
+            eid = stack_[size_stack] - 1;
+            size_stack--;
+            conntableidx = (mesh_teids[eid] & 255UL);
+            leid = mesh_teids[eid] >> 8;
+            buffertags[eid] = true;
+            //  append element
+            if (!etags[eid]) {
+              etags[eid] = true;
+              if (*nelems >= maxne) {
+                *overflow = true;
+              } else {
+                (*nelems)++;
+                ngbes[*nelems - 1] = eid + 1;
+              }
+            }
+            lvid = -1;
+            //  append vertices
+            v = mesh_elemtables[conntableidx - 1]
+                    .conn[mesh_elemtables[conntableidx - 1].conn.size(1) *
+                          (leid - 1)];
+            if (v == x) {
+              lvid = 0;
+            }
+            if (!vtags[v - 1]) {
+              vtags[v - 1] = true;
+              if (*nverts >= maxnpnts) {
+                *overflow = true;
+              } else {
+                (*nverts)++;
+                ngbvs[*nverts - 1] = v;
+              }
+            }
+            v = mesh_elemtables[conntableidx - 1]
+                    .conn[mesh_elemtables[conntableidx - 1].conn.size(1) *
+                              (leid - 1) +
+                          1];
+            if (v == x) {
+              lvid = 1;
+            }
+            if (!vtags[v - 1]) {
+              vtags[v - 1] = true;
+              if (*nverts >= maxnpnts) {
+                *overflow = true;
+              } else {
+                (*nverts)++;
+                ngbvs[*nverts - 1] = v;
+              }
+            }
+            v = mesh_elemtables[conntableidx - 1]
+                    .conn[mesh_elemtables[conntableidx - 1].conn.size(1) *
+                              (leid - 1) +
+                          2];
+            if (v == x) {
+              lvid = 2;
+            }
+            if (!vtags[v - 1]) {
+              vtags[v - 1] = true;
+              if (*nverts >= maxnpnts) {
+                *overflow = true;
+              } else {
+                (*nverts)++;
+                ngbvs[*nverts - 1] = v;
+              }
+            }
+            v = mesh_elemtables[conntableidx - 1]
+                    .conn[mesh_elemtables[conntableidx - 1].conn.size(1) *
+                              (leid - 1) +
+                          3];
+            if (v == x) {
+              lvid = 3;
+            }
+            if (!vtags[v - 1]) {
+              vtags[v - 1] = true;
+              if (*nverts >= maxnpnts) {
+                *overflow = true;
+              } else {
+                (*nverts)++;
+                ngbvs[*nverts - 1] = v;
+              }
+            }
+            //  push unvisited neighbor element onto stack
+            ngb =
+                mesh_sibhfs[(facenodes[3 * lvid] + mesh_sibhfs.size(1) * eid) -
+                            1] >>
+                8;
+            if ((ngb != 0UL) && (!buffertags[ngb - 1])) {
+              size_stack++;
+              stack_[size_stack] = ngb;
+            }
+            ngb = mesh_sibhfs[(facenodes[3 * lvid + 1] +
+                               mesh_sibhfs.size(1) * eid) -
+                              1] >>
+                  8;
+            if ((ngb != 0UL) && (!buffertags[ngb - 1])) {
+              size_stack++;
+              stack_[size_stack] = ngb;
+            }
+            ngb = mesh_sibhfs[(facenodes[3 * lvid + 2] +
+                               mesh_sibhfs.size(1) * eid) -
+                              1] >>
+                  8;
+            if ((ngb != 0UL) && (!buffertags[ngb - 1])) {
+              size_stack++;
+              stack_[size_stack] = ngb;
+            }
+          }
+          for (::coder::SizeType b_i{0}; b_i < *nelems; b_i++) {
+            buffertags[ngbes[b_i] - 1] = false;
+          }
+        }
+        cur_ring += 3;
+      }
+      nverts_pre = nverts_last;
+      iter++;
+    }
+    if (iter >= 100) {
+      m2cWarnMsgIdAndTxt("obtain_nring_3d:maxiters",
+                         "maximum number of iterations reached.");
+    }
+    //  Reset flags
+    vtags[vid - 1] = false;
+    for (::coder::SizeType b_i{0}; b_i < *nverts; b_i++) {
+      vtags[ngbvs[b_i] - 1] = false;
+    }
+    for (::coder::SizeType b_i{0}; b_i < *nelems; b_i++) {
+      etags[ngbes[b_i] - 1] = false;
+    }
+    if (*overflow) {
+      //  reset all tags manually
+      i = vtags.size(0);
+      for (::coder::SizeType b_i{0}; b_i < i; b_i++) {
+        vtags[b_i] = false;
+      }
+      i = etags.size(0);
+      for (::coder::SizeType b_i{0}; b_i < i; b_i++) {
+        etags[b_i] = false;
+      }
+    }
+  }
+}
+
 // omp4mRecurPartMesh Recursively partition an unstructured mesh
 static void omp4mRecurPartMesh(::coder::SizeType n,
                                const ::coder::array<int32_T, 2U> &cells,
-                               ::coder::SizeType dim, ::coder::SizeType nLevels,
-                               ::coder::SizeType nParts,
+                               ::coder::SizeType dim, ::coder::SizeType nLevels, ::coder::SizeType nParts,
                                ::coder::array<Omp4mPart, 1U> &parts)
 {
   ::coder::array<int32_T, 1U> cparts;
@@ -7960,85 +9474,95 @@ static void omp4mRecurPartMesh(::coder::SizeType n,
 }
 
 // prism_126 - Quintic prismatic element with equidistant nodes
-static inline void prism_126(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[126], real_T sdvals[378])
+static inline
+void prism_126(real_T xi, real_T eta, real_T zeta, real_T sfvals[126],
+                      real_T sdvals[378])
 {
   ::sfe_sfuncs::prism_126_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // prism_196 - Sextic prismatic element with equidistant nodes
-static inline void prism_196(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[196], real_T sdvals[588])
+static inline
+void prism_196(real_T xi, real_T eta, real_T zeta, real_T sfvals[196],
+                      real_T sdvals[588])
 {
   ::sfe_sfuncs::prism_196_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // prism_40 - Cubic prismatic element
-static inline void prism_40(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[40], real_T sdvals[120])
+static inline
+void prism_40(real_T xi, real_T eta, real_T zeta, real_T sfvals[40],
+                     real_T sdvals[120])
 {
   ::sfe_sfuncs::prism_40_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // prism_75 - Quartic prismatic element with equidistant nodes
-static inline void prism_75(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[75], real_T sdvals[225])
+static inline
+void prism_75(real_T xi, real_T eta, real_T zeta, real_T sfvals[75],
+                     real_T sdvals[225])
 {
   ::sfe_sfuncs::prism_75_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // prism_gl_126 - Quintic prismatic element with equidistant nodes
-static inline void prism_gl_126(real_T xi, real_T eta, real_T zeta,
-                                real_T sfvals[126], real_T sdvals[378])
+static inline
+void prism_gl_126(real_T xi, real_T eta, real_T zeta, real_T sfvals[126],
+                         real_T sdvals[378])
 {
   ::sfe_sfuncs::prism_gl_126_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // prism_gl_40 - Quadratic prismatic element with Gauss-Lobatto nodes
-static inline void prism_gl_40(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[40], real_T sdvals[120])
+static inline
+void prism_gl_40(real_T xi, real_T eta, real_T zeta, real_T sfvals[40],
+                        real_T sdvals[120])
 {
   ::sfe_sfuncs::prism_gl_40_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // prism_gl_75 - Quartic prismatic element with Gauss-Lobatto nodes
-static inline void prism_gl_75(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[75], real_T sdvals[225])
+static inline
+void prism_gl_75(real_T xi, real_T eta, real_T zeta, real_T sfvals[75],
+                        real_T sdvals[225])
 {
   ::sfe_sfuncs::prism_gl_75_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // pyra_30 - Compute shape functions and their derivatives of pyra_30
-static inline void pyra_30(real_T xi, real_T eta, real_T zeta,
-                           real_T sfvals[30], real_T sdvals[90])
+static inline
+void pyra_30(real_T xi, real_T eta, real_T zeta, real_T sfvals[30],
+                    real_T sdvals[90])
 {
   ::sfe_sfuncs::pyra_30_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // pyra_55 - Compute shape functions and their derivatives of pyra_55
-static inline void pyra_55(real_T xi, real_T eta, real_T zeta,
-                           real_T sfvals[55], real_T sdvals[165])
+static inline
+void pyra_55(real_T xi, real_T eta, real_T zeta, real_T sfvals[55],
+                    real_T sdvals[165])
 {
   ::sfe_sfuncs::pyra_55_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // pyra_gl_30 - Compute shape functions and their derivatives of pyra_gl_30
-static inline void pyra_gl_30(real_T xi, real_T eta, real_T zeta,
-                              real_T sfvals[30], real_T sdvals[90])
+static inline
+void pyra_gl_30(real_T xi, real_T eta, real_T zeta, real_T sfvals[30],
+                       real_T sdvals[90])
 {
   ::sfe_sfuncs::pyra_gl_30_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // pyra_gl_55 - Compute shape functions and their derivatives of pyra_gl_55
-static inline void pyra_gl_55(real_T xi, real_T eta, real_T zeta,
-                              real_T sfvals[55], real_T sdvals[165])
+static inline
+void pyra_gl_55(real_T xi, real_T eta, real_T zeta, real_T sfvals[55],
+                       real_T sdvals[165])
 {
   ::sfe_sfuncs::pyra_gl_55_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 //  pyra_quadrules - Obtain quadrature points and weights of a pyramidal
-static void pyra_quadrules(::coder::SizeType degree,
-                           ::coder::array<real_T, 2U> &cs,
+static void pyra_quadrules(::coder::SizeType degree, ::coder::array<real_T, 2U> &cs,
                            ::coder::array<real_T, 1U> &ws)
 {
   if (degree <= 1) {
@@ -8103,55 +9627,60 @@ static void pyra_quadrules(::coder::SizeType degree,
 }
 
 // quad_25 - Biquartic quadrilateral element with equidistant points
-static inline void quad_25(real_T xi, real_T eta, real_T sfvals[25],
-                           real_T sdvals[50])
+static inline
+void quad_25(real_T xi, real_T eta, real_T sfvals[25], real_T sdvals[50])
 {
   ::sfe_sfuncs::quad_25_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // quad_36   Biquintic quadrilateral element with equidistant points
-static inline void quad_36(real_T xi, real_T eta, real_T sfvals[36],
-                           real_T sdvals[72])
+static inline
+void quad_36(real_T xi, real_T eta, real_T sfvals[36], real_T sdvals[72])
 {
   ::sfe_sfuncs::quad_36_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // quad_49 - Bisextic quadrilateral element with equidistant points
-static inline void quad_49(real_T xi, real_T eta, real_T sfvals[49],
-                           real_T sdvals[98])
+static inline
+void quad_49(real_T xi, real_T eta, real_T sfvals[49], real_T sdvals[98])
 {
   ::sfe_sfuncs::quad_49_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // quad_gl_25 - Biquartic quadrilateral element with Gauss-Lobatto points
-static inline void quad_gl_25(real_T xi, real_T eta, real_T sfvals[25],
-                              real_T sdvals[50])
+static inline
+void quad_gl_25(real_T xi, real_T eta, real_T sfvals[25],
+                       real_T sdvals[50])
 {
   ::sfe_sfuncs::quad_gl_25_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // quad_gl_36 - Biquintic quadrilateral element with equidistant points
-static inline void quad_gl_36(real_T xi, real_T eta, real_T sfvals[36],
-                              real_T sdvals[72])
+static inline
+void quad_gl_36(real_T xi, real_T eta, real_T sfvals[36],
+                       real_T sdvals[72])
 {
   ::sfe_sfuncs::quad_gl_36_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // quad_gl_49 - Bisextic quadrilateral element with equidistant points
-static inline void quad_gl_49(real_T xi, real_T eta, real_T sfvals[49],
-                              real_T sdvals[98])
+static inline
+void quad_gl_49(real_T xi, real_T eta, real_T sfvals[49],
+                       real_T sdvals[98])
 {
   ::sfe_sfuncs::quad_gl_49_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // rdi_compute_oscind - Compute oscillation indicators (beta values)
-static void rdi_compute_oscind(
-    real_T rdi_epsbeta, const ::coder::array<real_T, 2U> &mesh_coords,
-    const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
-    const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-    const ::coder::array<real_T, 1U> &mesh_elemmeas, real_T mesh_globalh,
-    const ::coder::array<real_T, 2U> &df,
-    const ::coder::array<real_T, 2U> &alpha, ::coder::array<real_T, 2U> &beta)
+static void
+rdi_compute_oscind(real_T rdi_lref, real_T rdi_epsbeta,
+                   const ::coder::array<real_T, 2U> &mesh_coords,
+                   const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
+                   const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
+                   const ::coder::array<real_T, 1U> &mesh_elemmeas,
+                   real_T mesh_globalh, const ::coder::array<real_T, 2U> &df,
+                   const ::coder::array<real_T, 2U> &alpha,
+                   ::coder::array<real_T, 2U> &beta)
 {
   real_T epsbeta;
   if (alpha.size(1) != df.size(1)) {
@@ -8164,11 +9693,12 @@ static void rdi_compute_oscind(
   }
   compute_beta_kernel(mesh_coords, mesh_node2elems_row_ptr,
                       mesh_node2elems_col_ind, mesh_elemmeas, mesh_globalh, df,
-                      alpha, epsbeta, beta);
+                      alpha, epsbeta, rdi_lref, beta);
 }
 
 // rdi_compute_osusind - Compute over-/under-shoot indicators
-static inline void rdi_compute_osusind(
+static inline
+void rdi_compute_osusind(
     const ::coder::array<int64_T, 1U> &rdi_A_row_ptr,
     const ::coder::array<int32_T, 1U> &rdi_A_col_ind,
     const ::coder::array<real_T, 1U> &rdi_A_val, boolean_T rdi_fullrank,
@@ -8233,21 +9763,22 @@ rdi_contract_markers(::coder::array<int8_T, 2U> &distags,
     for (::coder::SizeType col{0}; col < nrhs; col++) {
       for (::coder::SizeType layer{0}; layer < nlayers; layer++) {
         ::coder::SizeType nbp;
-        ::coder::SizeType npts;
         //  Kernel for determine boundary nodes
-        npts = distags.size(0);
-        bdnodes_.set_size(distags.size(0));
+        u1 = distags.size(0);
+        bdnodes_.set_size(u1);
         nbp = 0;
-        for (::coder::SizeType i{0}; i < npts; i++) {
+        for (::coder::SizeType i{0}; i < u1; i++) {
           if (distags[col + distags.size(1) * i] != 0) {
             int64_T j;
             boolean_T exitg1;
             j = mesh_node2nodes_row_ptr[i];
             exitg1 = false;
             while ((!exitg1) && (j <= mesh_node2nodes_row_ptr[i + 1] - 1L)) {
-              if (distags[col + distags.size(1) *
-                                    (mesh_node2nodes_col_ind[j - 1] - 1)] ==
-                  0) {
+              if (distags[col +
+                          distags.size(1) *
+                              (mesh_node2nodes_col_ind[j -
+                                                       1] -
+                               1)] == 0) {
                 nbp++;
                 bdnodes_[nbp - 1] = i + 1;
                 exitg1 = true;
@@ -8284,8 +9815,7 @@ rdi_contract_markers(::coder::array<int8_T, 2U> &distags,
                                 &lgraph__ncols);
             n2 = compute_connected_components(visited_, iwork_, lgraph__row_ptr,
                                               lgraph__col_ind, lgraph__ncols);
-            // Local buffers with patterns "(\w+_)?(row_ptr|col_ind)" are
-            // legitimate
+            // Local buffers with patterns "(\w+_)?(row_ptr|col_ind)" are legitimate
             if (n1 != n2) {
               distags[col + distags.size(1) * (bdnodes_[i] - 1)] = b_i;
             }
@@ -8311,10 +9841,9 @@ rdi_expand_markers(::coder::array<int8_T, 2U> &distags,
     lvlptr_.set_size(nlayers + 1);
     lvlptr_[0] = 1;
     for (::coder::SizeType col{0}; col < nrhs; col++) {
-      int64_T j;
       ::coder::SizeType i;
       ::coder::SizeType i1;
-      ::coder::SizeType tag_tmp_tmp;
+      ::coder::SizeType i2;
       int8_T tag;
       //  Resets the counter if nrhs > 1
       lvlptr_[1] = lvlptr_[0];
@@ -8323,12 +9852,12 @@ rdi_expand_markers(::coder::array<int8_T, 2U> &distags,
         tag = distags[col + distags.size(1) * b_i];
         if (tag > 0) {
           //  Get connectivity of this node to get 1-ring, and mark them
-          for (j = mesh_node2nodes_row_ptr[b_i];
+          for (int64_T j = mesh_node2nodes_row_ptr[b_i];
                j < mesh_node2nodes_row_ptr[b_i + 1]; j++) {
             //  Preserve originally marked nodes and prefer C_0 over C_1
             i1 = mesh_node2nodes_col_ind[j - 1];
-            tag_tmp_tmp = distags[col + distags.size(1) * (i1 - 1)];
-            if ((tag_tmp_tmp == -2) || (tag_tmp_tmp == 0)) {
+            i2 = distags[col + distags.size(1) * (i1 - 1)];
+            if ((i2 == -2) || (i2 == 0)) {
               distags[col + distags.size(1) * (i1 - 1)] =
                   static_cast<int8_T>(-tag);
               expmarkers_[lvlptr_[1] - 1] = i1;
@@ -8342,29 +9871,27 @@ rdi_expand_markers(::coder::array<int8_T, 2U> &distags,
         i = lvlptr_[k - 2];
         i1 = lvlptr_[k - 1] - 1;
         for (::coder::SizeType b_i{i}; b_i <= i1; b_i++) {
-          int64_T i2;
-          tag_tmp_tmp = expmarkers_[b_i - 1];
-          tag = distags[col + distags.size(1) * (tag_tmp_tmp - 1)];
+          i2 = expmarkers_[b_i - 1];
+          tag = distags[col + distags.size(1) * (i2 - 1)];
           //  Get connectivity of this node to get 1-ring, and mark them
-          j = mesh_node2nodes_row_ptr[tag_tmp_tmp - 1];
-          i2 = mesh_node2nodes_row_ptr[tag_tmp_tmp] - 1L;
-          while (j <= i2) {
+          for (int64_T j = mesh_node2nodes_row_ptr[i2 - 1];
+               j < mesh_node2nodes_row_ptr[i2]; j++) {
             ::coder::SizeType i3;
+            ::coder::SizeType i4;
             //  Prefer C_0 over C_1
-            tag_tmp_tmp = mesh_node2nodes_col_ind[j - 1];
-            i3 = distags[col + distags.size(1) * (tag_tmp_tmp - 1)];
-            if ((i3 == -2) || (i3 == 0)) {
+            i3 = mesh_node2nodes_col_ind[j - 1];
+            i4 = distags[col + distags.size(1) * (i3 - 1)];
+            if ((i4 == -2) || (i4 == 0)) {
               if (tag < 0) {
-                distags[col + distags.size(1) * (tag_tmp_tmp - 1)] =
+                distags[col + distags.size(1) * (i3 - 1)] =
                     static_cast<int8_T>(-static_cast<int8_T>(-tag));
               } else {
-                distags[col + distags.size(1) * (tag_tmp_tmp - 1)] =
+                distags[col + distags.size(1) * (i3 - 1)] =
                     static_cast<int8_T>(-tag);
               }
-              expmarkers_[lvlptr_[k] - 1] = tag_tmp_tmp;
+              expmarkers_[lvlptr_[k] - 1] = i3;
               lvlptr_[k] = lvlptr_[k] + 1;
             }
-            j++;
           }
         }
       }
@@ -8374,8 +9901,8 @@ rdi_expand_markers(::coder::array<int8_T, 2U> &distags,
 
 // rdi_mark_discontinuities - Determine discontinuous nodes
 static void rdi_mark_discontinuities(
-    real_T rdi_cglobal, real_T rdi_clocal, real_T rdi_kappa0, real_T rdi_kappa1,
-    const ::coder::array<real_T, 2U> &mesh_coords,
+    real_T rdi_lref, real_T rdi_cglobal, real_T rdi_clocal, real_T rdi_kappa0,
+    real_T rdi_kappa1, const ::coder::array<real_T, 2U> &mesh_coords,
     const ::coder::array<ConnData, 1U> &mesh_elemtables,
     const ::coder::array<uint64_T, 1U> &mesh_teids,
     const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
@@ -8420,10 +9947,10 @@ static void rdi_mark_discontinuities(
   if (kappa0 <= kappa1) {
     kappa0 = kappa1;
   }
-  mark_discontinuities_kernel(mesh_coords, mesh_elemtables, mesh_teids,
-                              mesh_node2elems_row_ptr, mesh_node2elems_col_ind,
-                              mesh_elemh, mesh_globalh, fs, df, alpha, beta,
-                              cglobal, clocal, kappa1, kappa0, distags);
+  mark_discontinuities_kernel(
+      mesh_coords, mesh_elemtables, mesh_teids, mesh_node2elems_row_ptr,
+      mesh_node2elems_col_ind, mesh_elemh, mesh_globalh, fs, df, alpha, beta,
+      cglobal, clocal, kappa1, kappa0, rdi_lref, distags);
 }
 
 // rdi_update_osusop - Update OSUS operator for rank-deficient nodes
@@ -8464,8 +9991,7 @@ static void rdi_update_osusop(RdiObject *rdi, WlsMesh *mesh, boolean_T interp0)
 
 //  rrqr_factor  Compute rank-revealing QR with column pivoting
 static void rrqr_factor(const ::coder::array<real_T, 2U> &A, real_T thres,
-                        ::coder::SizeType rowoffset,
-                        ::coder::SizeType coloffset, ::coder::SizeType m,
+                        ::coder::SizeType rowoffset, ::coder::SizeType coloffset, ::coder::SizeType m,
                         ::coder::SizeType n, ::coder::array<real_T, 2U> &QR,
                         ::coder::array<int32_T, 1U> &p, int32_T *rank,
                         ::coder::array<real_T, 1U> &work)
@@ -8500,17 +10026,12 @@ static void rrqr_factor(const ::coder::array<real_T, 2U> &A, real_T thres,
 }
 
 //  rrqr_qmulti  Perform Q*bs, where Q is stored implicitly in QR
-static void rrqr_qmulti(const ::coder::array<real_T, 2U> &QR,
-                        ::coder::SizeType m, ::coder::SizeType n,
-                        ::coder::SizeType rank, ::coder::array<real_T, 2U> &bs,
-                        ::coder::SizeType nrhs,
-                        ::coder::array<real_T, 1U> &work)
+static void rrqr_qmulti(const ::coder::array<real_T, 2U> &QR, ::coder::SizeType m,
+                        ::coder::SizeType n, ::coder::SizeType rank, ::coder::array<real_T, 2U> &bs,
+                        ::coder::SizeType nrhs, ::coder::array<real_T, 1U> &work)
 {
-  ::coder::SizeType stride_bs;
   ::coder::SizeType u1;
   ::coder::SizeType wsize;
-  stride_bs = bs.size(1);
-  //  Obtain input arguments
   if (m == 0) {
     m = QR.size(1);
   }
@@ -8527,8 +10048,8 @@ static void rrqr_qmulti(const ::coder::array<real_T, 2U> &QR,
   if ((rank > u1) || (rank < 1)) {
     m2cErrMsgIdAndTxt(
         "wlslib:WrongRank",
-        "Rank %d must be a positive value no greater than min(%d, %d).",
-        (int)rank, (int)m, (int)n);
+        "Rank %d must be a positive value no greater than min(%d, %d).", (int)rank,
+        (int)m, (int)n);
   }
   if (nrhs == 0) {
     nrhs = bs.size(0);
@@ -8543,14 +10064,14 @@ static void rrqr_qmulti(const ::coder::array<real_T, 2U> &QR,
     }
   }
   //  Invoke C++ function
-  wls::rrqr_qmulti(&QR[0], m, n, rank, QR.size(1), nrhs, &bs[0], stride_bs,
+  wls::rrqr_qmulti(&QR[0], m, n, rank, QR.size(1), nrhs, &bs[0], bs.size(1),
                    &(work.data())[0], wsize);
 }
 
 //  rrqr_rtsolve  Perform forward substitution to compute bs=R'\bs, where R is
-static void rrqr_rtsolve(const ::coder::array<real_T, 2U> &QR,
-                         ::coder::SizeType n, ::coder::SizeType rank,
-                         ::coder::array<real_T, 2U> &bs, ::coder::SizeType nrhs)
+static void rrqr_rtsolve(const ::coder::array<real_T, 2U> &QR, ::coder::SizeType n,
+                         ::coder::SizeType rank, ::coder::array<real_T, 2U> &bs,
+                         ::coder::SizeType nrhs)
 {
   ::coder::SizeType i;
   if (n == 0) {
@@ -8567,8 +10088,8 @@ static void rrqr_rtsolve(const ::coder::array<real_T, 2U> &QR,
   if ((rank > i) || (rank < 1)) {
     m2cErrMsgIdAndTxt(
         "wlslib:WrongRank",
-        "Rank %d must be a positive value no greater than min(%d, %d).",
-        (int)rank, (int)QR.size(1), (int)n);
+        "Rank %d must be a positive value no greater than min(%d, %d).", (int)rank,
+        (int)QR.size(1), (int)n);
   }
   if (nrhs == 0) {
     nrhs = bs.size(0);
@@ -9081,7 +10602,7 @@ static void sfe2_tabulate_equi_quad(::coder::SizeType etype,
   ::coder::SizeType nqp;
   int16_T b_unnamed_idx_1;
   int16_T b_unnamed_idx_2;
-  //  triangular
+  //  quadrilaterals
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
   sfvals.set_size(cs.size(0), i);
@@ -9374,7 +10895,7 @@ static void sfe2_tabulate_equi_tri(::coder::SizeType etype,
   ::coder::SizeType nqp;
   int16_T b_unnamed_idx_1;
   int16_T b_unnamed_idx_2;
-  //  triangular
+  //  triangules
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
   sfvals.set_size(cs.size(0), i);
@@ -10208,9 +11729,11 @@ static void sfe2_tabulate_gl_tri(::coder::SizeType etype,
 }
 
 // sfe2_tabulate_shapefuncs - Tabulate shape functions and sdvals at given
-static inline void sfe2_tabulate_shapefuncs(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals)
+static inline
+void sfe2_tabulate_shapefuncs(::coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals)
 {
   switch (etype & 3) {
   case 0:
@@ -11922,149 +13445,6 @@ static void sfe3_tabulate_shapefuncs(::coder::SizeType etype,
 }
 
 // sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *sfe, const ::coder::array<real_T, 2U> &xs)
-{
-  real_T dv[9];
-  real_T v;
-  ::coder::SizeType i;
-  ::coder::SizeType sfe_idx_0_tmp_tmp;
-  boolean_T cond;
-  if ((sfe->etypes[0] > 0) && (iv[sfe->etypes[0] - 1] != 0)) {
-    cond = true;
-  } else {
-    cond = false;
-  }
-  m2cAssert(cond, "");
-  //  potentially skip re-tabulating
-  sfe_idx_0_tmp_tmp = sfe->nqp;
-  sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (::coder::SizeType k{0}; k < i; k++) {
-      ::coder::SizeType m;
-      m = sfe->shapes_geom.size(1);
-      v = sfe->shapes_geom[sfe->shapes_geom.size(1) * q] * xs[k];
-      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += sfe->shapes_geom[(b_i + sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      sfe->cs_phy[k + sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  sfe->wdetJ.set_size(sfe->nqp);
-  if ((sfe->etypes[1] == 68) || (sfe->etypes[1] == 132) ||
-      (sfe->etypes[1] == 36)) {
-    real_T d;
-    ::coder::SizeType geom_dim;
-    ::coder::SizeType n;
-    ::coder::SizeType topo_dim;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(real_T));
-    n = xs.size(0);
-    for (::coder::SizeType k{0}; k < n; k++) {
-      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (::coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   sfe->derivs_geom[b_i + sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      sfe->jacTs[i] = dv[i];
-    }
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      sfe->wdetJ[q] = d * sfe->ws[q];
-    }
-  } else {
-    ::coder::SizeType sfe_idx_0;
-    //  Super-parametric
-    sfe_idx_0 = sfe->nqp * 3;
-    sfe->jacTs.set_size(sfe_idx_0, 3);
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      ::coder::SizeType geom_dim;
-      ::coder::SizeType n;
-      ::coder::SizeType topo_dim;
-      ::coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(real_T));
-      n = xs.size(0);
-      for (::coder::SizeType k{0}; k < n; k++) {
-        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (::coder::SizeType j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] *
-                     sfe->derivs_geom[(b_i + sfe->derivs_geom.size(2) * k) +
-                                      sfe->derivs_geom.size(2) *
-                                          sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i = 0; i < 3; i++) {
-        sfe_idx_0 = i + y;
-        sfe->jacTs[3 * sfe_idx_0] = dv[3 * i];
-        sfe->jacTs[3 * sfe_idx_0 + 1] = dv[3 * i + 1];
-        sfe->jacTs[3 * sfe_idx_0 + 2] = dv[3 * i + 2];
-      }
-      sfe->wdetJ[q] = v;
-      sfe->wdetJ[q] = sfe->wdetJ[q] * sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
 static void sfe_init(SfeObject *sfe, ::coder::SizeType etypes,
                      const ::coder::array<real_T, 2U> &xs)
 {
@@ -12204,7 +13584,8 @@ static void sfe_init(SfeObject *sfe, ::coder::SizeType etypes,
           }
         }
       }
-      if (xs.size(1) == sfe->derivs_sol.size(2)) {
+      i = sfe->derivs_sol.size(2);
+      if (xs.size(1) == i) {
         if (xs.size(1) == 1) {
           v = dv[0];
         } else if (xs.size(1) == 2) {
@@ -12214,7 +13595,7 @@ static void sfe_init(SfeObject *sfe, ::coder::SizeType etypes,
                dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
               dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
         }
-      } else if (sfe->derivs_sol.size(2) == 1) {
+      } else if (i == 1) {
         v = dv[0] * dv[0] + dv[1] * dv[1];
         if (xs.size(1) == 3) {
           v += dv[2] * dv[2];
@@ -12232,6 +13613,150 @@ static void sfe_init(SfeObject *sfe, ::coder::SizeType etypes,
         sfe->jacTs[3 * loop_ub] = dv[3 * i];
         sfe->jacTs[3 * loop_ub + 1] = dv[3 * i + 1];
         sfe->jacTs[3 * loop_ub + 2] = dv[3 * i + 2];
+      }
+      sfe->wdetJ[q] = v;
+      sfe->wdetJ[q] = sfe->wdetJ[q] * sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *sfe, const ::coder::array<real_T, 2U> &xs)
+{
+  real_T dv[9];
+  real_T v;
+  ::coder::SizeType i;
+  ::coder::SizeType sfe_idx_0_tmp_tmp;
+  boolean_T cond;
+  if ((sfe->etypes[0] > 0) && (iv[sfe->etypes[0] - 1] != 0)) {
+    cond = true;
+  } else {
+    cond = false;
+  }
+  m2cAssert(cond, "");
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = sfe->nqp;
+  sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (::coder::SizeType k{0}; k < i; k++) {
+      ::coder::SizeType m;
+      m = sfe->shapes_geom.size(1);
+      v = sfe->shapes_geom[sfe->shapes_geom.size(1) * q] * xs[k];
+      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += sfe->shapes_geom[(b_i + sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      sfe->cs_phy[k + sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  sfe->wdetJ.set_size(sfe->nqp);
+  if ((sfe->etypes[1] == 68) || (sfe->etypes[1] == 132) ||
+      (sfe->etypes[1] == 36)) {
+    real_T d;
+    ::coder::SizeType geom_dim;
+    ::coder::SizeType n;
+    ::coder::SizeType topo_dim;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(real_T));
+    n = xs.size(0);
+    for (::coder::SizeType k{0}; k < n; k++) {
+      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (::coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   sfe->derivs_geom[b_i + sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      sfe->jacTs[i] = dv[i];
+    }
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      sfe->wdetJ[q] = d * sfe->ws[q];
+    }
+  } else {
+    ::coder::SizeType sfe_idx_0;
+    //  Super-parametric
+    sfe_idx_0 = sfe->nqp * 3;
+    sfe->jacTs.set_size(sfe_idx_0, 3);
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      ::coder::SizeType geom_dim;
+      ::coder::SizeType n;
+      ::coder::SizeType topo_dim;
+      ::coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(real_T));
+      n = xs.size(0);
+      for (::coder::SizeType k{0}; k < n; k++) {
+        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (::coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     sfe->derivs_geom[(b_i + sfe->derivs_geom.size(2) * k) +
+                                      sfe->derivs_geom.size(2) *
+                                          sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      i = sfe->derivs_geom.size(2);
+      if (xs.size(1) == i) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (i == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        sfe_idx_0 = i + y;
+        sfe->jacTs[3 * sfe_idx_0] = dv[3 * i];
+        sfe->jacTs[3 * sfe_idx_0 + 1] = dv[3 * i + 1];
+        sfe->jacTs[3 * sfe_idx_0 + 2] = dv[3 * i + 2];
       }
       sfe->wdetJ[q] = v;
       sfe->wdetJ[q] = sfe->wdetJ[q] * sfe->ws[q];
@@ -12546,92 +14071,101 @@ static void tabulate_shapefuncs(::coder::SizeType etype,
 }
 
 // tet_20 - Compute shape functions and their derivatives of tet_20
-static inline void tet_20(real_T xi, real_T eta, real_T zeta, real_T sfvals[20],
-                          real_T sdvals[60])
+static inline
+void tet_20(real_T xi, real_T eta, real_T zeta, real_T sfvals[20],
+                   real_T sdvals[60])
 {
   ::sfe_sfuncs::tet_20_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // tet_35 - Compute shape functions and their derivatives of tet_35
-static inline void tet_35(real_T xi, real_T eta, real_T zeta, real_T sfvals[35],
-                          real_T sdvals[105])
+static inline
+void tet_35(real_T xi, real_T eta, real_T zeta, real_T sfvals[35],
+                   real_T sdvals[105])
 {
   ::sfe_sfuncs::tet_35_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // tet_56 - Compute shape functions and their derivatives of tet_56
-static inline void tet_56(real_T xi, real_T eta, real_T zeta, real_T sfvals[56],
-                          real_T sdvals[168])
+static inline
+void tet_56(real_T xi, real_T eta, real_T zeta, real_T sfvals[56],
+                   real_T sdvals[168])
 {
   ::sfe_sfuncs::tet_56_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // tet_84 - Compute shape functions and their derivatives of tet_84
-static inline void tet_84(real_T xi, real_T eta, real_T zeta, real_T sfvals[84],
-                          real_T sdvals[252])
+static inline
+void tet_84(real_T xi, real_T eta, real_T zeta, real_T sfvals[84],
+                   real_T sdvals[252])
 {
   ::sfe_sfuncs::tet_84_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // tet_gl_20 - Compute shape functions and their derivatives of tet_gl_20
-static inline void tet_gl_20(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[20], real_T sdvals[60])
+static inline
+void tet_gl_20(real_T xi, real_T eta, real_T zeta, real_T sfvals[20],
+                      real_T sdvals[60])
 {
   ::sfe_sfuncs::tet_gl_20_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // tet_gl_35 - Compute shape functions and their derivatives of tet_gl_35
-static inline void tet_gl_35(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[35], real_T sdvals[105])
+static inline
+void tet_gl_35(real_T xi, real_T eta, real_T zeta, real_T sfvals[35],
+                      real_T sdvals[105])
 {
   ::sfe_sfuncs::tet_gl_35_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // tri_21 - Compute shape functions and their derivatives of tri_21
-static inline void tri_21(real_T xi, real_T eta, real_T sfvals[21],
-                          real_T sdvals[42])
+static inline
+void tri_21(real_T xi, real_T eta, real_T sfvals[21], real_T sdvals[42])
 {
   ::sfe_sfuncs::tri_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // tri_28 - Compute shape functions and their derivatives of tri_28
-static inline void tri_28(real_T xi, real_T eta, real_T sfvals[28],
-                          real_T sdvals[56])
+static inline
+void tri_28(real_T xi, real_T eta, real_T sfvals[28], real_T sdvals[56])
 {
   ::sfe_sfuncs::tri_28_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // tri_fek_15 - Compute shape functions and their derivatives of tri_fek_15
-static inline void tri_fek_15(real_T xi, real_T eta, real_T sfvals[15],
-                              real_T sdvals[30])
+static inline
+void tri_fek_15(real_T xi, real_T eta, real_T sfvals[15],
+                       real_T sdvals[30])
 {
   ::sfe_sfuncs::tri_fek_15_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // tri_fek_21 - Compute shape functions and their derivatives of tri_fek_21
-static inline void tri_fek_21(real_T xi, real_T eta, real_T sfvals[21],
-                              real_T sdvals[42])
+static inline
+void tri_fek_21(real_T xi, real_T eta, real_T sfvals[21],
+                       real_T sdvals[42])
 {
   ::sfe_sfuncs::tri_fek_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // tri_fek_28 - Compute shape functions and their derivatives of tri_fek_28
-static inline void tri_fek_28(real_T xi, real_T eta, real_T sfvals[28],
-                              real_T sdvals[56])
+static inline
+void tri_fek_28(real_T xi, real_T eta, real_T sfvals[28],
+                       real_T sdvals[56])
 {
   ::sfe_sfuncs::tri_fek_28_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 // tri_gl_21 - Compute shape functions and their derivatives of tri_gl_21
-static inline void tri_gl_21(real_T xi, real_T eta, real_T sfvals[21],
-                             real_T sdvals[42])
+static inline
+void tri_gl_21(real_T xi, real_T eta, real_T sfvals[21],
+                      real_T sdvals[42])
 {
   ::sfe_sfuncs::tri_gl_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 //  tri_quadrules - Obtain quadrature points and weights of a triangular
-static void tri_quadrules(::coder::SizeType degree,
-                          ::coder::array<real_T, 2U> &cs,
+static void tri_quadrules(::coder::SizeType degree, ::coder::array<real_T, 2U> &cs,
                           ::coder::array<real_T, 1U> &ws)
 {
   if (degree <= 1) {
@@ -12697,12 +14231,11 @@ static void tri_quadrules(::coder::SizeType degree,
 
 // update_osusop - Update CRS given a subset stencil
 static void
-update_osusop(CrsMatrix *A, ::coder::array<int32_T, 1U> &nnzs,
+update_osusop(CrsMatrixD *A, ::coder::array<int32_T, 1U> &nnzs,
               const ::coder::array<real_T, 2U> &mesh_coords,
               const ::coder::array<int64_T, 1U> &mesh_node2elems_row_ptr,
               const ::coder::array<int32_T, 1U> &mesh_node2elems_col_ind,
-              const ::coder::array<Stencils, 1U> &mesh_stencils,
-              ::coder::SizeType stclid)
+              const ::coder::array<Stencils, 1U> &mesh_stencils, ::coder::SizeType stclid)
 {
   ::coder::array<boolean_T, 1U> visited_;
   ::coder::SizeType i;
@@ -12737,8 +14270,9 @@ update_osusop(CrsMatrix *A, ::coder::array<int32_T, 1U> &nnzs,
         visited_[A->col_ind[k - 1] - 1] = true;
         k++;
       }
-      i1 = (mesh_stencils[stclid - 1].ngbverts.row_ptr[b_i + 1] -
-            mesh_stencils[stclid - 1].ngbverts.row_ptr[b_i]);
+      i1 = (
+          mesh_stencils[stclid - 1].ngbverts.row_ptr[b_i + 1] -
+          mesh_stencils[stclid - 1].ngbverts.row_ptr[b_i]);
       for (::coder::SizeType b_k{0}; b_k < i1; b_k++) {
         ::coder::SizeType v;
         v = mesh_stencils[stclid - 1]
@@ -12752,7 +14286,8 @@ update_osusop(CrsMatrix *A, ::coder::array<int32_T, 1U> &nnzs,
           if (nnzs[loop_ub] >= A->row_ptr[loop_ub + 1] - A->row_ptr[loop_ub]) {
             insert_mem_crs(loop_ub + 1, A->row_ptr, A->col_ind, A->val);
           }
-          A->col_ind[(A->row_ptr[loop_ub] + nnzs[loop_ub]) - 1] = v;
+          A->col_ind[(A->row_ptr[loop_ub] + nnzs[loop_ub]) -
+                     1] = v;
           nnzs[loop_ub] = nnzs[loop_ub] + 1;
           visited_[v - 1] = true;
         }
@@ -12769,8 +14304,7 @@ update_osusop(CrsMatrix *A, ::coder::array<int32_T, 1U> &nnzs,
 
 //  wls_buhmann_weights  Weights based on Buhmann's radial basis function
 static void wls_buhmann_weights(const ::coder::array<real_T, 2U> &us,
-                                ::coder::SizeType npoints,
-                                ::coder::SizeType degree,
+                                ::coder::SizeType npoints, ::coder::SizeType degree,
                                 const ::coder::array<real_T, 1U> &params_sh,
                                 const ::coder::array<real_T, 2U> &params_pw,
                                 ::coder::array<real_T, 1U> &ws)
@@ -12841,14 +14375,20 @@ static void wls_buhmann_weights(const ::coder::array<real_T, 2U> &us,
     if (degree < 0) {
       i = abs_degree * abs_degree;
     } else {
-      i = (abs_degree + 1) * abs_degree / 2;
+      i = static_cast<::coder::SizeType>(
+          static_cast<::coder::SizeType>((abs_degree + 1) * abs_degree) >> 1);
     }
   } else if (degree < 0) {
     i = abs_degree * abs_degree * abs_degree;
   } else {
-    i = (abs_degree + 2) * (abs_degree + 1) * abs_degree / 6;
+    i = static_cast<::coder::SizeType>(
+        static_cast<::coder::SizeType>((abs_degree + 2) * (abs_degree + 1) *
+                              abs_degree) /
+        6U);
   }
-  dist_k = find_kth_shortest_dist(ws, (i * 3 + 1) / 2, 1, npoints);
+  dist_k = find_kth_shortest_dist(
+      ws, static_cast<::coder::SizeType>(static_cast<uint32_T>(i * 3 + 1) >> 1), 1,
+      npoints);
   rho = sigma * dist_k;
   if ((params_pw.size(0) == 0) || (params_pw.size(1) == 0)) {
     for (::coder::SizeType b_i{0}; b_i < npoints; b_i++) {
@@ -12881,9 +14421,9 @@ static void wls_buhmann_weights(const ::coder::array<real_T, 2U> &us,
         r_sqrt = std::sqrt(r);
         ws[b_i] = r * r *
                       (r * r_sqrt *
-                           (r_sqrt * (r_sqrt * 112.0 / 45.0 + -7.0) +
-                            5.333333333333333) +
-                       -0.93333333333333335) +
+                           (r_sqrt * (r_sqrt * 112.0 / 45.0 - 7.0) +
+                            5.333333333333333) -
+                       0.93333333333333335) +
                   0.1111111111111111;
       }
     }
@@ -12926,9 +14466,9 @@ static void wls_buhmann_weights(const ::coder::array<real_T, 2U> &us,
           ws[b_i] =
               b_gamma * (r * r *
                              (r * r_sqrt *
-                                  (r_sqrt * (r_sqrt * 112.0 / 45.0 + -7.0) +
-                                   5.333333333333333) +
-                              -0.93333333333333335) +
+                                  (r_sqrt * (r_sqrt * 112.0 / 45.0 - 7.0) +
+                                   5.333333333333333) -
+                              0.93333333333333335) +
                          0.1111111111111111);
         }
       }
@@ -12944,9 +14484,9 @@ static void wls_eno_weights(const ::coder::array<real_T, 2U> &us,
                             const ::coder::array<real_T, 2U> &params_pw,
                             ::coder::array<real_T, 1U> &ws)
 {
+  real_T a;
   real_T c1dfg;
   real_T h2bar;
-  real_T h2bar_tmp;
   real_T safegauard;
   m2cAssert(params_sh.size(0) >= 2, "first two shared parameters are required");
   m2cAssert(params_pw.size(0) >= npoints,
@@ -12965,11 +14505,11 @@ static void wls_eno_weights(const ::coder::array<real_T, 2U> &us,
     i = us_unscaled.size(1);
     for (::coder::SizeType b_i{0}; b_i < npoints; b_i++) {
       real_T r2;
-      h2bar_tmp = us_unscaled[us_unscaled.size(1) * b_i];
-      r2 = h2bar_tmp * h2bar_tmp;
+      a = us_unscaled[us_unscaled.size(1) * b_i];
+      r2 = a * a;
       for (::coder::SizeType j{2}; j <= i; j++) {
-        h2bar_tmp = us_unscaled[(j + us_unscaled.size(1) * b_i) - 1];
-        r2 += h2bar_tmp * h2bar_tmp;
+        a = us_unscaled[(j + us_unscaled.size(1) * b_i) - 1];
+        r2 += a * a;
       }
       ws[b_i] = std::sqrt(r2);
     }
@@ -12992,8 +14532,8 @@ static void wls_eno_weights(const ::coder::array<real_T, 2U> &us,
   }
   h2bar = ws[0] * ws[0];
   for (::coder::SizeType b_i{2}; b_i <= npoints; b_i++) {
-    h2bar_tmp = ws[b_i - 1];
-    h2bar += h2bar_tmp * h2bar_tmp;
+    a = ws[b_i - 1];
+    h2bar += a * a;
   }
   h2bar /= static_cast<real_T>(npoints);
   //  Evaluate the inverse-distance weights as base
@@ -13002,18 +14542,19 @@ static void wls_eno_weights(const ::coder::array<real_T, 2U> &us,
   safegauard = 0.001 * (params_sh[1] * params_sh[1]) * h2bar;
   if (params_pw.size(1) > 2) {
     for (::coder::SizeType b_i{0}; b_i < npoints; b_i++) {
-      h2bar_tmp = params_pw[params_pw.size(1) * b_i] - params_sh[0];
-      ws[b_i] = ws[b_i] / ((h2bar_tmp * h2bar_tmp +
-                            c1dfg * params_pw[params_pw.size(1) * b_i + 1]) +
-                           safegauard);
+      a = params_pw[params_pw.size(1) * b_i] - params_sh[0];
+      ws[b_i] =
+          ws[b_i] / ((a * a + c1dfg * params_pw[params_pw.size(1) * b_i + 1]) +
+                     safegauard);
     }
   }
 }
 
 //  wls_func - Evaluate wls-fitting at one or more points.
-static inline void wls_func(WlsObject *wls,
-                            const ::coder::array<real_T, 2U> &eval_pnts,
-                            ::coder::array<real_T, 2U> &varargout_1)
+static inline
+void wls_func(WlsObject *wls,
+                     const ::coder::array<real_T, 2U> &eval_pnts,
+                     ::coder::array<real_T, 2U> &varargout_1)
 {
   wls_kernel(wls, eval_pnts, varargout_1);
 }
@@ -13024,8 +14565,7 @@ static void wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
                      const ::coder::array<real_T, 1U> &weight_params_shared,
                      const ::coder::array<real_T, 2U> &weight_params_pointwise,
                      const ::coder::array<boolean_T, 1U> &weight_omit_rows,
-                     ::coder::SizeType degree, ::coder::SizeType interp0,
-                     ::coder::SizeType nstpnts)
+                     ::coder::SizeType degree, ::coder::SizeType interp0, ::coder::SizeType nstpnts)
 {
   static const real_T dv[7]{333.33333333333331,
                             1000.0,
@@ -13054,10 +14594,8 @@ static void wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
     real_T maxx;
     real_T maxx_inv;
     real_T thres;
-    ::coder::SizeType a;
     ::coder::SizeType b_i;
     ::coder::SizeType loop_ub;
-    ::coder::SizeType ncols;
     ::coder::SizeType u1;
     if (wls->interp0 != 0) {
       //  Make the first node the origin in interp0 mode
@@ -13079,18 +14617,18 @@ static void wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
             b = false;
             loop_ub = i % us.size(0) * us.size(1) + i / us.size(0);
           } else {
-            a = us.size(1) * us.size(0) - 1;
+            u1 = us.size(1) * us.size(0) - 1;
             if (loop_ub > MAX_int32_T - us.size(1)) {
               loop_ub = i % us.size(0) * us.size(1) + i / us.size(0);
             } else {
               loop_ub += us.size(1);
-              if (loop_ub > a) {
-                loop_ub -= a;
+              if (loop_ub > u1) {
+                loop_ub -= u1;
               }
             }
           }
-          a = wls->us.size(0);
-          wls->us[i % a * wls->us.size(1) + i / a] = us[loop_ub] - us[0];
+          u1 = wls->us.size(0);
+          wls->us[i % u1 * wls->us.size(1) + i / u1] = us[loop_ub] - us[0];
         }
       } break;
       case 2:
@@ -13133,18 +14671,18 @@ static void wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
             b = false;
             loop_ub = i % us.size(0) * us.size(1) + i / us.size(0);
           } else {
-            a = us.size(1) * us.size(0) - 1;
+            u1 = us.size(1) * us.size(0) - 1;
             if (loop_ub > MAX_int32_T - us.size(1)) {
               loop_ub = i % us.size(0) * us.size(1) + i / us.size(0);
             } else {
               loop_ub += us.size(1);
-              if (loop_ub > a) {
-                loop_ub -= a;
+              if (loop_ub > u1) {
+                loop_ub -= u1;
               }
             }
           }
-          a = wls->us.size(0);
-          wls->us[i % a * wls->us.size(1) + i / a] = us[loop_ub];
+          u1 = wls->us.size(0);
+          wls->us[i % u1 * wls->us.size(1) + i / u1] = us[loop_ub];
         }
       } break;
       case 2:
@@ -13271,8 +14809,6 @@ static void wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
     }
     //  Compute Vandermonde system
     gen_vander(wls->us, nstpnts, degree, wls->rweights, wls->V);
-    a = wls->V.size(1);
-    ncols = wls->V.size(0);
     //  Compact CVM if needed
     loop_ub = weight_omit_rows.size(0);
     u1 = wls->nrows;
@@ -13295,8 +14831,8 @@ static void wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
       wls->runtimes[0] = timestamp1 - timestamp;
       timestamp = timestamp1;
     }
-    wls->nrows = a / wls->stride * nstpnts;
-    wls->ncols = ncols;
+    wls->nrows = wls->V.size(1) / wls->stride * nstpnts;
+    wls->ncols = wls->V.size(0);
     //  Perform QR with column pivoting
     if ((degree > 1) && (degree < 7)) {
       thres = dv[degree - 1];
@@ -13305,8 +14841,9 @@ static void wls_init(WlsObject *wls, const ::coder::array<real_T, 2U> &us,
     }
     //  In interp0 mode, we trim off the first row and first column.
     rrqr_factor(wls->V, thres, interp0, interp0, wls->nrows - interp0,
-                ncols - interp0, wls->QR, wls->jpvt, &wls->rank, wls->work);
-    wls->fullrank = wls->rank == ncols - interp0;
+                wls->V.size(0) - interp0, wls->QR, wls->jpvt, &wls->rank,
+                wls->work);
+    wls->fullrank = wls->rank == wls->V.size(0) - interp0;
     wls->rowmajor = true;
     if (wls->runtimes.size(0) != 0) {
       real_T t;
@@ -13365,20 +14902,19 @@ static void wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
 
 //  wls_invdist_weights  Weights based on inverse distance
 static void wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
-                                ::coder::SizeType npoints,
-                                ::coder::SizeType degree,
+                                ::coder::SizeType npoints, ::coder::SizeType degree,
                                 const ::coder::array<real_T, 1U> &params_sh,
                                 const ::coder::array<real_T, 2U> &params_pw,
                                 ::coder::array<real_T, 1U> &ws)
 {
   real_T alpha;
-  ::coder::SizeType b_degree;
+  ::coder::SizeType i;
   if (degree < 0) {
-    b_degree = -degree;
+    i = -degree;
   } else {
-    b_degree = degree;
+    i = degree;
   }
-  alpha = static_cast<real_T>(b_degree) / 2.0;
+  alpha = static_cast<real_T>(i) / 2.0;
   if ((params_sh.size(0) > 1) && (params_sh[1] != 0.0)) {
     alpha = params_sh[1];
   }
@@ -13389,26 +14925,26 @@ static void wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
               "length of ws cannot be smaller than npoints");
   }
   if ((params_pw.size(0) == 0) || (params_pw.size(1) == 0)) {
-    for (::coder::SizeType i{0}; i < npoints; i++) {
+    for (::coder::SizeType b_i{0}; b_i < npoints; b_i++) {
       real_T r;
       real_T r2;
-      r = std::abs(us[us.size(1) * i]);
+      r = std::abs(us[us.size(1) * b_i]);
       if (us.size(1) > 1) {
         if (degree > 0) {
           //  Compute 2-norm
           r2 = r * r;
-          b_degree = us.size(1);
-          for (::coder::SizeType j{2}; j <= b_degree; j++) {
+          i = us.size(1);
+          for (::coder::SizeType j{2}; j <= i; j++) {
             real_T d;
-            d = us[(j + us.size(1) * i) - 1];
+            d = us[(j + us.size(1) * b_i) - 1];
             r2 += d * d;
           }
         } else {
           //  Compute inf-norm for tensor-product
-          b_degree = us.size(1);
-          for (::coder::SizeType j{2}; j <= b_degree; j++) {
+          i = us.size(1);
+          for (::coder::SizeType j{2}; j <= i; j++) {
             real_T r1;
-            r1 = std::abs(us[(j + us.size(1) * i) - 1]);
+            r1 = std::abs(us[(j + us.size(1) * b_i) - 1]);
             if (r1 > r) {
               r = r1;
             }
@@ -13419,36 +14955,36 @@ static void wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
         r2 = r * r;
       }
       //  Compute weight
-      ws[i] = std::pow(std::sqrt(r2 + 0.01), -alpha);
+      ws[b_i] = std::pow(std::sqrt(r2 + 0.01), -alpha);
     }
   } else {
     m2cAssert(params_pw.size(0) >= npoints,
               "size(params_pw,1) should be >=npoints");
-    for (::coder::SizeType i{0}; i < npoints; i++) {
+    for (::coder::SizeType b_i{0}; b_i < npoints; b_i++) {
       real_T b_gamma;
-      b_gamma = params_pw[params_pw.size(1) * i];
+      b_gamma = params_pw[params_pw.size(1) * b_i];
       if (b_gamma <= 0.0) {
-        ws[i] = 0.0;
+        ws[b_i] = 0.0;
       } else {
         real_T r;
         real_T r2;
-        r = std::abs(us[us.size(1) * i]);
+        r = std::abs(us[us.size(1) * b_i]);
         if (us.size(1) > 1) {
           if (degree > 0) {
             //  Compute 2-norm
             r2 = r * r;
-            b_degree = us.size(1);
-            for (::coder::SizeType j{2}; j <= b_degree; j++) {
+            i = us.size(1);
+            for (::coder::SizeType j{2}; j <= i; j++) {
               real_T d;
-              d = us[(j + us.size(1) * i) - 1];
+              d = us[(j + us.size(1) * b_i) - 1];
               r2 += d * d;
             }
           } else {
             //  Compute inf-norm for tensor-product
-            b_degree = us.size(1);
-            for (::coder::SizeType j{2}; j <= b_degree; j++) {
+            i = us.size(1);
+            for (::coder::SizeType j{2}; j <= i; j++) {
               real_T r1;
-              r1 = std::abs(us[(j + us.size(1) * i) - 1]);
+              r1 = std::abs(us[(j + us.size(1) * b_i) - 1]);
               if (r1 > r) {
                 r = r1;
               }
@@ -13459,7 +14995,7 @@ static void wls_invdist_weights(const ::coder::array<real_T, 2U> &us,
           r2 = r * r;
         }
         //  Compute weight
-        ws[i] = b_gamma * std::pow(std::sqrt(r2 + 0.01), -alpha);
+        ws[b_i] = b_gamma * std::pow(std::sqrt(r2 + 0.01), -alpha);
       }
     }
   }
@@ -13483,7 +15019,10 @@ static void wls_kernel(WlsObject *wls,
   nDims = eval_pnts.size(1) - 1;
   wls->nevpnts = eval_pnts.size(0);
   //  scale the coordinates; use wls.us as buffer
-  wls->us.set_size(((eval_pnts.size(0) + 3) / 4) << 2, eval_pnts.size(1));
+  wls->us.set_size(
+      static_cast<::coder::SizeType>((eval_pnts.size(0) + 3) >> 2)
+          << 2,
+      eval_pnts.size(1));
   if (wls->interp0 != 0) {
     for (::coder::SizeType iPoint{0}; iPoint < nevpnts; iPoint++) {
       for (::coder::SizeType dim{0}; dim <= nDims; dim++) {
@@ -13525,17 +15064,17 @@ static void wls_kernel(WlsObject *wls,
 }
 
 //  wls_resize  Reinitialize the buffers of WlsObject
-static void wls_resize(WlsObject *wls, ::coder::SizeType dim,
-                       ::coder::SizeType nstpnts, ::coder::SizeType degree)
+static void wls_resize(WlsObject *wls, ::coder::SizeType dim, ::coder::SizeType nstpnts,
+                       ::coder::SizeType degree)
 {
-  ::coder::SizeType b_degree;
+  ::coder::SizeType dim_idx_1;
   ::coder::SizeType ncols;
   ::coder::SizeType stride;
   ::coder::SizeType x;
   wls->degree = degree;
   wls->order = 0;
   //  make stride a multiple of four
-  stride = ((nstpnts + 3) / 4) << 2;
+  stride = static_cast<::coder::SizeType>(static_cast<uint32_T>(nstpnts + 3) >> 2) << 2;
   wls->stride = stride;
   wls->us.set_size(stride, dim);
   wls->rweights.set_size(stride);
@@ -13544,22 +15083,25 @@ static void wls_resize(WlsObject *wls, ::coder::SizeType dim,
   switch (dim) {
   case 1:
     if (degree < 0) {
-      b_degree = -degree;
+      dim_idx_1 = -degree;
     } else {
-      b_degree = degree;
+      dim_idx_1 = degree;
     }
-    ncols = b_degree + 1;
+    ncols = dim_idx_1 + 1;
     break;
   case 2:
     if (degree > 0) {
-      ncols = (degree + 1) * (degree + 2) / 2;
+      ncols = static_cast<::coder::SizeType>(
+          static_cast<::coder::SizeType>((degree + 1) * (degree + 2)) >> 1);
     } else {
       ncols = (1 - degree) * (1 - degree);
     }
     break;
   default:
     if (degree > 0) {
-      ncols = (degree + 1) * (degree + 2) * (degree + 3) / 6;
+      ncols = static_cast<::coder::SizeType>(
+          static_cast<::coder::SizeType>((degree + 1) * (degree + 2) * (degree + 3)) /
+          6U);
     } else {
       ncols = (1 - degree) * (1 - degree) * (1 - degree);
     }
@@ -13568,19 +15110,19 @@ static void wls_resize(WlsObject *wls, ::coder::SizeType dim,
   wls->hs_inv.set_size(1, dim);
   wls->jpvt.set_size(ncols);
   wls->V.set_size(ncols, stride);
-  b_degree = (ncols - wls->interp0) + 1;
-  wls->QR.set_size(b_degree, stride);
+  dim_idx_1 = (ncols - wls->interp0) + 1;
+  wls->QR.set_size(dim_idx_1, stride);
   wls->rank = 0;
   //  work space
   x = ncols << 2;
-  b_degree = ncols + 1;
-  if (stride >= b_degree) {
-    b_degree = stride;
+  dim_idx_1 = ncols + 1;
+  if (stride >= dim_idx_1) {
+    dim_idx_1 = stride;
   }
   if (x < 4160) {
     x = 4160;
   }
-  wls->work.set_size((b_degree << 5) + x);
+  wls->work.set_size((dim_idx_1 << 5) + x);
 }
 
 // wls_solve_sys - Solve Vandermonde system to obtain the operator
@@ -13684,7 +15226,7 @@ static void wlsmesh_compute_1ring(WlsMesh *mesh)
   } else if (mesh->topo_ndims == 2) {
     compute_stencils_2d(mesh, mesh->stencils.size(0), mykrings);
   } else {
-    m2cAssert(false, "Not impl");
+    compute_stencils_3d(mesh, mesh->stencils.size(0), mykrings);
   }
   //  Copy to 1-ring structures in mesh
   mesh->node2nodes = mesh->stencils[mesh->stencils.size(0) - 1].ngbverts;
@@ -13706,9 +15248,10 @@ static void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
   ::coder::array<real_T, 2U> xs_;
   SfeObject sfe;
   real_T t_data[6];
-  ::coder::SizeType b_loop_ub;
+  ::coder::SizeType b_k;
   ::coder::SizeType i;
   ::coder::SizeType loop_ub;
+  ::coder::SizeType mesh_idx_0;
   ::coder::SizeType nelems;
   ::coder::SizeType outsize_idx_0;
   if (mesh->teids.size(0) == 0) {
@@ -13754,25 +15297,27 @@ static void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
   mesh->elemmeas.set_size(mesh->teids.size(0));
   for (::coder::SizeType b_i{0}; b_i < nelems; b_i++) {
     uint64_T c;
-    ::coder::SizeType eid;
     c = mesh->teids[b_i] & 255UL;
-    eid = (mesh->teids[b_i] >> 8);
-    loop_ub = mesh->elemtables[c - 1].conn.size(1);
-    outsize_idx_0 = mesh->coords.size(1);
-    xs_.set_size(loop_ub, outsize_idx_0);
-    for (i = 0; i < loop_ub; i++) {
+    b_k = (mesh->teids[b_i] >> 8);
+    mesh_idx_0 = mesh->elemtables[c - 1].conn.size(1);
+    xs_.set_size(mesh_idx_0, mesh->coords.size(1));
+    for (i = 0; i < mesh_idx_0; i++) {
+      outsize_idx_0 = mesh->coords.size(1);
       for (::coder::SizeType i2{0}; i2 < outsize_idx_0; i2++) {
         xs_[i2 + xs_.size(1) * i] =
-            mesh->coords
-                [i2 + mesh->coords.size(1) *
-                          (mesh->elemtables[c - 1]
-                               .conn[i + mesh->elemtables[c - 1].conn.size(1) *
-                                             (eid - 1)] -
-                           1)];
+            mesh->coords[i2 +
+                         mesh->coords.size(1) *
+                             (mesh->elemtables[c - 1].conn
+                                  [i +
+                                   mesh->elemtables[c - 1]
+                                           .conn.size(1) *
+                                       (b_k - 1)] -
+                              1)];
       }
     }
     if (sfes_[c - 1].etypes[0] <= 0) {
-      sfe_init(&sfes_[c - 1], mesh->elemtables[c - 1].etype, xs_);
+      sfe_init(&sfes_[c - 1],
+               mesh->elemtables[c - 1].etype, xs_);
     } else {
       sfe_init(&sfes_[c - 1], xs_);
     }
@@ -13780,8 +15325,8 @@ static void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
   }
   //  Sizes
   if (mesh->coords.size(1) == mesh->topo_ndims + 1) {
-    real_T a_tmp;
-    real_T hmax;
+    real_T d;
+    real_T ex;
     ::coder::SizeType dim;
     ::coder::SizeType m;
     ::coder::SizeType n;
@@ -13803,65 +15348,70 @@ static void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
     for (::coder::SizeType b_i{0}; b_i < n; b_i++) {
       int64_T i1;
       (*nodeh)[b_i] = 0.0;
+      if ((nrms->size(0) != 0) && (nrms->size(1) != 0)) {
+        //  Surface
+        outsize_idx_0 = nrms->size(1) - 1;
+        if (nrms->size(1) == 2) {
+          //  2D
+          t_data[0] = -(*nrms)[nrms->size(1) * b_i + 1];
+          t_data[outsize_idx_0] = (*nrms)[nrms->size(1) * b_i];
+        } else {
+          real_T a;
+          d = std::abs((*nrms)[nrms->size(1) * b_i]);
+          if ((d > std::abs((*nrms)[nrms->size(1) * b_i + 1])) &&
+              (d > std::abs((*nrms)[nrms->size(1) * b_i + 2]))) {
+            t_data[0] = -(*nrms)[nrms->size(1) * b_i] *
+                        (*nrms)[nrms->size(1) * b_i + 1];
+            t_data[outsize_idx_0] = 1.0 - (*nrms)[nrms->size(1) * b_i + 1] *
+                                              (*nrms)[nrms->size(1) * b_i + 1];
+            t_data[outsize_idx_0 * 2] = -(*nrms)[nrms->size(1) * b_i + 1] *
+                                        (*nrms)[nrms->size(1) * b_i + 2];
+          } else {
+            t_data[0] = 1.0 - (*nrms)[nrms->size(1) * b_i] *
+                                  (*nrms)[nrms->size(1) * b_i];
+            t_data[outsize_idx_0] = -(*nrms)[nrms->size(1) * b_i] *
+                                    (*nrms)[nrms->size(1) * b_i + 1];
+            t_data[outsize_idx_0 * 2] = -(*nrms)[nrms->size(1) * b_i] *
+                                        (*nrms)[nrms->size(1) * b_i + 2];
+          }
+          ex = t_data[outsize_idx_0 * 2];
+          a = std::sqrt((t_data[0] * t_data[0] +
+                         t_data[outsize_idx_0] * t_data[outsize_idx_0]) +
+                        ex * ex);
+          t_data[0] /= a;
+          t_data[outsize_idx_0] /= a;
+          t_data[outsize_idx_0 * 2] /= a;
+          //  cross
+          t_data[1] =
+              t_data[outsize_idx_0 * 2] * (*nrms)[nrms->size(1) * b_i + 1] -
+              t_data[outsize_idx_0] * (*nrms)[nrms->size(1) * b_i + 2];
+          t_data[outsize_idx_0 + 1] =
+              t_data[0] * (*nrms)[nrms->size(1) * b_i + 2] -
+              (*nrms)[nrms->size(1) * b_i] * t_data[outsize_idx_0 * 2];
+          t_data[outsize_idx_0 * 2 + 1] =
+              (*nrms)[nrms->size(1) * b_i] * t_data[outsize_idx_0] -
+              t_data[0] * (*nrms)[nrms->size(1) * b_i + 1];
+        }
+      } else {
+        outsize_idx_0 = dim;
+      }
       i1 = (*mesh_node2nodes_row_ptr)[b_i + 1];
       if ((*mesh_node2nodes_row_ptr)[b_i] <= i1 - 1L) {
-        b_loop_ub = mesh_coords->size(1);
+        loop_ub = mesh_coords->size(1);
       }
       for (int64_T k = (*mesh_node2nodes_row_ptr)[b_i]; k < i1; k++) {
         real_T v_data[3];
         real_T len;
-        for (i = 0; i < b_loop_ub; i++) {
+        for (i = 0; i < loop_ub; i++) {
           v_data[i] =
               (*mesh_coords)[i + mesh_coords->size(1) *
-                                     ((*mesh_node2nodes_col_ind)[k - 1] - 1)] -
+                                     ((*mesh_node2nodes_col_ind)
+                                          [k - 1] -
+                                      1)] -
               (*mesh_coords)[i + mesh_coords->size(1) * b_i];
         }
         if ((nrms->size(0) != 0) && (nrms->size(1) != 0)) {
           real_T u_data[2];
-          //  Surface
-          outsize_idx_0 = nrms->size(1) - 1;
-          if (nrms->size(1) == 2) {
-            //  2D
-            t_data[0] = -(*nrms)[nrms->size(1) * b_i + 1];
-            t_data[outsize_idx_0] = (*nrms)[nrms->size(1) * b_i];
-          } else {
-            real_T a;
-            a_tmp = std::abs((*nrms)[nrms->size(1) * b_i]);
-            if ((a_tmp > std::abs((*nrms)[nrms->size(1) * b_i + 1])) &&
-                (a_tmp > std::abs((*nrms)[nrms->size(1) * b_i + 2]))) {
-              t_data[0] = -(*nrms)[nrms->size(1) * b_i] *
-                          (*nrms)[nrms->size(1) * b_i + 1];
-              t_data[outsize_idx_0] =
-                  1.0 - (*nrms)[nrms->size(1) * b_i + 1] *
-                            (*nrms)[nrms->size(1) * b_i + 1];
-              t_data[outsize_idx_0 * 2] = -(*nrms)[nrms->size(1) * b_i + 1] *
-                                          (*nrms)[nrms->size(1) * b_i + 2];
-            } else {
-              t_data[0] = 1.0 - (*nrms)[nrms->size(1) * b_i] *
-                                    (*nrms)[nrms->size(1) * b_i];
-              t_data[outsize_idx_0] = -(*nrms)[nrms->size(1) * b_i] *
-                                      (*nrms)[nrms->size(1) * b_i + 1];
-              t_data[outsize_idx_0 * 2] = -(*nrms)[nrms->size(1) * b_i] *
-                                          (*nrms)[nrms->size(1) * b_i + 2];
-            }
-            a_tmp = t_data[outsize_idx_0 * 2];
-            a = std::sqrt((t_data[0] * t_data[0] +
-                           t_data[outsize_idx_0] * t_data[outsize_idx_0]) +
-                          a_tmp * a_tmp);
-            t_data[0] /= a;
-            t_data[outsize_idx_0] /= a;
-            t_data[outsize_idx_0 * 2] /= a;
-            //  cross
-            t_data[1] =
-                t_data[outsize_idx_0 * 2] * (*nrms)[nrms->size(1) * b_i + 1] -
-                t_data[outsize_idx_0] * (*nrms)[nrms->size(1) * b_i + 2];
-            t_data[outsize_idx_0 + 1] =
-                t_data[0] * (*nrms)[nrms->size(1) * b_i + 2] -
-                (*nrms)[nrms->size(1) * b_i] * t_data[outsize_idx_0 * 2];
-            t_data[outsize_idx_0 * 2 + 1] =
-                (*nrms)[nrms->size(1) * b_i] * t_data[outsize_idx_0] -
-                t_data[0] * (*nrms)[nrms->size(1) * b_i + 1];
-          }
           //  Project
           for (::coder::SizeType ii{0}; ii < dim; ii++) {
             u_data[ii] = 0.0;
@@ -13877,9 +15427,10 @@ static void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
         } else {
           len = 0.0;
           for (::coder::SizeType ii{0}; ii <= dim; ii++) {
-            a_tmp = v_data[ii];
-            len += std::sqrt(a_tmp * a_tmp);
+            d = v_data[ii];
+            len += d * d;
           }
+          len = std::sqrt(len);
         }
         (*nodeh)[b_i] = (*nodeh)[b_i] + len;
       }
@@ -13889,30 +15440,45 @@ static void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
     }
     elemh->set_size(mesh_teids->size(0));
     //  serial
-    hmax = 0.0;
     for (::coder::SizeType b_i{0}; b_i < m; b_i++) {
       real_T h0;
       ::coder::SizeType etable;
       etable = static_cast<::coder::SizeType>((*mesh_teids)[b_i] & 255UL) - 1;
       h0 = 0.0;
-      i = (*mesh_elemtables)[etable].conn.size(1) - 1;
-      for (::coder::SizeType j{0}; j <= i; j++) {
-        h0 += (*nodeh)[(*mesh_elemtables)[etable]
-                           .conn[j + (*mesh_elemtables)[etable].conn.size(1) *
-                                         (static_cast<::coder::SizeType>(
-                                              (*mesh_teids)[b_i] >> 8) -
-                                          1)] -
-                       1];
+      i = (*mesh_elemtables)[etable].conn.size(1);
+      for (::coder::SizeType j{0}; j < i; j++) {
+        h0 += (*nodeh)
+            [(*mesh_elemtables)[etable].conn
+                 [j + (*mesh_elemtables)[etable].conn.size(1) *
+                          (static_cast<::coder::SizeType>((*mesh_teids)[b_i] >> 8) - 1)] -
+             1];
       }
       //  Average
-      a_tmp = h0 / static_cast<real_T>((*mesh_elemtables)[etable].conn.size(1));
-      (*elemh)[b_i] = a_tmp;
-      hmax = std::fmax(hmax, a_tmp);
+      (*elemh)[b_i] =
+          h0 / static_cast<real_T>((*mesh_elemtables)[etable].conn.size(1));
     }
     //  Compute global h
-    mesh->globalh = hmax;
+    outsize_idx_0 = elemh->size(0);
+    if (elemh->size(0) <= 2) {
+      if (elemh->size(0) == 1) {
+        ex = (*elemh)[0];
+      } else if ((*elemh)[0] < (*elemh)[elemh->size(0) - 1]) {
+        ex = (*elemh)[elemh->size(0) - 1];
+      } else {
+        ex = (*elemh)[0];
+      }
+    } else {
+      ex = (*elemh)[0];
+      for (b_k = 2; b_k <= outsize_idx_0; b_k++) {
+        d = (*elemh)[b_k - 1];
+        if (ex < d) {
+          ex = d;
+        }
+      }
+    }
+    mesh->globalh = ex;
   } else {
-    real_T hmax;
+    real_T d;
     ::coder::SizeType dim;
     ::coder::SizeType m;
     ::coder::SizeType n;
@@ -13934,19 +15500,18 @@ static void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
         if (k <= i1 - 1L) {
           real_T v_data[3];
           real_T len;
-          loop_ub = mesh->coords.size(1);
-          outsize_idx_0 = mesh->node2nodes.col_ind[k - 1];
-          for (i = 0; i < loop_ub; i++) {
-            v_data[i] =
-                mesh->coords[i + mesh->coords.size(1) * (outsize_idx_0 - 1)] -
-                mesh->coords[i + mesh->coords.size(1) * b_i];
+          b_k = mesh->node2nodes.col_ind[k - 1];
+          mesh_idx_0 = mesh->coords.size(1);
+          for (i = 0; i < mesh_idx_0; i++) {
+            v_data[i] = mesh->coords[i + mesh->coords.size(1) * (b_k - 1)] -
+                        mesh->coords[i + mesh->coords.size(1) * b_i];
           }
           len = 0.0;
           for (::coder::SizeType ii{0}; ii < dim; ii++) {
-            real_T a_tmp;
-            a_tmp = v_data[ii];
-            len += std::sqrt(a_tmp * a_tmp);
+            d = v_data[ii];
+            len += d * d;
           }
+          len = std::sqrt(len);
           mesh->nodeh[b_i] = mesh->nodeh[b_i] + len;
           k++;
         } else {
@@ -13960,26 +15525,45 @@ static void wlsmesh_compute_meshprop(WlsMesh *mesh, ::coder::SizeType nrmidx)
     }
     mesh->elemh.set_size(mesh->teids.size(0));
     //  serial
-    hmax = 0.0;
     for (::coder::SizeType b_i{0}; b_i < m; b_i++) {
       real_T h0;
       ::coder::SizeType etable;
       etable = (mesh->teids[b_i] & 255UL) - 1;
       h0 = 0.0;
-      i = mesh->elemtables[etable].conn.size(1) - 1;
-      for (::coder::SizeType j{0}; j <= i; j++) {
+      i = mesh->elemtables[etable].conn.size(1);
+      for (::coder::SizeType j{0}; j < i; j++) {
         h0 += mesh->nodeh[mesh->elemtables[etable]
                               .conn[j + mesh->elemtables[etable].conn.size(1) *
-                                            ((mesh->teids[b_i] >> 8) - 1)] -
+                                            ((
+                                                 mesh->teids[b_i] >> 8) -
+                                             1)] -
                           1];
       }
       //  Average
       mesh->elemh[b_i] =
           h0 / static_cast<real_T>(mesh->elemtables[etable].conn.size(1));
-      hmax = std::fmax(hmax, mesh->elemh[b_i]);
     }
     //  Compute global h
-    mesh->globalh = hmax;
+    outsize_idx_0 = mesh->elemh.size(0);
+    if (mesh->elemh.size(0) <= 2) {
+      if (mesh->elemh.size(0) == 1) {
+        mesh->globalh = mesh->elemh[0];
+      } else if (mesh->elemh[0] < mesh->elemh[mesh->elemh.size(0) - 1]) {
+        mesh->globalh = mesh->elemh[mesh->elemh.size(0) - 1];
+      } else {
+        mesh->globalh = mesh->elemh[0];
+      }
+    } else {
+      real_T ex;
+      ex = mesh->elemh[0];
+      for (b_k = 2; b_k <= outsize_idx_0; b_k++) {
+        d = mesh->elemh[b_k - 1];
+        if (ex < d) {
+          ex = d;
+        }
+      }
+      mesh->globalh = ex;
+    }
   }
 }
 
@@ -14057,7 +15641,7 @@ static void wlsmesh_compute_stencils(WlsMesh *mesh, ::coder::SizeType stclidx)
   } else if (mesh->topo_ndims == 2) {
     b_compute_stencils_2d(mesh, stclidx, mykrings);
   } else {
-    m2cAssert(false, "Not impl");
+    b_compute_stencils_3d(mesh, stclidx, mykrings);
   }
 }
 
@@ -14089,18 +15673,18 @@ static void wlsmesh_compute_stencils(WlsMesh *mesh, ::coder::SizeType stclidx,
   } else if (mesh->topo_ndims == 2) {
     compute_stencils_2d(mesh, stclidx, mykrings);
   } else {
-    m2cAssert(false, "Not impl");
+    compute_stencils_3d(mesh, stclidx, mykrings);
   }
 }
 
 // rdi_apply - Apply RDI to obtain indicators and disc. tags
 void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
-               const ::coder::array<real_T, 2U> &fs,
-               const ::coder::array<real_T, 2U> &df,
-               ::coder::array<real_T, 2U> &alpha,
-               ::coder::array<real_T, 2U> &beta,
-               ::coder::array<int8_T, 2U> &distags,
-               ::coder::array<real_T, 2U> &alphanode)
+                const ::coder::array<real_T, 2U> &fs,
+                const ::coder::array<real_T, 2U> &df,
+                ::coder::array<real_T, 2U> &alpha,
+                ::coder::array<real_T, 2U> &beta,
+                ::coder::array<int8_T, 2U> &distags,
+                ::coder::array<real_T, 2U> &alphanode)
 {
   int64_T j;
   real_T asum_tmp;
@@ -14137,7 +15721,8 @@ void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
         alpha[k + alpha.size(1) * i] =
             alpha[k + alpha.size(1) * i] +
             rdi->A.val[j - 1] *
-                fs[k + fs.size(1) * (rdi->A.col_ind[j - 1] - 1)];
+                fs[k + fs.size(1) *
+                           (rdi->A.col_ind[j - 1] - 1)];
       }
     }
   }
@@ -14153,7 +15738,10 @@ void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
       for (j = mesh->node2elems.row_ptr[i]; j < mesh->node2elems.row_ptr[i + 1];
            j++) {
         asum_tmp = std::abs(
-            alpha[k + alpha.size(1) * (mesh->node2elems.col_ind[j - 1] - 1)]);
+            alpha[k +
+                  alpha.size(1) *
+                      (mesh->node2elems.col_ind[j - 1] -
+                       1)]);
         if (a < asum_tmp) {
           a = asum_tmp;
         }
@@ -14174,7 +15762,7 @@ void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
   nrhs = df.size(1);
   beta.set_size(mesh->coords.size(0), df.size(1));
   //  Serial
-  epsh2 = epsbeta * mesh->globalh * mesh->globalh;
+  epsh2 = epsbeta * mesh->globalh * mesh->globalh / (rdi->lref * rdi->lref);
   //  C++
   for (::coder::SizeType i{0}; i < n; i++) {
     for (::coder::SizeType k{0}; k < nrhs; k++) {
@@ -14248,7 +15836,7 @@ void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
   n = mesh->coords.size(0);
   nrhs = alpha.size(1);
   distags.set_size(mesh->coords.size(0), alpha.size(1));
-  thres = cglobal * std::pow(mesh->globalh, 1.5);
+  thres = cglobal * std::pow(mesh->globalh / rdi->lref, 1.5);
   for (::coder::SizeType i{0}; i < n; i++) {
     for (::coder::SizeType k{0}; k < nrhs; k++) {
       real_T tauglobal;
@@ -14267,22 +15855,30 @@ void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
         ::coder::SizeType leid;
         atop_tmp = mesh->node2elems.col_ind[j - 1] - 1;
         c = mesh->teids[atop_tmp] & 255UL;
-        leid = (mesh->teids[mesh->node2elems.col_ind[j - 1] - 1] >> 8);
+        leid = (
+            mesh->teids[mesh->node2elems.col_ind[j - 1] -
+                        1] >>
+            8);
         b_fmax = -1.7976931348623157E+308;
         b_fmin = 1.7976931348623157E+308;
         i1 =
-            mesh->elemtables[(mesh->teids[mesh->node2elems.col_ind[j - 1] - 1] &
-                              255UL) -
+            mesh->elemtables[(
+                                 mesh->teids[mesh->node2elems.col_ind
+                                                 [j - 1] -
+                                             1] &
+                                 255UL) -
                              1]
                 .conn.size(1);
         for (::coder::SizeType ii{0}; ii < i1; ii++) {
           real_T fvalue;
           fvalue =
-              fs[k + fs.size(1) *
-                         (mesh->elemtables[c - 1]
-                              .conn[ii + mesh->elemtables[c - 1].conn.size(1) *
-                                             (leid - 1)] -
-                          1)];
+              fs[k +
+                 fs.size(1) *
+                     (mesh->elemtables[c - 1].conn
+                          [ii + mesh->elemtables[c - 1]
+                                        .conn.size(1) *
+                                    (leid - 1)] -
+                      1)];
           if (b_fmax < fvalue) {
             b_fmax = fvalue;
           }
@@ -14315,12 +15911,12 @@ void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
 
 // rdi_apply - Apply RDI to obtain indicators and disc. tags
 void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
-               const ::coder::array<real_T, 2U> &fs,
-               const ::coder::array<real_T, 2U> &df,
-               ::coder::SizeType varargin_2, ::coder::array<real_T, 2U> &alpha,
-               ::coder::array<real_T, 2U> &beta,
-               ::coder::array<int8_T, 2U> &distags,
-               ::coder::array<real_T, 2U> &alphanode)
+                const ::coder::array<real_T, 2U> &fs,
+                const ::coder::array<real_T, 2U> &df, ::coder::SizeType varargin_2,
+                ::coder::array<real_T, 2U> &alpha,
+                ::coder::array<real_T, 2U> &beta,
+                ::coder::array<int8_T, 2U> &distags,
+                ::coder::array<real_T, 2U> &alphanode)
 {
   boolean_T m2cTryBlkErrFlag;
   ::coder::SizeType nthreads;
@@ -14341,12 +15937,12 @@ void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
                         mesh->node2elems.col_ind, fs, alpha, alphanode);
 #pragma omp barrier
     //  Step 2, compute osc. indicators (beta values)
-    rdi_compute_oscind(rdi->epsbeta, mesh->coords, mesh->node2elems.row_ptr,
-                       mesh->node2elems.col_ind, mesh->elemmeas, mesh->globalh,
-                       df, alpha, beta);
+    rdi_compute_oscind(rdi->lref, rdi->epsbeta, mesh->coords,
+                       mesh->node2elems.row_ptr, mesh->node2elems.col_ind,
+                       mesh->elemmeas, mesh->globalh, df, alpha, beta);
 #pragma omp barrier
     //  Step 3, determine disc. nodes
-    rdi_mark_discontinuities(rdi->cglobal, rdi->clocal, rdi->kappa0,
+    rdi_mark_discontinuities(rdi->lref, rdi->cglobal, rdi->clocal, rdi->kappa0,
                              rdi->kappa1, mesh->coords, mesh->elemtables,
                              mesh->teids, mesh->node2elems.row_ptr,
                              mesh->node2elems.col_ind, mesh->elemh,
@@ -14371,29 +15967,30 @@ void rdi_apply(const RdiObject *rdi, const WlsMesh *mesh,
 }
 
 // rdi_apply - Apply RDI to obtain indicators and disc. tags
-static inline void rdi_apply3(const RdiObject *rdi, const WlsMesh *mesh,
-                              const ::coder::array<real_T, 2U> &fs,
-                              const ::coder::array<real_T, 2U> &df,
-                              ::coder::array<real_T, 2U> &alpha,
-                              ::coder::array<real_T, 2U> &beta,
-                              ::coder::array<int8_T, 2U> &distags,
-                              ::coder::array<real_T, 2U> &alphanode)
+static inline
+void rdi_apply3(const RdiObject *rdi, const WlsMesh *mesh,
+                const ::coder::array<real_T, 2U> &fs,
+                const ::coder::array<real_T, 2U> &df,
+                ::coder::array<real_T, 2U> &alpha,
+                ::coder::array<real_T, 2U> &beta,
+                ::coder::array<int8_T, 2U> &distags,
+                ::coder::array<real_T, 2U> &alphanode)
 {
   rdi_compute_osusind(rdi->A.row_ptr, rdi->A.col_ind, rdi->A.val, rdi->fullrank,
                       mesh->coords, mesh->node2elems.row_ptr,
                       mesh->node2elems.col_ind, fs, alpha, alphanode);
 #pragma omp barrier
   //  Step 2, compute osc. indicators (beta values)
-  rdi_compute_oscind(rdi->epsbeta, mesh->coords, mesh->node2elems.row_ptr,
-                     mesh->node2elems.col_ind, mesh->elemmeas, mesh->globalh,
-                     df, alpha, beta);
+  rdi_compute_oscind(rdi->lref, rdi->epsbeta, mesh->coords,
+                     mesh->node2elems.row_ptr, mesh->node2elems.col_ind,
+                     mesh->elemmeas, mesh->globalh, df, alpha, beta);
 #pragma omp barrier
   //  Step 3, determine disc. nodes
-  rdi_mark_discontinuities(rdi->cglobal, rdi->clocal, rdi->kappa0, rdi->kappa1,
-                           mesh->coords, mesh->elemtables, mesh->teids,
-                           mesh->node2elems.row_ptr, mesh->node2elems.col_ind,
-                           mesh->elemh, mesh->globalh, fs, df, alpha, beta,
-                           distags);
+  rdi_mark_discontinuities(rdi->lref, rdi->cglobal, rdi->clocal, rdi->kappa0,
+                           rdi->kappa1, mesh->coords, mesh->elemtables,
+                           mesh->teids, mesh->node2elems.row_ptr,
+                           mesh->node2elems.col_ind, mesh->elemh, mesh->globalh,
+                           fs, df, alpha, beta, distags);
 }
 
 // rdi_compute_osusop - Compute the over- and under-shoot operator
@@ -14469,7 +16066,7 @@ void rdi_compute_osusop2(RdiObject *rdi, WlsMesh *mesh, boolean_T interp0)
 
 // rdi_compute_osusop - Compute the over- and under-shoot operator
 void rdi_compute_osusop(RdiObject *rdi, WlsMesh *mesh, boolean_T interp0,
-                        ::coder::SizeType varargin_2)
+                         ::coder::SizeType varargin_2)
 {
   ::coder::SizeType extstclid;
   init_osusop(mesh->coords, mesh->elemtables, mesh->teids, mesh->stencils,
@@ -14553,6 +16150,8 @@ void rdi_compute_osusop4(RdiObject *rdi, WlsMesh *mesh, boolean_T interp0)
 // rdi_create - Create RDI object
 void rdi_create(WlsMesh *mesh, RdiObject *rdi)
 {
+  real_T d;
+  real_T d1;
   ::coder::SizeType loop_ub;
   if (mesh->teids.size(0) == 0) {
     m2cErrMsgIdAndTxt("rdi_create:emptyMesh", "Call setup on the input mesh");
@@ -14574,6 +16173,8 @@ void rdi_create(WlsMesh *mesh, RdiObject *rdi)
   rdi->epsbeta = 0.0002;
   rdi->cglobal = 0.05;
   rdi->clocal = 0.5;
+  //  Step 1, compute reference length, use kappa's as buffers
+  compute_lref(mesh->coords, &rdi->lref, &d, &d1);
   rdi->kappa0 = 1.0;
   rdi->kappa1 = 0.3;
   //  Step 1, compute 1-ring information
@@ -14601,6 +16202,8 @@ void rdi_create(WlsMesh *mesh, RdiObject *rdi)
 // rdi_create - Create RDI object
 void rdi_create(WlsMesh *mesh, ::coder::SizeType degree, RdiObject *rdi)
 {
+  real_T d;
+  real_T d1;
   ::coder::SizeType loop_ub;
   if (mesh->teids.size(0) == 0) {
     m2cErrMsgIdAndTxt("rdi_create:emptyMesh", "Call setup on the input mesh");
@@ -14622,6 +16225,8 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree, RdiObject *rdi)
   rdi->epsbeta = 0.0002;
   rdi->cglobal = 0.05;
   rdi->clocal = 0.5;
+  //  Step 1, compute reference length, use kappa's as buffers
+  compute_lref(mesh->coords, &rdi->lref, &d, &d1);
   rdi->kappa0 = 1.0;
   rdi->kappa1 = 0.3;
   //  Step 1, compute 1-ring information
@@ -14647,9 +16252,10 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree, RdiObject *rdi)
 }
 
 // rdi_create - Create RDI object
-void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
-                ::coder::SizeType nparts, RdiObject *rdi)
+void rdi_create(WlsMesh *mesh, ::coder::SizeType degree, ::coder::SizeType nparts, RdiObject *rdi)
 {
+  real_T d;
+  real_T d1;
   ::coder::SizeType loop_ub;
   if (mesh->teids.size(0) == 0) {
     m2cErrMsgIdAndTxt("rdi_create:emptyMesh", "Call setup on the input mesh");
@@ -14671,6 +16277,8 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
   rdi->epsbeta = 0.0002;
   rdi->cglobal = 0.05;
   rdi->clocal = 0.5;
+  //  Step 1, compute reference length, use kappa's as buffers
+  compute_lref(mesh->coords, &rdi->lref, &d, &d1);
   rdi->kappa0 = 1.0;
   rdi->kappa1 = 0.3;
   //  Step 1, compute 1-ring information
@@ -14706,10 +16314,11 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
 }
 
 // rdi_create - Create RDI object
-void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
-                ::coder::SizeType nparts, ::coder::SizeType nrmid,
-                RdiObject *rdi)
+void rdi_create(WlsMesh *mesh, ::coder::SizeType degree, ::coder::SizeType nparts, ::coder::SizeType nrmid,
+                 RdiObject *rdi)
 {
+  real_T d;
+  real_T d1;
   ::coder::SizeType loop_ub;
   if (mesh->teids.size(0) == 0) {
     m2cErrMsgIdAndTxt("rdi_create:emptyMesh", "Call setup on the input mesh");
@@ -14732,6 +16341,8 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
   rdi->epsbeta = 0.0002;
   rdi->cglobal = 0.05;
   rdi->clocal = 0.5;
+  //  Step 1, compute reference length, use kappa's as buffers
+  compute_lref(mesh->coords, &rdi->lref, &d, &d1);
   rdi->kappa0 = 1.0;
   rdi->kappa1 = 0.3;
   //  Step 1, compute 1-ring information
@@ -14767,10 +16378,11 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
 }
 
 // rdi_create - Create RDI object
-void rdi_create5(WlsMesh *mesh, ::coder::SizeType degree,
-                 ::coder::SizeType nparts, ::coder::SizeType nrmid, real_T ring,
-                 RdiObject *rdi)
+void rdi_create5(WlsMesh *mesh, ::coder::SizeType degree, ::coder::SizeType nparts, ::coder::SizeType nrmid,
+                 real_T ring, RdiObject *rdi)
 {
+  real_T d;
+  real_T d1;
   ::coder::SizeType loop_ub;
   if (mesh->teids.size(0) == 0) {
     m2cErrMsgIdAndTxt("rdi_create:emptyMesh", "Call setup on the input mesh");
@@ -14793,6 +16405,8 @@ void rdi_create5(WlsMesh *mesh, ::coder::SizeType degree,
   rdi->epsbeta = 0.0002;
   rdi->cglobal = 0.05;
   rdi->clocal = 0.5;
+  //  Step 1, compute reference length, use kappa's as buffers
+  compute_lref(mesh->coords, &rdi->lref, &d, &d1);
   rdi->kappa0 = 1.0;
   rdi->kappa1 = 0.3;
   //  Step 1, compute 1-ring information
@@ -14828,11 +16442,12 @@ void rdi_create5(WlsMesh *mesh, ::coder::SizeType degree,
 }
 
 // rdi_create - Create RDI object
-void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
-                ::coder::SizeType nparts, ::coder::SizeType nrmid, real_T ring,
-                ::coder::SizeType varargin_2, RdiObject *rdi)
+void rdi_create(WlsMesh *mesh, ::coder::SizeType degree, ::coder::SizeType nparts, ::coder::SizeType nrmid,
+                 real_T ring, ::coder::SizeType varargin_2, RdiObject *rdi)
 {
   boolean_T m2cTryBlkErrFlag;
+  real_T d;
+  real_T d1;
   ::coder::SizeType loop_ub;
   ::coder::SizeType nthreads;
   if (mesh->teids.size(0) == 0) {
@@ -14856,8 +16471,6 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
   rdi->epsbeta = 0.0002;
   rdi->cglobal = 0.05;
   rdi->clocal = 0.5;
-  rdi->kappa0 = 1.0;
-  rdi->kappa1 = 0.3;
   if (varargin_2 <= 0) {
     nthreads = 1;
 #ifdef _OPENMP
@@ -14869,6 +16482,10 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
   m2cTryBlkErrFlag = 0;
 #pragma omp parallel default(shared) num_threads(nthreads)
   try { // try
+    //  Step 1, compute reference length, use kappa's as buffers
+    b_compute_lref(mesh->coords, &rdi->lref, &d, &d1);
+    rdi->kappa0 = 1.0;
+    rdi->kappa1 = 0.3;
     //  Step 1, compute 1-ring information
     if ((mesh->node2nodes.row_ptr.size(0) == 0) ||
         (mesh->node2elems.row_ptr.size(0) == 0)) {
@@ -14930,10 +16547,11 @@ void rdi_create(WlsMesh *mesh, ::coder::SizeType degree,
 }
 
 // rdi_create - Create RDI object
-void rdi_create7(WlsMesh *mesh, ::coder::SizeType degree,
-                 ::coder::SizeType nparts, ::coder::SizeType nrmid, real_T ring,
-                 RdiObject *rdi)
+void rdi_create7(WlsMesh *mesh, ::coder::SizeType degree, ::coder::SizeType nparts, ::coder::SizeType nrmid,
+                 real_T ring, RdiObject *rdi)
 {
+  real_T d;
+  real_T d1;
   ::coder::SizeType loop_ub;
   if (mesh->teids.size(0) == 0) {
     m2cErrMsgIdAndTxt("rdi_create:emptyMesh", "Call setup on the input mesh");
@@ -14956,6 +16574,8 @@ void rdi_create7(WlsMesh *mesh, ::coder::SizeType degree,
   rdi->epsbeta = 0.0002;
   rdi->cglobal = 0.05;
   rdi->clocal = 0.5;
+  //  Step 1, compute reference length, use kappa's as buffers
+  b_compute_lref(mesh->coords, &rdi->lref, &d, &d1);
   rdi->kappa0 = 1.0;
   rdi->kappa1 = 0.3;
   //  Step 1, compute 1-ring information
@@ -15002,8 +16622,9 @@ void rdi_create7(WlsMesh *mesh, ::coder::SizeType degree,
 }
 
 // rdi_postproc_markers - Improve disc. markers via post-processing
-static inline void rdi_postproc_markers(::coder::array<int8_T, 2U> &distags,
-                                        const WlsMesh *mesh)
+static inline
+void rdi_postproc_markers(::coder::array<int8_T, 2U> &distags,
+                           const WlsMesh *mesh)
 {
   rdi_expand_markers(distags, mesh->node2nodes.row_ptr,
                      mesh->node2nodes.col_ind, 4);
@@ -15015,7 +16636,7 @@ static inline void rdi_postproc_markers(::coder::array<int8_T, 2U> &distags,
 
 // rdi_postproc_markers - Improve disc. markers via post-processing
 void rdi_postproc_markers(::coder::array<int8_T, 2U> &distags,
-                          const WlsMesh *mesh, ::coder::SizeType nlayers)
+                           const WlsMesh *mesh, ::coder::SizeType nlayers)
 {
   if (nlayers < 0) {
     nlayers = 4;

@@ -1,4 +1,4 @@
-// Copyright 2022 The NumGeom Group, Stony Brook University
+// Copyright 2023 The NumGeom Group, Stony Brook University
 //
 // librdi_types.h
 //
@@ -54,7 +54,7 @@ struct Stencils {
   CrsGraph ngbelems;
 };
 
-struct CrsMatrix {
+struct CrsMatrixD {
   ::coder::array<int64_T, 1U> row_ptr;
   ::coder::array<int32_T, 1U> col_ind;
   ::coder::array<real_T, 1U> val;
@@ -67,7 +67,8 @@ struct RdiObject {
   int32_T stclid;
   int32_T extstclid;
   real_T ring;
-  CrsMatrix A;
+  real_T lref;
+  CrsMatrixD A;
   ::coder::array<int32_T, 1U> nnzs;
   ::coder::array<boolean_T, 1U> rdtags;
   boolean_T fullrank;
@@ -86,6 +87,8 @@ struct NodeSet {
 struct ElementSet {
   ::coder::array<char_T, 2U> name;
   ::coder::array<int32_T, 1U> eids;
+  ::coder::array<int32_T, 2U> itags;
+  ::coder::array<real_T, 2U> dtags;
 };
 
 struct FacetSet {

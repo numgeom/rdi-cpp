@@ -2,8 +2,12 @@
 /* Copied from
  * fullfile(matlabroot,'extern','include','coder','coder_array','coder_array_rtw_cpp11.h') */
 
-// !defined(MATLAB_MEX_FILE) is added by X. Jiao
-#if !defined(_mw_coder_array_cpp11_h) && !defined(MATLAB_MEX_FILE)
+// defined(MATLAB_MEX_FILE) was added by X. Jiao
+#ifdef MATLAB_MEX_FILE
+#include "coder_array_mex.h"
+#else
+
+#if !defined(_mw_coder_array_cpp11_h)
 #define _mw_coder_array_cpp11_h
 
 //  Usage:
@@ -789,5 +793,7 @@ class array<T, 1> : public array_base<T, SizeType, 1> {
     }
 };
 } // namespace coder
+
+#endif
 
 #endif
